@@ -160,6 +160,9 @@ Resolutions to C++ Defect Reports
   ``-Wdeprecated-literal-operator`` for the latter, off by default for now.
 
   .. code-block:: c++
+- Attributes now expect unevaluated strings in attributes parameters that are string literals.
+  This is applied to both C++ standard attributes, and other attributes supported by Clang.
+  This completes the implementation of `P2361R6 Unevaluated Strings <https://wg21.link/P2361R6>_`
 
     // What follows is warned by -Wuser-defined-literals
     // albeit "ill-formed, no diagnostic required".
