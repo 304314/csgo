@@ -10,11 +10,15 @@ sysroot="$BISHENG_CROSS_SYSROOT"
 # Initialize our own variables:
 buildtype=RelWithDebInfo
 backends="ARM;AArch64;X86"
+enabled_projects="clang;lld;openmp;clang-tools-extra"
+embedded_toolchain="0"
 split_dwarf=on
 use_ccache="0"
 do_install="0"
 clean=0
 unit_test=""
+install="install"
+install_toolchain_only="0"
 verbose=""
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 build_dir_name="build"
@@ -43,16 +47,19 @@ usage() {
   cat <<EOF
 Usage: $0 [options]
 
-Build the compiler under $(get_relative_path $build_prefix), then install under $(get_relative_path $install_prefix) .
+Build the compiler under $build_prefix, then install under $install_prefix.
 
 Options:
   -b type  Specify CMake build type (default: $buildtype).
   -c       Use ccache (default: $use_ccache).
+  -e       Build for embedded cross tool chain.
   -h       Display this help message.
   -i       Install the build (default: $do_install).
   -I name  Specify install directory name (default: "$install_dir_name").
   -j N     Allow N jobs at once (default: $threads).
-  -r       Delete $(get_relative_path $install_prefix) and perform a clean build (default: incremental).
+  -o       Enable LLVM_INSTALL_TOOLCHAIN_ONLY=ON.
+  -r       Delete $install_prefix and perform a clean build (default: incremental).
+  -s       Strip binaries and minimize file permissions when (re-)installing.
   -t       Enable unit tests for components that support them (make check-all).
   -v       Enable verbose build output (default: quiet).
   -X archs Build only the specified semi-colon-delimited list of backends (default: "$backends").
@@ -62,7 +69,7 @@ EOF
 
 # Process command-line options. Remember the options for passing to the
 # containerized build script.
-while getopts :b:chiI:j:rtvX:x: optchr; do
+while getopts :b:cehiI:j:orstvX:x: optchr; do
   case "$optchr" in
     b)
       buildtype="$OPTARG"
@@ -81,6 +88,9 @@ while getopts :b:chiI:j:rtvX:x: optchr; do
     c)
       use_ccache="1"
       ;;
+    e)
+      embedded_toolchain="1"
+      ;;
     h)
       usage
       exit
@@ -95,8 +105,14 @@ while getopts :b:chiI:j:rtvX:x: optchr; do
     j)
       threads="$OPTARG"
       ;;
+    o)
+      install_toolchain_only=1
+      ;;
     r)
       clean=1
+      ;;
+    s)
+      install="install/strip"
       ;;
     t)
       unit_test=check-all
@@ -164,6 +180,18 @@ if [ $use_ccache == "1" ]; then
                    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache "
 fi
 
+if [ $embedded_toolchain == "1" ]; then
+  echo "Build for embedded cross tool chain"
+  enabled_projects="clang;lld;compiler-rt;"
+fi
+
+# When set LLVM_INSTALL_TOOLCHAIN_ONLY to On it removes many of the LLVM development
+# and testing tools as well as component libraries from the default install target.
+if [ $install_toolchain_only == "1" ]; then
+  echo "Only install toolchain"
+  CMAKE_OPTIONS="$CMAKE_OPTIONS -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON"
+fi
+
 # Build and install
 if [ $clean -eq 1 -a -e "$install_prefix" ]; then
   rm -rf "$install_prefix"
@@ -175,21 +203,22 @@ if [ $clean -eq 1 -a -e "$build_prefix" ]; then
 fi
 
 mkdir -p "$build_prefix" && cd "$build_prefix"
-run_or_die \
-  cmake $CMAKE_OPTIONS \
-        $llvm_use_ccache \
-        -DCOMPILER_RT_BUILD_SANITIZERS=on \
-        -DLLVM_ENABLE_PROJECTS="clang;lld;openmp;clang-tools-extra" \
-        -DLLVM_ENABLE_RUNTIMES="compiler-rt;libcxx;libcxxabi;libunwind" \
-        -DLLVM_USE_LINKER=gold \
-        -DLLVM_LIT_ARGS="-sv -j$threads" \
-        -DLLVM_USE_SPLIT_DWARF=$split_dwarf \
-        -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO="-Wl,--gdb-index -Wl,--compress-debug-sections=zlib"\
-        -DCMAKE_EXE_LINKER_FLAGS_DEBUG="-Wl,--gdb-index -Wl,--compress-debug-sections=zlib" \
-        ../llvm
+cmake $CMAKE_OPTIONS \
+      $llvm_use_ccache \
+      -DCOMPILER_RT_BUILD_SANITIZERS=on \
+      -DLLVM_ENABLE_PROJECTS=$enabled_projects \
+      -DLLVM_ENABLE_RUNTIMES="compiler-rt;libcxx;libcxxabi;libunwind" \
+      -DLLVM_USE_LINKER=gold \
+      -DLLVM_LIT_ARGS="-sv -j$threads" \
+      -DLLVM_USE_SPLIT_DWARF=$split_dwarf \
+      -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO="-Wl,--gdb-index -Wl,--compress-debug-sections=zlib"\
+      -DCMAKE_EXE_LINKER_FLAGS_DEBUG="-Wl,--gdb-index -Wl,--compress-debug-sections=zlib" \
+      ../llvm
 
 make -j$threads
-make -j$threads $verbose install
+if [ $do_install == "1" ]; then
+  make -j$threads $verbose $install
+fi
 
 if [ -n "$unit_test" ]; then
   make -j$threads $verbose check-all
@@ -368,5 +397,11 @@ if [ "$cross_compile_arch" != "" ]; then
 fi
 
 cd ..
+
+# When building official deliverables, minimize file permissions under the
+# installation directory.
+if [ "$install" = "install/strip" ]; then
+  find $install_prefix -type f -exec chmod a-w,o-rx {} \;
+fi
 
 echo "$0: SUCCESS"
