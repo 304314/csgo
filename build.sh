@@ -4,9 +4,6 @@
 C_COMPILER_PATH=gcc
 CXX_COMPILER_PATH=g++
 
-gcc_toolchain="$BISHENG_CROSS_TOOLCHAIN"
-sysroot="$BISHENG_CROSS_SYSROOT"
-
 # Initialize our own variables:
 buildtype=RelWithDebInfo
 backends="ARM;AArch64;X86"
@@ -27,6 +24,8 @@ build_prefix="$dir/$build_dir_name"
 install_prefix="$dir/$install_dir_name"
 cross_compile_arch=""
 host_arch="$(uname -m)"
+gcc_toolchain=""
+sysroot=""
 
 # Use 8 threads for builds and tests by default. Use more threads if possible,
 # but avoid overloading the system by using up to 50% of available cores.
@@ -60,16 +59,19 @@ Options:
   -o       Enable LLVM_INSTALL_TOOLCHAIN_ONLY=ON.
   -r       Delete $install_prefix and perform a clean build (default: incremental).
   -s       Strip binaries and minimize file permissions when (re-)installing.
+  -S path  Cross-sysroot path required for cross-compilation (default: "sysroot").
   -t       Enable unit tests for components that support them (make check-all).
+  -T path  GCC cross-toolchain path required for cross-compilation (default: "gcc_toolchain").
   -v       Enable verbose build output (default: quiet).
-  -X archs Build only the specified semi-colon-delimited list of backends (default: "$backends").
   -x arch  Build cross-compiling toolchain for the specified target.
+  -X archs Build only the specified semi-colon-delimited list of backends (default: "$backends").
+
 EOF
 }
 
 # Process command-line options. Remember the options for passing to the
 # containerized build script.
-while getopts :b:cehiI:j:orstvX:x: optchr; do
+while getopts :b:cehiI:j:orsS:tT:vx:X: optchr; do
   case "$optchr" in
     b)
       buildtype="$OPTARG"
@@ -114,32 +116,35 @@ while getopts :b:cehiI:j:orstvX:x: optchr; do
     s)
       install="install/strip"
       ;;
+    S)
+      sysroot="$OPTARG"
+      ;;
     t)
       unit_test=check-all
       ;;
+    T)
+      gcc_toolchain="$OPTARG"
+      ;;
     v)
       verbose="VERBOSE=1"
-      ;;
-    X)
-      backends="$OPTARG"
       ;;
     x)
       cross_compile_arch=$OPTARG
       case "${cross_compile_arch,,}" in
         aarch64)
           ;;
-        riscv64)
-          # RISCV backend is not built by default.
-          backends+=";RISCV"
-          ;;
         *)
           echo "$0: unsupported architecture for cross-compilation: $cross_compile_arch"
           exit 1
           ;;
       esac
-      ;;    :)
+      ;;
+    :)
       echo "$0: missing argument for option '-$OPTARG'"
       exit 1
+      ;;
+    X)
+      backends="$OPTARG"
       ;;
     ?)
       echo "$0: invalid option '-$OPTARG'"
@@ -231,16 +236,6 @@ build_openmp() {
   local stage_install_prefix="$cross_compile_install_prefix"
   local cross_cmake_flags="$cross_cmake_flags \
                            -DOPENMP_ENABLE_LIBOMPTARGET=off"
-  if [ -d "$libelf_path" ]; then
-    cross_cmake_flags="$cross_cmake_flags \
-                       -DLIBOMPTARGET_DEP_LIBELF_INCLUDE_DIR=$libelf_path/include \
-                       -DLIBOMPTARGET_DEP_LIBELF_LIBRARIES=$libelf_path/lib"
-  fi
-  if [ -d "$libffi_path" ]; then
-    cross_cmake_flags="$cross_cmake_flags \
-                       -DLIBOMPTARGET_DEP_LIBFFI_INCLUDE_DIR=$libffi_path/include \
-                       -DLIBOMPTARGET_DEP_LIBFFI_LIBRARIES=$libffi_path/lib64"
-  fi
 
   echo $1
   if [ "$1" = "static" ]; then
@@ -401,3 +396,5 @@ fi
 cd ..
 
 echo "$0: SUCCESS"
+
+
