@@ -19,9 +19,5 @@
  具体的编译选项可以在build.sh中查看，也可以通过“./build.sh -h”命令查看。
  例如：
    ./build.sh -r -b release -X X86 -i
- 交叉编译:
-   export BISHENG_LIBELF_PATH=/xxx/libelf/install
-   export BISHENG_LIBFFI_PATH=/xxx/libffi/install
-   export BISHENG_CROSS_TOOLCHAIN=/xxx/gcc-arm-aarch64-none-linux-gnu/
-   export BISHENG_CROSS_SYSROOT=$BISHENG_CROSS_TOOLCHAIN/aarch64-none-linux-gnu/libc
-   ./build.sh -r -b release -X "AArch64;X86" -x aarch64 -i
+ 交叉编译: 
+   ./build.sh -r -b release -X "AArch64;X86" -x aarch64 -i -T /xxx/gcc-arm-aarch64-none-linux-gnu(绝对路径) -S /xxx/aarch64-none-linux-gnu/libc(绝对路径)
