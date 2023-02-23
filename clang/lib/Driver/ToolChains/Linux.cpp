@@ -376,7 +376,7 @@ std::string Linux::computeSysRoot() const {
     return std::string();
   }
 
-  if (!GCCInstallation.isValid() || !getTriple().isMIPS())
+  if (!GCCInstallation.isValid() || (!getTriple().isMIPS() && getTriple().getVendor() != llvm::Triple::OpenEmbedded))
     return std::string();
 
   // Standalone MIPS toolchains use different names for sysroot folder
@@ -395,6 +395,11 @@ std::string Linux::computeSysRoot() const {
     return Path;
 
   Path = (InstallDir + "/../../../../sysroot" + Multilib.osSuffix()).str();
+
+  if (getVFS().exists(Path))
+    return Path;
+
+  Path = (InstallDir + "/../../../../../" + TripleStr).str();
 
   if (getVFS().exists(Path))
     return Path;
@@ -454,7 +459,7 @@ std::string Linux::getDynamicLinker(const ArgList &Args) const {
     llvm_unreachable("unsupported architecture");
 
   case llvm::Triple::aarch64:
-    LibDir = "lib";
+    LibDir = "lib64";
     Loader = "ld-linux-aarch64.so.1";
     break;
   case llvm::Triple::aarch64_be:
@@ -545,9 +550,12 @@ std::string Linux::getDynamicLinker(const ArgList &Args) const {
     break;
   case llvm::Triple::x86_64: {
     bool X32 = Triple.isX32();
+    bool OE = (Triple.getVendor() == llvm::Triple::OpenEmbedded);
 
     LibDir = X32 ? "libx32" : "lib64";
     Loader = X32 ? "ld-linux-x32.so.2" : "ld-linux-x86-64.so.2";
+    if (OE) 
+        return "/opt/buildtools/nativesdk/sysroots/" + Triple.str() + "/lib/"+ Loader;
     break;
   }
   case llvm::Triple::ve:
