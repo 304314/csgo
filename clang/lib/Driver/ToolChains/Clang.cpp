@@ -4542,6 +4542,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   CmdArgs.push_back("-triple");
   CmdArgs.push_back(Args.MakeArgString(TripleStr));
 
+  if (Args.hasFlag(options::OPT_fgcc_compatible,
+                   options::OPT_fno_gcc_compatible, false)) {
+    Args.AddLastArg(CmdArgs, options::OPT_fgcc_compatible,
+                    options::OPT_fno_gcc_compatible);
+  }
+
   if (const Arg *MJ = Args.getLastArg(options::OPT_MJ)) {
     DumpCompilationDatabase(C, MJ->getValue(), TripleStr, Output, Input, Args);
     Args.ClaimAllArgs(options::OPT_MJ);
