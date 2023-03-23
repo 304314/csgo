@@ -522,6 +522,12 @@ defvar std = !strconcat("LangStandard::getLangStandardForKind(", lang_std.KeyPat
 
 // Developer Driver Options
 
+def fgcc_compatible : Flag<["-"], "fgcc-compatible">, Group<f_Group>,
+  MarshallingInfoFlag<DiagnosticOpts<"GccCompatible">>, Flags<[CC1Option, NoArgumentUnused]>,
+  HelpText<"Enable gcc compatibility.">;
+def fno_gcc_compatible : Flag<["-"], "fno-gcc-compatible">, Group<f_Group>,
+  Flags<[CC1Option, NoArgumentUnused]>;
+
 def internal_Group : OptionGroup<"<clang internal options>">, Flags<[HelpHidden]>;
 def internal_driver_Group : OptionGroup<"<clang driver internal options>">,
   Group<internal_Group>, HelpText<"DRIVER OPTIONS">;
