@@ -29,6 +29,10 @@
 #include <utility>
 using namespace clang;
 
+#include <set>
+std::set<std::string> GccCompatibleWhitelist{"stringop-overflow",
+                                             "maybe-uninitialized"};
+
 // EmitUnknownDiagWarning - Emit a warning and typo hint for unknown warning
 // opts
 static void EmitUnknownDiagWarning(DiagnosticsEngine &Diags,
@@ -129,6 +133,11 @@ void clang::ProcessWarningOptions(DiagnosticsEngine &Diags,
         continue;
       }
 
+      if (Opts.GccCompatible) {
+        if (GccCompatibleWhitelist.find(std::string(Opt)) != GccCompatibleWhitelist.end())
+          continue;
+      }
+      
       // -Werror/-Wno-error is a special case, not controlled by the option
       // table. It also has the "specifier" form of -Werror=foo. GCC supports
       // the deprecated -Werror-implicit-function-declaration which is used by

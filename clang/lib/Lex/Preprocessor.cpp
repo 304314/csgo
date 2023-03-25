@@ -1448,6 +1448,9 @@ void Preprocessor::emitMacroDeprecationWarning(const Token &Identifier) const {
   assert(A.DeprecationInfo &&
          "Macro deprecation warning without recorded annotation!");
   const MacroAnnotationInfo &Info = *A.DeprecationInfo;
+  if (getLangOpts().GccCompatible)
+    if (Identifier.getIdentifierInfo()->isStr("ATOMIC_VAR_INIT"))
+      return;
   if (Info.Message.empty())
     Diag(Identifier, diag::warn_pragma_deprecated_macro_use)
         << Identifier.getIdentifierInfo() << 0;
