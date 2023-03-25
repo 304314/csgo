@@ -4544,6 +4544,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   if (Args.hasFlag(options::OPT_fgcc_compatible,
                    options::OPT_fno_gcc_compatible, false)) {
+    CmdArgs.push_back("-Wno-error=int-conversion");
+    CmdArgs.push_back("-Wno-unused-private-field");
+    CmdArgs.push_back("-Wno-empty-body");
+    CmdArgs.push_back("-Wno-pointer-to-enum-cast");
+    CmdArgs.push_back("-Wno-unused-but-set-variable");
     Args.AddLastArg(CmdArgs, options::OPT_fgcc_compatible,
                     options::OPT_fno_gcc_compatible);
   }

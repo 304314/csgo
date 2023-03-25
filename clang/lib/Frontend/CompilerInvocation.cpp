@@ -3557,6 +3557,9 @@ void CompilerInvocation::GenerateLangArgs(const LangOptions &Opts,
 
   if (!Opts.RandstructSeed.empty())
     GenerateArg(Args, OPT_frandomize_layout_seed_EQ, Opts.RandstructSeed, SA);
+
+  if(Opts.GccCompatible)
+    GenerateArg(Args, OPT_fgcc_compatible, SA);
 }
 
 bool CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
@@ -4106,6 +4109,10 @@ bool CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
 
   if (const Arg *A = Args.getLastArg(OPT_frandomize_layout_seed_EQ))
     Opts.RandstructSeed = A->getValue(0);
+
+  Opts.GccCompatible = Args.hasArg(options::OPT_fgcc_compatible,
+                                   options::OPT_fno_gcc_compatible,
+                                   /*Default=*/false);
 
   return Diags.getNumErrors() == NumErrorsBefore;
 }
