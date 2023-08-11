@@ -678,3 +678,217 @@ define i8 @nabs_extra_use_icmp_sub(i8 %x) {
   %s = select i1 %c, i8 %x, i8 %n
   ret i8 %s
 }
+
+; x>y ? abs(x-y+1) : 0 -> x>y ? x-y+1 : 0
+define i32 @abs_sub_with_pos_constant_sgt(i32 %x, i32 %y) {
+; CHECK-LABEL: @abs_sub_with_pos_constant_sgt(
+; CHECK-NEXT:   entry:
+; CHECK-NEXT:     [[CMP:%.*]] = icmp sgt i32 [[X:%.*]], [[Y:%.*]] 
+; CHECK-NEXT:     br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_END:%.*]]
+; CHECK:        cond.true:
+; CHECK-NEXT:     [[SUB:%.*]] = sub nsw i32 [[X]], [[Y]]
+; CHECK-NEXT:     [[ADD:%.*]] = add nsw i32 [[SUB]], 1
+; CHECK-NEXT:     br label [[COND_END]]
+; CHECK:        cond.end:
+; CHECK-NEXT:     [[R:%.*]] = phi i32 [ [[ADD]], [[COND_TRUE]] ], [ 0, [[ENTRY:%.*]] ]
+; CHECK-NEXT:     ret i32 [[R]]
+; CHECK-NEXT:   }
+;
+entry:
+  %cmp = icmp sgt i32 %x, %y
+  br i1 %cmp, label %cond.true, label %cond.end
+
+cond.true:
+  %sub = sub nsw i32 %x, %y
+  %add = add nsw i32 %sub, 1
+  %call = call i32 @abs(i32 %add)
+  br label %cond.end
+
+cond.end:
+  %cond = phi i32 [ %call, %cond.true ], [ 0, %entry ]
+  ret i32 %cond
+}
+
+
+; x>=y ? abs(x-y+1) : 0 -> x>=y ? x-y+1 : 0
+define i32 @abs_sub_with_pos_constant_sge(i32 %x, i32 %y) {
+; CHECK-LABEL: @abs_sub_with_pos_constant_sge(
+; CHECK-NEXT:   entry:
+; CHECK-NEXT:     [[CMP:%.*]] = icmp slt i32 [[X:%.*]], [[Y:%.*]] 
+; CHECK-NEXT:     br i1 [[CMP]], label [[COND_END:%.*]], label [[COND_TRUE:%.*]]
+; CHECK:        cond.true:
+; CHECK-NEXT:     [[SUB:%.*]] = sub nsw i32 [[X]], [[Y]]
+; CHECK-NEXT:     [[ADD:%.*]] = add nsw i32 [[SUB]], 1
+; CHECK-NEXT:     br label [[COND_END]]
+; CHECK:        cond.end:
+; CHECK-NEXT:     [[R:%.*]] = phi i32 [ [[ADD]], [[COND_TRUE]] ], [ 0, [[ENTRY:%.*]] ]
+; CHECK-NEXT:     ret i32 [[R]]
+; CHECK-NEXT:   }
+;
+entry:
+  %cmp = icmp slt i32 %x, %y
+  br i1 %cmp, label %cond.end, label %cond.true
+
+cond.true:
+  %sub = sub nsw i32 %x, %y
+  %add = add nsw i32 %sub, 1
+  %call = call i32 @abs(i32 %add)
+  br label %cond.end
+
+cond.end:
+  %cond = phi i32 [ %call, %cond.true ], [ 0, %entry ]
+  ret i32 %cond
+}
+
+; x<y ? abs(x-y+1) : 0 -> x<y ? y-x-1 : 0
+define i32 @abs_sub_with_pos_constant_slt(i32 %x, i32 %y) {
+; CHECK-LABEL: @abs_sub_with_pos_constant_slt(
+; CHECK-NEXT:   entry:
+; CHECK-NEXT:     [[CMP:%.*]] = icmp slt i32 [[X:%.*]], [[Y:%.*]] 
+; CHECK-NEXT:     br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_END:%.*]]
+; CHECK:        cond.true:
+; CHECK-NEXT:     [[XOR:%.*]] = xor i32 [[X]], -1
+; CHECK-NEXT:     [[ADD:%.*]] = add i32 [[XOR]], [[Y]]
+; CHECK-NEXT:     br label [[COND_END]]
+; CHECK:        cond.end:
+; CHECK-NEXT:     [[R:%.*]] = phi i32 [ [[ADD]], [[COND_TRUE]] ], [ 0, [[ENTRY:%.*]] ]
+; CHECK-NEXT:     ret i32 [[R]]
+; CHECK-NEXT:   }
+;
+entry:
+  %cmp = icmp slt i32 %x, %y
+  br i1 %cmp, label %cond.true, label %cond.end
+
+cond.true:
+  %sub = sub nsw i32 %x, %y
+  %add = add nsw i32 %sub, 1
+  %call = call i32 @abs(i32 %add)
+  br label %cond.end
+
+cond.end:
+  %cond = phi i32 [ %call, %cond.true ], [ 0, %entry ]
+  ret i32 %cond
+}
+
+; x<=y ? abs(x-y+1) : 0 -> x<=y ? select(x-y<-1, y-x-1, x-y+1) : 0
+define i32 @abs_sub_with_pos_constant_sle(i32 %x, i32 %y) {
+; CHECK-LABEL: @abs_sub_with_pos_constant_sle(
+; CHECK-NEXT:   entry:
+; CHECK-NEXT:     [[CMP:%.*]] = icmp sgt i32 [[X:%.*]], [[Y:%.*]] 
+; CHECK-NEXT:     br i1 [[CMP]], label [[COND_END:%.*]], label [[COND_TRUE:%.*]]
+; CHECK:        cond.true:
+; CHECK-NEXT:     [[SUB:%.*]] = sub nsw i32 [[X]], [[Y]]
+; CHECK-NEXT:     [[ADD:%.*]] = add nsw i32 [[SUB]], 1
+; CHECK-NEXT:     [[SIGN:%.*]] = icmp slt i32 [[SUB]], -1
+; CHECK-NEXT:     [[NEG:%.*]] = xor i32 [[SUB]], -1
+; CHECK-NEXT:     [[CALL:%.*]] = select i1 [[SIGN]], i32 [[NEG]], i32 [[ADD]]
+; CHECK-NEXT:     br label [[COND_END]]
+; CHECK:        cond.end:
+; CHECK-NEXT:     [[R:%.*]] = phi i32 [ [[CALL]], [[COND_TRUE]] ], [ 0, [[ENTRY:%.*]] ]
+; CHECK-NEXT:     ret i32 [[R]]
+; CHECK-NEXT:   }
+;
+entry:
+  %cmp = icmp sgt i32 %x, %y
+  br i1 %cmp, label %cond.end, label %cond.true
+
+cond.true:
+  %sub = sub nsw i32 %x, %y
+  %add = add nsw i32 %sub, 1
+  %call = call i32 @abs(i32 %add)
+  br label %cond.end
+
+cond.end:
+  %cond = phi i32 [ %call, %cond.true ], [ 0, %entry ]
+  ret i32 %cond
+}
+
+; x>y ? abs(x+1-y) : 0 -> x>y ? x+1-y : 0
+define i32 @abs_sub_with_pos_constant_communitive(i32 %x, i32 %y) {
+; CHECK-LABEL: @abs_sub_with_pos_constant_communitive(
+; CHECK-NEXT:   entry:
+; CHECK-NEXT:     [[CMP:%.*]] = icmp sgt i32 [[X:%.*]], [[Y:%.*]] 
+; CHECK-NEXT:     br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_END:%.*]]
+; CHECK:        cond.true:
+; CHECK-NEXT:     [[ADD:%.*]] = add nsw i32 [[X]], 1
+; CHECK-NEXT:     [[SUB:%.*]] = sub nsw i32 [[ADD]], [[Y]]
+; CHECK-NEXT:     br label [[COND_END]]
+; CHECK:        cond.end:
+; CHECK-NEXT:     [[R:%.*]] = phi i32 [ [[SUB]], [[COND_TRUE]] ], [ 0, [[ENTRY:%.*]] ]
+; CHECK-NEXT:     ret i32 [[R]]
+; CHECK-NEXT:   }
+;
+entry:
+  %cmp = icmp sgt i32 %x, %y
+  br i1 %cmp, label %cond.true, label %cond.end
+
+cond.true:
+  %add = add nsw i32 %x, 1
+  %sub = sub nsw i32 %add, %y
+  %call = call i32 @abs(i32 %sub)
+  br label %cond.end
+
+cond.end:
+  %cond = phi i32 [ %call, %cond.true ], [ 0, %entry ]
+  ret i32 %cond
+}
+
+; x<y ? abs(x-y-1) : 0 -> x<y ? y+1-x: 0
+define i32 @abs_sub_with_neg_constant_slt(i32 %x, i32 %y) {
+; CHECK-LABEL: @abs_sub_with_neg_constant_slt(
+; CHECK-NEXT:   entry:
+; CHECK-NEXT:     [[CMP:%.*]] = icmp slt i32 [[X:%.*]], [[Y:%.*]] 
+; CHECK-NEXT:     br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_END:%.*]]
+; CHECK:        cond.true:
+; CHECK-NEXT:     [[NEG:%.*]] = add i32 [[Y]], 1
+; CHECK-NEXT:     [[SUB:%.*]] = sub i32 [[NEG]], [[X]]
+; CHECK-NEXT:     br label [[COND_END]]
+; CHECK:        cond.end:
+; CHECK-NEXT:     [[R:%.*]] = phi i32 [ [[SUB]], [[COND_TRUE]] ], [ 0, [[ENTRY:%.*]] ]
+; CHECK-NEXT:     ret i32 [[R]]
+; CHECK-NEXT:   }
+;
+entry:
+  %cmp = icmp slt i32 %x, %y
+  br i1 %cmp, label %cond.true, label %cond.end
+
+cond.true:
+  %sub = sub nsw i32 %x, %y
+  %sub1 = sub nsw i32 %sub, 1
+  %call = call i32 @abs(i32 %sub1)
+  br label %cond.end
+
+cond.end:
+  %cond = phi i32 [ %call, %cond.true ], [ 0, %entry ]
+  ret i32 %cond
+}
+
+; x>y ? abs(x-y-1) : 0 -> x>y ? x-y-1: 0
+define i32 @abs_sub_with_neg_constant_sgt(i32 %x, i32 %y) {
+; CHECK-LABEL: @abs_sub_with_neg_constant_sgt(
+; CHECK-NEXT:   entry:
+; CHECK-NEXT:     [[CMP:%.*]] = icmp sgt i32 [[X:%.*]], [[Y:%.*]] 
+; CHECK-NEXT:     br i1 [[CMP]], label [[COND_TRUE:%.*]], label [[COND_END:%.*]]
+; CHECK:        cond.true:
+; CHECK-NEXT:     [[XOR:%.*]] = xor i32 [[Y]], -1
+; CHECK-NEXT:     [[ADD:%.*]] = add i32 [[XOR]], [[X]]
+; CHECK-NEXT:     br label [[COND_END]]
+; CHECK:        cond.end:
+; CHECK-NEXT:     [[R:%.*]] = phi i32 [ [[ADD]], [[COND_TRUE]] ], [ 0, [[ENTRY:%.*]] ]
+; CHECK-NEXT:     ret i32 [[R]]
+; CHECK-NEXT:   }
+;
+entry:
+  %cmp = icmp sgt i32 %x, %y
+  br i1 %cmp, label %cond.true, label %cond.end
+
+cond.true:
+  %sub = sub nsw i32 %x, %y
+  %sub1 = sub nsw i32 %sub, 1
+  %call = call i32 @abs(i32 %sub1)
+  br label %cond.end
+
+cond.end:
+  %cond = phi i32 [ %call, %cond.true ], [ 0, %entry ]
+  ret i32 %cond
+}

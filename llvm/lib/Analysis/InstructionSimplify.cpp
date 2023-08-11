@@ -4562,6 +4562,42 @@ static Value *simplifySelectWithICmpCond(Value *CondVal, Value *TrueVal,
       return FalseVal;
   }
 
+  // If we have a inequality comparison which is generated from abs call, then
+  // we can deduce the value of select expression to one of its arm value
+  if (Pred == ICmpInst::ICMP_SLT) {
+    Value *X, *Y;
+    // x-y+1 and x+1-y is positive when x-y>=0 and semi-negative when x-y<0
+    if ((match(CmpLHS, m_Add(m_Sub(m_Value(X), m_Value(Y)), m_One())) ||
+         match(CmpLHS,
+               m_Sub(m_Add(m_Value(X), m_NonNegative()), m_Value(Y)))) &&
+        match(CmpRHS, m_Zero())) {
+      // sign of x-y+1 and x+1-y can be determined when x-y>=0
+      if (std::optional<bool> Flag =
+              isImpliedByDomCondition(ICmpInst::ICMP_SGE, X, Y, Q.CxtI, Q.DL))
+        if (*Flag)
+          return FalseVal;
+      // sign of x-y+1 and x+1-y can be determined when x-y<0
+      if (std::optional<bool> Flag =
+              isImpliedByDomCondition(ICmpInst::ICMP_SLT, X, Y, Q.CxtI, Q.DL))
+        if (*Flag)
+          return TrueVal;
+    }
+    // x-y-1 is negative when x-y<=0 and semi-positive when x>y
+    if (match(CmpLHS, m_Add(m_Xor(m_Value(Y), m_AllOnes()), m_Value(X))) &&
+        match(CmpRHS, m_Zero())) {
+      // sign of x-y-1 can be determined when x-y<=0
+      if (std::optional<bool> Flag =
+              isImpliedByDomCondition(ICmpInst::ICMP_SLE, X, Y, Q.CxtI, Q.DL))
+        if (*Flag)
+          return TrueVal;
+      // sign of x-y-1 can be determined when x>y
+      if (std::optional<bool> Flag =
+              isImpliedByDomCondition(ICmpInst::ICMP_SGT, X, Y, Q.CxtI, Q.DL))
+        if (*Flag)
+          return FalseVal;
+    }
+  }
+
   return nullptr;
 }
 
