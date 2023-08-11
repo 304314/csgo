@@ -932,7 +932,8 @@ static std::optional<bool> getKnownSign(Value *Op, Instruction *CxtI,
     return true;
 
   Value *X, *Y;
-  if (match(Op, m_NSWSub(m_Value(X), m_Value(Y))))
+  if (match(Op, m_NSWSub(m_Value(X), m_Value(Y)))
+    || match(Op, m_NSWShl(m_NSWSub(m_Value(X), m_Value(Y)), m_NonNegative()))) // abs(2*(x-y)) -> x-y or y-x
     return isImpliedByDomCondition(ICmpInst::ICMP_SLT, X, Y, CxtI, DL);
 
   return isImpliedByDomCondition(
