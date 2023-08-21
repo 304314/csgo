@@ -22,6 +22,10 @@ build_dir_name="build"
 install_dir_name="install"
 build_prefix="$dir/$build_dir_name"
 install_prefix="$dir/$install_dir_name"
+cross_compile_arch=""
+host_arch="$(uname -m)"
+gcc_toolchain=""
+sysroot=""
 
 # Use 8 threads for builds and tests by default. Use more threads if possible,
 # but avoid overloading the system by using up to 50% of available cores.
@@ -55,15 +59,19 @@ Options:
   -o       Enable LLVM_INSTALL_TOOLCHAIN_ONLY=ON.
   -r       Delete $install_prefix and perform a clean build (default: incremental).
   -s       Strip binaries and minimize file permissions when (re-)installing.
+  -S path  Cross-sysroot path required for cross-compilation (default: "sysroot").
   -t       Enable unit tests for components that support them (make check-all).
+  -T path  GCC cross-toolchain path required for cross-compilation (default: "gcc_toolchain").
   -v       Enable verbose build output (default: quiet).
+  -x arch  Build cross-compiling toolchain for the specified target.
   -X archs Build only the specified semi-colon-delimited list of backends (default: "$backends").
+
 EOF
 }
 
 # Process command-line options. Remember the options for passing to the
 # containerized build script.
-while getopts :b:cehiI:j:orstvX: optchr; do
+while getopts :b:cehiI:j:orsS:tT:vx:X: optchr; do
   case "$optchr" in
     b)
       buildtype="$OPTARG"
@@ -108,18 +116,35 @@ while getopts :b:cehiI:j:orstvX: optchr; do
     s)
       install="install/strip"
       ;;
+    S)
+      sysroot="$OPTARG"
+      ;;
     t)
       unit_test=check-all
+      ;;
+    T)
+      gcc_toolchain="$OPTARG"
       ;;
     v)
       verbose="VERBOSE=1"
       ;;
-    X)
-      backends="$OPTARG"
+    x)
+      cross_compile_arch=$OPTARG
+      case "${cross_compile_arch,,}" in
+        aarch64)
+          ;;
+        *)
+          echo "$0: unsupported architecture for cross-compilation: $cross_compile_arch"
+          exit 1
+          ;;
+      esac
       ;;
     :)
       echo "$0: missing argument for option '-$OPTARG'"
       exit 1
+      ;;
+    X)
+      backends="$OPTARG"
       ;;
     ?)
       echo "$0: invalid option '-$OPTARG'"
@@ -127,6 +152,23 @@ while getopts :b:cehiI:j:orstvX: optchr; do
       ;;
   esac
 done
+
+# Run a command as a background process, wait for its termination, and die
+# if its exit code is non-zero. Running a command in the background and
+# waiting allows the trap handler in this script to catch a signal and
+# immediately stop all child processes. Note that sub-shells are not
+# interruptible unless they also enable job control and wait for background
+# commands. For this reason, sub-shells should be avoided.
+run_or_die() {
+  set -x
+  "$@" &
+  set +x
+  wait $! || exit 1
+}
+
+COMMON_CFLAGS="-pthread"
+
+generator="Unix Makefiles"
 
 CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$install_prefix \
                -DCMAKE_BUILD_TYPE=$buildtype \
@@ -136,11 +178,11 @@ CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$install_prefix \
 
 # Warning: the -DLLVM_ENABLE_PROJECTS option is specified with cmake
 # to avoid issues with nested quotation marks
+llvm_use_ccache=""
 if [ $use_ccache == "1" ]; then
   echo "Build using ccache"
-  CMAKE_OPTIONS="$CMAKE_OPTIONS \
-                -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-                -DCMAKE_CXX_COMPILER_LAUNCHER=ccache "
+  llvm_use_ccache="-DCMAKE_C_COMPILER_LAUNCHER=ccache \
+                   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache "
 fi
 
 if [ $embedded_toolchain == "1" ]; then
@@ -166,7 +208,9 @@ if [ $clean -eq 1 -a -e "$build_prefix" ]; then
 fi
 
 mkdir -p "$build_prefix" && cd "$build_prefix"
-cmake $CMAKE_OPTIONS \
+run_or_die \
+  cmake $CMAKE_OPTIONS \
+      $llvm_use_ccache \
       -DCOMPILER_RT_BUILD_SANITIZERS=on \
       -DLLVM_ENABLE_PROJECTS=$enabled_projects \
       -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
@@ -187,12 +231,170 @@ if [ -n "$unit_test" ]; then
   make -j$threads $verbose check-all
 fi
 
-cd ..
+build_openmp() {
+  local cross_suffix="-cross"
+  local stage_install_prefix="$cross_compile_install_prefix"
+  local cross_cmake_flags="$cross_cmake_flags \
+                           -DOPENMP_ENABLE_LIBOMPTARGET=off"
 
-# When building official deliverables, minimize file permissions under the
-# installation directory.
-if [ "$install" = "install/strip" ]; then
-  find $install_prefix -type f -exec chmod a-w,o-rx {} \;
+  echo $1
+  if [ "$1" = "static" ]; then
+    local static_suffix="-static"
+    local static_cmake_flags="-DLIBOMP_ENABLE_SHARED=off \
+                              -DLIBOMP_OMPT_SUPPORT=off \
+                              -DOPENMP_ENABLE_LIBOMPTARGET=off \
+                              -DOPENMP_ENABLE_OMPT_TOOLS=off"
+  else
+    local static_suffix=""
+    local static_cmake_flags=""
+  fi
+
+  echo "$0: building openmp$static_suffix$cross_suffix"
+
+  if [ $clean -eq 1 ]; then
+    rm -rf "$build_prefix"/projects/openmp"$static_suffix$cross_suffix"
+  fi
+	
+  mkdir -p "$build_prefix"/projects/openmp"$static_suffix$cross_suffix" && cd "$build_prefix"/projects/openmp"$static_suffix$cross_suffix"
+  # Disable OMPT and libomptarget, to prevent overwriting shared libraries
+  # that have already been built when building static archives.
+  run_or_die \
+    cmake -Wno-dev -G "$generator" \
+          -DCMAKE_BUILD_TYPE=$buildtype \
+          -DCMAKE_INSTALL_PREFIX="$stage_install_prefix" \
+          -DCMAKE_INSTALL_MESSAGE=LAZY \
+          $llvm_use_ccache \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DLIBOMP_ENABLE_ASSERTIONS=off \
+          $static_cmake_flags \
+          -DOPENMP_LLVM_TOOLS_DIR="$(dirname $llvm_lit)" \
+          -DOPENMP_LIT_ARGS="-sv -j$threads" \
+          -DOPENMP_TEST_CXX_COMPILER="$stage_install_prefix/bin/clang++" \
+          -DOPENMP_TEST_C_COMPILER="$stage_install_prefix/bin/clang" \
+          $cross_cmake_flags \
+          ../../../openmp
+
+  run_or_die make -j$threads
+  run_or_die make -j$threads $verbose $install
+}
+
+build_libunwind() {
+  local stage_install_prefix="$cross_compile_install_prefix"
+  local cross_cmake_flags="$cross_cmake_flags"
+
+  echo "$0: building libunwind-cross"
+  if [ $clean -eq 1 ]; then
+    rm -rf "$build_prefix"/projects/libunwind-cross
+  fi
+  mkdir -p "$build_prefix"/projects/libunwind-cross && cd "$build_prefix"/projects/libunwind-cross
+  run_or_die \
+    cmake -Wno-dev -G "$generator" \
+          -DCMAKE_BUILD_TYPE=$buildtype \
+          -DCMAKE_INSTALL_PREFIX="$stage_install_prefix" \
+          -DCMAKE_INSTALL_MESSAGE=LAZY \
+          $llvm_use_ccache \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          $cross_cmake_flags \
+          ../../../libunwind
+
+  run_or_die make -j$threads
+  run_or_die make -j$threads $verbose $install
+}
+
+build_compiler_rt() {
+  local cross_cmake_flags="$cross_cmake_flags"
+  local stage_install_prefix="$($install_prefix/bin/clang --print-resource-dir)"
+
+  echo "$0: building compiler-rt-cross"
+  if [ $clean -eq 1 ]; then
+    rm -rf "$build_prefix"/projects/compiler-rt-cross
+  fi
+
+  mkdir -p "$build_prefix"/projects/compiler-rt-cross && cd "$build_prefix"/projects/compiler-rt-cross
+  run_or_die \
+     cmake -Wno-dev -G "$generator" \
+           -DCMAKE_BUILD_TYPE=$buildtype \
+           -DCMAKE_INSTALL_PREFIX="$stage_install_prefix" \
+           -DCMAKE_INSTALL_MESSAGE=LAZY \
+           -DCMAKE_C_COMPILER=clang \
+           -DCMAKE_CXX_COMPILER=clang++ \
+           -DCOMPILER_RT_BUILD_BUILTINS=on \
+           -DCOMPILER_RT_BUILD_LIBFUZZER=off \
+           -DCOMPILER_RT_BUILD_PROFILE=on \
+           -DCOMPILER_RT_BUILD_SANITIZERS=off \
+           -DCOMPILER_RT_BUILD_XRAY=off \
+           -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+           $cross_cmake_flags \
+           ../../../compiler-rt
+
+  run_or_die make -j$threads
+  run_or_die make -j$threads $verbose $install
+}
+
+build_libcxx() {
+  echo $install_libcxx
+  local stage_install_prefix="$cross_compile_install_prefix"
+  local cross_cmake_flags="$cross_cmake_flags"
+
+  echo "$0: building libcxx-cross"
+  if [ $clean -eq 1 -a -e "$build_prefix/projects/libcxx-cross" ]; then
+    rm -rf "$build_prefix/projects/libcxx-cross"
+  fi
+  mkdir -p "$build_prefix/projects/libcxx-cross" && cd "$build_prefix/projects/libcxx-cross"
+  run_or_die \
+    cmake -Wno-dev -G "$generator" \
+          -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" \
+	  -DCMAKE_BUILD_TYPE=$buildtype \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DLLVM_TABLEGEN=$install_prefix/bin/llvm-tblgen \
+          -DCMAKE_INSTALL_PREFIX="$stage_install_prefix" \
+          -DCMAKE_INSTALL_MESSAGE=LAZY \
+          -DLLVM_ENABLE_ASSERTIONS=off \
+		  -DLLVM_ENABLE_ZSTD=off \
+          -DLLVM_USE_SPLIT_DWARF=$split_dwarf \
+          -DLLVM_LIT_ARGS="-sv -j$threads" \
+          $cross_cmake_flags \
+          ../../../llvm
+
+  run_or_die make -j$threads $verbose
+  run_or_die make -j$threads $verbose $install
+}
+
+path_orig="$PATH"
+ld_library_path_orig="$LD_LIBRARY_PATH"
+export PATH="$install_prefix/bin:$path_orig"
+export LD_LIBRARY_PATH="$install_prefix/lib:$ld_library_path_orig"
+
+if [ "$cross_compile_arch" != "" ]; then
+  if [ "$host_arch" = "$cross_compile_arch" ]; then
+    echo "$0: cannot cross-compile from $host_arch to $cross_compile_arch"
+    exit 1
+  fi
+
+  host_triple="$(llvm-config --host-target)"
+  cross_compile_triple="${host_triple/$host_arch/$cross_compile_arch}"
+  cross_compile_install_prefix="$install_prefix/$cross_compile_triple"
+  mkdir -p "$cross_compile_install_prefix"
+
+  cross_cmake_flags="-DCMAKE_C_COMPILER_TARGET=$cross_compile_triple \
+                     -DCMAKE_CXX_COMPILER_TARGET=$cross_compile_triple \
+                     -DCMAKE_ASM_COMPILER_TARGET=$cross_compile_triple \
+                     -DCMAKE_SYSROOT=$sysroot \
+                     -DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=$gcc_toolchain \
+                     -DCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=$gcc_toolchain"
+
+  build_openmp shared
+  build_openmp static
+  build_libunwind
+  build_compiler_rt
+  build_libcxx
 fi
 
+cd ..
+
 echo "$0: SUCCESS"
+
+
