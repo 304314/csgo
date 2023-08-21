@@ -2296,6 +2296,9 @@ Value *LibCallSimplifier::optimizeCbrt(CallInst *CI, IRBuilderBase &B) {
       return Ret;
     }
   }
+  // Reverting to the original handling of the cbrt function
+  if (UnsafeFPShrink && hasFloatVersion(M, CI->getCalledFunction()->getName()))
+      return optimizeUnaryDoubleFP(CI, B, TLI, true);
   return nullptr;
 }
 
