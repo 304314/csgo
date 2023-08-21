@@ -7,7 +7,7 @@ CXX_COMPILER_PATH=g++
 # Initialize our own variables:
 buildtype=RelWithDebInfo
 backends="ARM;AArch64;X86"
-enabled_projects="clang;lld;compiler-rt;openmp;clang-tools-extra"
+enabled_projects="clang;lld;compiler-rt;clang-tools-extra"
 embedded_toolchain="0"
 split_dwarf=on
 use_ccache="0"
@@ -130,8 +130,37 @@ done
 
 CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$install_prefix \
                -DCMAKE_BUILD_TYPE=$buildtype \
+               -DBUILD_SHARED_LIBS:BOOL=OFF \
+               -DCMAKE_SKIP_RPATH:BOOL=ON \
                -DCMAKE_C_COMPILER=$C_COMPILER_PATH \
                -DCMAKE_CXX_COMPILER=$CXX_COMPILER_PATH \
+               -DLLVM_USE_PERF:BOOL=ON \
+               -DLLVM_BUILD_RUNTIME:BOOL=ON \
+               -DLLVM_INCLUDE_TOOLS:BOOL=ON \
+               -DLLVM_BUILD_TOOLS:BOOL=ON \
+               -DLLVM_INCLUDE_TESTS:BOOL=ON \
+               -DLLVM_BUILD_TESTS:BOOL=ON \
+               -DLLVM_INCLUDE_DOCS:BOOL=ON \
+               -DLLVM_BUILD_DOCS:BOOL=ON \
+               -DLLVM_INCLUDE_EXAMPLES:BOOL=ON \
+               -DLLVM_BUILD_EXAMPLES:BOOL=OFF \
+               -DLLVM_INCLUDE_UTILS:BOOL=ON \
+               -DLLVM_INSTALL_UTILS:BOOL=ON \
+               -DLLVM_ENABLE_DOXYGEN:BOOL=OFF \
+               -DSPHINX_WARNINGS_AS_ERRORS=OFF \
+               -DCLANG_DEFAULT_PIE_ON_LINUX=ON \
+               -DCLANG_BUILD_TOOLS:BOOL=ON \
+               -DCLANG_INCLUDE_TESTS:BOOL=ON \
+               -DCLANG_ENABLE_ARCMT:BOOL=ON \
+               -DCLANG_ENABLE_STATIC_ANALYZER:BOOL=ON \
+               -DCLANG_INCLUDE_DOCS:BOOL=ON \
+               -DCLANG_PLUGIN_SUPPORT:BOOL=ON \
+               -DLLVM_CONFIG:FILEPATH=${build_prefix}/bin/llvm-comfig \
+               -DENABLE_LINKER_BUILD_ID:BOOL=ON \
+               -DLLVM_ENABLE_EH=ON \
+               -DLLVM_ENABLE_ZLIB:BOOL=ON \
+               -DLLVM_ENABLE_FFI:BOOL=ON \
+               -DLLVM_ENABLE_RTTI:BOOL=ON \
                -DLLVM_TARGETS_TO_BUILD=$backends "
 
 # Warning: the -DLLVM_ENABLE_PROJECTS option is specified with cmake
