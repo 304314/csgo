@@ -1982,8 +1982,6 @@ Value *LibCallSimplifier::replaceNestedPowAndSqrtWithPow(CallInst *Pow,
   CallInst *BaseFn = dyn_cast<CallInst>(Base);
   if (BaseFn && BaseFn->hasOneUse() && BaseFn->isFast() && Pow->isFast()) {
     Function *CalleeFn = BaseFn->getCalledFunction();
-    if (!TargetLibraryInfoImpl::isCallingConvCCompatible(CalleeFn))
-      return nullptr;
     LibFunc LibFn;
 
     // If Pow is an intrinsic call, and 
@@ -2045,8 +2043,6 @@ Value *LibCallSimplifier::replaceNestedPowAndPowWithPow(CallInst *Pow, IRBuilder
 
   if (BaseFn && BaseFn->hasOneUse() && BaseFn->isFast() && Pow->isFast()){
     Function *CalleeFn = BaseFn->getCalledFunction();
-    if (!TargetLibraryInfoImpl::isCallingConvCCompatible(CalleeFn))
-      return nullptr;
     LibFunc LibFn;
     // If Pow is an intrinsic call and 
     // its first argument is also an intrinsic call to pow
@@ -2111,8 +2107,6 @@ Value *LibCallSimplifier::replaceNestedSqrtAndPowWithPow(CallInst *Sqrt,
   CallInst *Pow = dyn_cast<CallInst>(OldPow);
   if (Pow && Pow->hasOneUse() && Pow->isFast() && Sqrt->isFast()) {
     Function *CalleeFn = Pow->getCalledFunction();
-    if (!TargetLibraryInfoImpl::isCallingConvCCompatible(CalleeFn))
-      return nullptr;
     IRBuilderBase::FastMathFlagGuard Guard(B);
     B.setFastMathFlags(Sqrt->getFastMathFlags());
     LibFunc LibFn;
