@@ -346,6 +346,8 @@ public:
   MachineBasicBlock::iterator probedStackAlloc(MachineBasicBlock::iterator MBBI,
                                                Register TargetReg,
                                                bool FrameSetup) const;
+
+  bool isReallyTriviallyReMaterializable(const MachineInstr &MI) const override;
 #define GET_INSTRINFO_HELPER_DECLS
 #include "AArch64GenInstrInfo.inc"
 
