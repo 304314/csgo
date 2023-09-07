@@ -14,14 +14,25 @@
 #include "clang/Driver/Multilib.h"
 #include "clang/Driver/Tool.h"
 #include "clang/Driver/ToolChain.h"
+#include "llvm/Option/ArgList.h"
 #include "llvm/Support/CodeGen.h"
 
 namespace clang {
 namespace driver {
 namespace tools {
 
+#ifdef ENABLE_CLASSIC_FLANG
+bool needFortranLibs(const Driver &D, const llvm::opt::ArgList &Args);
+#endif
+
 void addPathIfExists(const Driver &D, const Twine &Path,
                      ToolChain::path_list &Paths);
+
+void getTargetFeatureList(const Driver &D,
+                          const llvm::Triple &Triple,
+                          const llvm::opt::ArgList &Args,
+                          llvm::opt::ArgStringList &CmdArgs,
+                          bool ForAS, std::vector<StringRef> &Features);
 
 void AddLinkerInputs(const ToolChain &TC, const InputInfoList &Inputs,
                      const llvm::opt::ArgList &Args,
@@ -122,6 +133,9 @@ bool addOpenMPRuntime(llvm::opt::ArgStringList &CmdArgs, const ToolChain &TC,
 
 /// Adds Fortran runtime libraries to \p CmdArgs.
 void addFortranRuntimeLibs(const ToolChain &TC,
+#ifdef ENABLE_CLASSIC_FLANG
+                           const llvm::opt::ArgList &Args,
+#endif
                            llvm::opt::ArgStringList &CmdArgs);
 
 /// Adds the path for the Fortran runtime libraries to \p CmdArgs.

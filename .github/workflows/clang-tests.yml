@@ -3,18 +3,16 @@ name: Clang Tests
 on:
   workflow_dispatch:
   push:
-    ignore-forks: true
     branches:
-      - 'release/**'
+      - 'release_*x'
     paths:
       - 'clang/**'
       - '.github/workflows/clang-tests.yml'
       - '.github/workflows/llvm-project-tests.yml'
       - '!llvm/**'
   pull_request:
-    ignore-forks: true
     branches:
-      - 'release/**'
+      - 'release_*x'
     paths:
       - 'clang/**'
       - '.github/workflows/clang-tests.yml'
@@ -29,9 +27,9 @@ concurrency:
 
 jobs:
   check_clang:
-    if: github.repository_owner == 'llvm'
-    name: Test clang,lldb,libclc
+    if: github.repository_owner == 'flang-compiler'
+    name: Test clang
     uses: ./.github/workflows/llvm-project-tests.yml
     with:
       build_target: check-clang
-      projects: clang;lldb;libclc
+      projects: clang;openmp
