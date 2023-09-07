@@ -10,7 +10,6 @@
 #include "AMDGPU.h"
 #include "Arch/AArch64.h"
 #include "Arch/ARM.h"
-#include "Arch/CSKY.h"
 #include "Arch/M68k.h"
 #include "Arch/Mips.h"
 #include "Arch/PPC.h"
@@ -21,7 +20,6 @@
 #include "Arch/X86.h"
 #include "CommonArgs.h"
 #include "Hexagon.h"
-#include "MSP430.h"
 #include "PS4CPU.h"
 #include "clang/Basic/CLWarnings.h"
 #include "clang/Basic/CharInfo.h"
@@ -291,87 +289,12 @@ static void ParseMPreferVectorWidth(const Driver &D, const ArgList &Args,
   }
 }
 
-static void getWebAssemblyTargetFeatures(const ArgList &Args,
-                                         std::vector<StringRef> &Features) {
-  handleTargetFeaturesGroup(Args, Features, options::OPT_m_wasm_Features_Group);
-}
-
 static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
                               const ArgList &Args, ArgStringList &CmdArgs,
                               bool ForAS, bool IsAux = false) {
   std::vector<StringRef> Features;
-  switch (Triple.getArch()) {
-  default:
-    break;
-  case llvm::Triple::mips:
-  case llvm::Triple::mipsel:
-  case llvm::Triple::mips64:
-  case llvm::Triple::mips64el:
-    mips::getMIPSTargetFeatures(D, Triple, Args, Features);
-    break;
 
-  case llvm::Triple::arm:
-  case llvm::Triple::armeb:
-  case llvm::Triple::thumb:
-  case llvm::Triple::thumbeb:
-    arm::getARMTargetFeatures(D, Triple, Args, Features, ForAS);
-    break;
-
-  case llvm::Triple::ppc:
-  case llvm::Triple::ppcle:
-  case llvm::Triple::ppc64:
-  case llvm::Triple::ppc64le:
-    ppc::getPPCTargetFeatures(D, Triple, Args, Features);
-    break;
-  case llvm::Triple::riscv32:
-  case llvm::Triple::riscv64:
-    riscv::getRISCVTargetFeatures(D, Triple, Args, Features);
-    break;
-  case llvm::Triple::systemz:
-    systemz::getSystemZTargetFeatures(D, Args, Features);
-    break;
-  case llvm::Triple::aarch64:
-  case llvm::Triple::aarch64_32:
-  case llvm::Triple::aarch64_be:
-    aarch64::getAArch64TargetFeatures(D, Triple, Args, Features, ForAS);
-    break;
-  case llvm::Triple::x86:
-  case llvm::Triple::x86_64:
-    x86::getX86TargetFeatures(D, Triple, Args, Features);
-    break;
-  case llvm::Triple::hexagon:
-    hexagon::getHexagonTargetFeatures(D, Args, Features);
-    break;
-  case llvm::Triple::wasm32:
-  case llvm::Triple::wasm64:
-    getWebAssemblyTargetFeatures(Args, Features);
-    break;
-  case llvm::Triple::sparc:
-  case llvm::Triple::sparcel:
-  case llvm::Triple::sparcv9:
-    sparc::getSparcTargetFeatures(D, Args, Features);
-    break;
-  case llvm::Triple::r600:
-  case llvm::Triple::amdgcn:
-    amdgpu::getAMDGPUTargetFeatures(D, Triple, Args, Features);
-    break;
-  case llvm::Triple::nvptx:
-  case llvm::Triple::nvptx64:
-    NVPTX::getNVPTXTargetFeatures(D, Triple, Args, Features);
-    break;
-  case llvm::Triple::m68k:
-    m68k::getM68kTargetFeatures(D, Triple, Args, Features);
-    break;
-  case llvm::Triple::msp430:
-    msp430::getMSP430TargetFeatures(D, Args, Features);
-    break;
-  case llvm::Triple::ve:
-    ve::getVETargetFeatures(D, Args, Features);
-    break;
-  case llvm::Triple::csky:
-    csky::getCSKYTargetFeatures(D, Triple, Args, CmdArgs, Features);
-    break;
-  }
+  getTargetFeatureList(D, Triple, Args, CmdArgs, ForAS, Features);
 
   for (auto Feature : unifyTargetFeatures(Features)) {
     CmdArgs.push_back(IsAux ? "-aux-target-feature" : "-target-feature");
@@ -5096,7 +5019,68 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     }
   }
 
+#ifndef ENABLE_CLASSIC_FLANG
   Args.AddLastArg(CmdArgs, options::OPT_fveclib);
+#else
+  if (Args.getLastArg(options::OPT_fveclib))
+    Args.AddLastArg(CmdArgs, options::OPT_fveclib);
+  else
+    CmdArgs.push_back("-fveclib=PGMATH");
+
+  std::string PassRemarkVal(""), PassRemarkOpt("");
+  if (Args.getLastArg(options::OPT_Minfoall)) {
+    PassRemarkVal = ".*";
+    Args.ClaimAllArgs(options::OPT_Minfoall);
+  } else if (Arg *A = Args.getLastArg(options::OPT_Minfo_EQ)) {
+    for (StringRef val : A->getValues()) {
+      if (val.equals("all")) {
+        PassRemarkVal = ".*";
+        break;
+      } else if (val.equals("inline") || val.equals("vect")) {
+        PassRemarkVal += PassRemarkVal.empty() ? "" : "|";
+        PassRemarkVal += val;
+      } else {
+        D.Diag(diag::err_drv_clang_unsupported_minfo_arg)
+          << A->getOption().getName()
+          << val.str();
+        break;
+      }
+    }
+  }
+  PassRemarkOpt = "-pass-remarks=" + PassRemarkVal;
+  CmdArgs.push_back("-mllvm");
+  CmdArgs.push_back(Args.MakeArgString(PassRemarkOpt));
+  Args.ClaimAllArgs(options::OPT_Minfo_EQ);
+  PassRemarkVal.clear();
+  PassRemarkOpt.clear();
+
+  if (Args.getLastArg(options::OPT_Mneginfoall)) {
+    PassRemarkVal = ".*";
+    Args.ClaimAllArgs(options::OPT_Mneginfoall);
+  } else if (Arg *A = Args.getLastArg(options::OPT_Mneginfo_EQ)) {
+    for (StringRef val : A->getValues()) {
+      if (val.equals("all")) {
+        PassRemarkVal = ".*";
+        break;
+      } else if (val.equals("inline") || val.equals("vect")) {
+        PassRemarkVal += PassRemarkVal.empty() ? "" : "|";
+        PassRemarkVal += val;
+      } else {
+        D.Diag(diag::err_drv_clang_unsupported_minfo_arg)
+          << A->getOption().getName()
+          << val.str();
+        break;
+      }
+    }
+  }
+  PassRemarkOpt = "-pass-remarks-missed=" + PassRemarkVal;
+  CmdArgs.push_back("-mllvm");
+  CmdArgs.push_back(Args.MakeArgString(PassRemarkOpt));
+  PassRemarkOpt = "-pass-remarks-analysis=" + PassRemarkVal;
+  CmdArgs.push_back("-mllvm");
+  CmdArgs.push_back(Args.MakeArgString(PassRemarkOpt));
+  Args.ClaimAllArgs(options::OPT_Mneginfo_EQ);
+#endif
 
   if (Args.hasFlag(options::OPT_fmerge_all_constants,
                    options::OPT_fno_merge_all_constants, false))
