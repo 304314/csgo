@@ -54,9 +54,14 @@ define double @sqrt_nroot(double %x, double %n){
 ; CHECK-LABEL: @sqrt_nroot(
 ; CHECK-NEXT:    [[DIV:%.*]] = fdiv double 1.000000e+00, [[N:%.*]]
 ; CHECK-NEXT:    [[UNUSED:%.*]] = call fast double @pow(double [[X:%.*]], double [[DIV]])
+<<<<<<< HEAD
 ; CHECK-NEXT:    [[ABSX:%.*]] = call fast double @llvm.fabs.f64(double [[X:%.*]])
 ; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[DIV]], 5.000000e-01
 ; CHECK-NEXT:    [[POW:%.*]] = call fast double @pow(double [[ABSX]], double [[MUL]])
+=======
+; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[DIV]], 5.000000e-01
+; CHECK-NEXT:    [[POW:%.*]] = call fast double @pow(double [[X:%.*]], double [[MUL]])
+>>>>>>> 89fe0551ddae (实现了以下几种数学库和并优化,并进行了功能验证：)
 ; CHECK-NEXT:    ret double [[POW]]
 ;
   %div = fdiv double 1.000000e+00, %n
@@ -69,9 +74,14 @@ define float @sqrtf_nroot(float %x, float %n){
 ; CHECK-LABEL: @sqrtf_nroot(
 ; CHECK-NEXT:    [[DIV:%.*]] = fdiv float 1.000000e+00, [[N:%.*]]
 ; CHECK-NEXT:    [[UNUSED:%.*]] = call fast float @powf(float [[X:%.*]], float [[DIV]])
+<<<<<<< HEAD
 ; CHECK-NEXT:    [[ABSX:%.*]] = call fast float @llvm.fabs.f32(float [[X:%.*]])
 ; CHECK-NEXT:    [[MUL:%.*]] = fmul fast float [[DIV]], 5.000000e-01
 ; CHECK-NEXT:    [[POW:%.*]] = call fast float @powf(float [[ABSX]], float [[MUL]])
+=======
+; CHECK-NEXT:    [[MUL:%.*]] = fmul fast float [[DIV]], 5.000000e-01
+; CHECK-NEXT:    [[POW:%.*]] = call fast float @powf(float [[X:%.*]], float [[MUL]])
+>>>>>>> 89fe0551ddae (实现了以下几种数学库和并优化,并进行了功能验证：)
 ; CHECK-NEXT:    ret float [[POW]]
 ;
   %div = fdiv float 1.000000e+00, %n
@@ -83,9 +93,14 @@ define float @sqrtf_nroot(float %x, float %n){
 define double @sqrt_pow(double %x, double %y) {
 ; CHECK-LABEL: @sqrt_pow(
 ; CHECK-NEXT:    [[UNUSED:%.*]] = call fast double  @pow(double [[X:%.*]], double [[Y:%.*]])
+<<<<<<< HEAD
 ; CHECK-NEXT:    [[ABSX:%.*]] = call fast double @llvm.fabs.f64(double [[X:%.*]])
 ; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[Y:%.*]], 5.000000e-01
 ; CHECK-NEXT:    [[POW:%.*]] = call fast double @pow(double [[ABSX]], double [[MUL]])
+=======
+; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[Y:%.*]], 5.000000e-01
+; CHECK-NEXT:    [[POW:%.*]] = call fast double @pow(double [[X:%.*]], double [[MUL]])
+>>>>>>> 89fe0551ddae (实现了以下几种数学库和并优化,并进行了功能验证：)
 ; CHECK-NEXT:    ret double [[POW]]
 ;
   %call = call fast double @pow(double %x, double %y) 
@@ -96,9 +111,14 @@ define double @sqrt_pow(double %x, double %y) {
 define float @sqrtf_powf(float %x, float %y) {
 ; CHECK-LABEL: @sqrtf_powf(
 ; CHECK-NEXT:    [[UNUSED:%.*]] = call fast float  @powf(float [[X:%.*]], float [[Y:%.*]])
+<<<<<<< HEAD
 ; CHECK-NEXT:    [[ABSX:%.*]] = call fast float @llvm.fabs.f32(float [[X:%.*]])
 ; CHECK-NEXT:    [[MUL:%.*]] = fmul fast float [[Y:%.*]], 5.000000e-01
 ; CHECK-NEXT:    [[POW:%.*]] = call fast float @powf(float [[ABSX]], float [[MUL]])
+=======
+; CHECK-NEXT:    [[MUL:%.*]] = fmul fast float [[Y:%.*]], 5.000000e-01
+; CHECK-NEXT:    [[POW:%.*]] = call fast float @powf(float [[X:%.*]], float [[MUL]])
+>>>>>>> 89fe0551ddae (实现了以下几种数学库和并优化,并进行了功能验证：)
 ; CHECK-NEXT:    ret float [[POW]]
 ;
   %call = call fast float @powf(float %x, float %y) 
@@ -217,6 +237,10 @@ declare float @cbrtf(float)
 declare double @exp(double)
 declare float @expf(float)
 declare double @exp2(double)
+<<<<<<< HEAD
 declare float @exp2f(float)
 declare double @llvm.fabs.f64(double)
 declare float @llvm.fabs.f32(float)
+=======
+declare float @exp2f(float)
+>>>>>>> 89fe0551ddae (实现了以下几种数学库和并优化,并进行了功能验证：)
