@@ -1934,7 +1934,7 @@ void AsmPrinter::emitFunctionBody() {
     for (const auto &MBB : *MF) {
       *MBBProfileDumpFileOutput.get()
           << MF->getName() << "," << MBB.getBBID() << ","
-          << MBFI.getBlockFreqRelativeToEntryBlock(&MBB) << "\n";
+          << MBFI.getBlockFreq(&MBB).getFrequency() << "\n";
     }
   }
 }
