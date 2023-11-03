@@ -938,6 +938,11 @@ Arm and AArch64 Support
   and the selected processor lacks floating point registers.
   (`#55755 <https://github.com/llvm/llvm-project/issues/55755>`_)
 
+- New AArch64 asm constraints have been added for r8-r11(Uci) and r12-r15(Ucj).
+
+Android Support
+^^^^^^^^^^^^^^^
+
 - Clang builtin ``__arithmetic_fence`` and the command line option ``-fprotect-parens``
   are now enabled for AArch64.
 
