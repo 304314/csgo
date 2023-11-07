@@ -1868,3 +1868,15 @@ let TargetGuard = "sve2p1" in {
 def SVSCLAMP : SInst<"svclamp[_{d}]", "dddd", "csil",     MergeNone, "aarch64_sve_sclamp", [], []>;
 def SVUCLAMP : SInst<"svclamp[_{d}]", "dddd", "UcUsUiUl", MergeNone, "aarch64_sve_uclamp", [], []>;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// SME2
+
+// SME intrinsics which operate only on vectors and do not require ZA should be added here,
+// as they could possibly become SVE instructions in the future.
+
+let TargetGuard = "sme2" in {
+// == ADD (vectors) ==
+  def SVADD_SINGLE_X2 : SInst<"svadd[_single_{d}_x2]", "22d", "cUcsUsiUilUl", MergeNone, "aarch64_sve_add_single_x2", [IsStreaming], []>;
+  def SVADD_SINGLE_X4 : SInst<"svadd[_single_{d}_x4]", "44d", "cUcsUsiUilUl", MergeNone, "aarch64_sve_add_single_x4", [IsStreaming], []>;
+}
