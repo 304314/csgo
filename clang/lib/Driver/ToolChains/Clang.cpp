@@ -4544,6 +4544,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   if (Args.hasFlag(options::OPT_fgcc_compatible,
                    options::OPT_fno_gcc_compatible, false)) {
+    CmdArgs.push_back("-Wno-error=unknown-warning-option");
+    CmdArgs.push_back("-Wno-error=unused-command-line-argument");
     Args.AddLastArg(CmdArgs, options::OPT_fgcc_compatible,
                     options::OPT_fno_gcc_compatible);
   }
