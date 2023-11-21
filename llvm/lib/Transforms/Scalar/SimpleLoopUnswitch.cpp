@@ -2863,6 +2863,10 @@ static bool unswitchBestCondition(
       L.getHeader()->getParent()->hasMinSize()
       ? TargetTransformInfo::TCK_CodeSize
       : TargetTransformInfo::TCK_SizeAndLatency;
+
+  // =======code size=======
+  CostKind = TargetTransformInfo::TCK_CodeSize;
+  // =======code size=======
   InstructionCost LoopCost = 0;
   for (auto *BB : L.blocks()) {
     InstructionCost Cost = 0;

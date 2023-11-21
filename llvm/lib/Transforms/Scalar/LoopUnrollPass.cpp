@@ -72,6 +72,11 @@ using namespace llvm;
 
 #define DEBUG_TYPE "loop-unroll"
 
+static cl::opt<bool> EnableCodeSizeLoop(
+    "enable-code-size-loop", cl::init(true), cl::Hidden,
+    cl::desc("Enable optimizations for code size as part of the optimization "
+             "pipeline"));
+
 cl::opt<bool> llvm::ForgetSCEVInLoopUnroll(
     "forget-scev-loop-unroll", cl::init(false), cl::Hidden,
     cl::desc("Forget everything in SCEV when doing LoopUnroll, instead of just"
@@ -222,6 +227,10 @@ TargetTransformInfo::UnrollingPreferences llvm::gatherUnrollingPreferences(
                     (hasUnrollTransformation(L) != TM_ForcedByUser &&
                      llvm::shouldOptimizeForSize(L->getHeader(), PSI, BFI,
                                                  PGSOQueryType::IRPass));
+
+  //for code size
+  if(EnableCodeSizeLoop) OptForSize = true;
+
   if (OptForSize) {
     UP.Threshold = UP.OptSizeThreshold;
     UP.PartialThreshold = UP.PartialOptSizeThreshold;
@@ -403,6 +412,9 @@ static Optional<EstimatedUnrollCost> analyzeLoopUnrollCost(
       RootI.getFunction()->hasMinSize() ?
       TargetTransformInfo::TCK_CodeSize :
       TargetTransformInfo::TCK_SizeAndLatency;
+    // ============ code size
+    if(EnableCodeSizeLoop) CostKind = TargetTransformInfo::TCK_CodeSize;
+    // ============ code size
     for (;; --Iteration) {
       do {
         Instruction *I = CostWorklist.pop_back_val();
@@ -486,6 +498,11 @@ static Optional<EstimatedUnrollCost> analyzeLoopUnrollCost(
   TargetTransformInfo::TargetCostKind CostKind =
     L->getHeader()->getParent()->hasMinSize() ?
     TargetTransformInfo::TCK_CodeSize : TargetTransformInfo::TCK_SizeAndLatency;
+    
+  // ============ code size
+  if(EnableCodeSizeLoop) CostKind = TargetTransformInfo::TCK_CodeSize;
+  // ============ code size
+  
   // Simulate execution of each iteration of the loop counting instructions,
   // which would be simplified.
   // Since the same load will take different values on different iterations,
@@ -1172,6 +1189,10 @@ static LoopUnrollResult tryToUnrollLoop(
     return LoopUnrollResult::Unmodified;
 
   bool OptForSize = L->getHeader()->getParent()->hasOptSize();
+
+  //for code size
+  if(EnableCodeSizeLoop) OptForSize = true;
+
   unsigned NumInlineCandidates;
   bool NotDuplicatable;
   bool Convergent;

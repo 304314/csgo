@@ -1208,8 +1208,14 @@ bool EarlyCSE::processNode(DomTreeNode *Node) {
   // have invalidated the live-out memory values of our parent value.  For now,
   // just be conservative and invalidate memory if this block has multiple
   // predecessors.
+
+  //feisen:debug
+  // errs()<<"BB->getSinglePredecessor() before:\n";
   if (!BB->getSinglePredecessor())
     ++CurrentGeneration;
+
+  //feisen:debug
+  // errs()<<"BB->getSinglePredecessor() after:\n";
 
   // If this node has a single predecessor which ends in a conditional branch,
   // we can infer the value of the branch condition given that we took this
@@ -1226,6 +1232,9 @@ bool EarlyCSE::processNode(DomTreeNode *Node) {
     }
   }
 
+  //feisen:debug
+  // errs()<<"BB->getSinglePredecessor() after 2:\n";
+
   /// LastStore - Keep track of the last non-volatile store that we saw... for
   /// as long as there in no instruction that reads memory.  If we see a store
   /// to the same location, we delete the dead store.  This zaps trivial dead
@@ -1234,7 +1243,59 @@ bool EarlyCSE::processNode(DomTreeNode *Node) {
 
   // See if any instructions in the block can be eliminated.  If so, do it.  If
   // not, add them to AvailableValues.
+
+  //feisen:debug
+  // -----------------------------
+//   int counter = 0;
+//   errs()<<"BB->getSinglePredecessor() after 3:\n";
+//   BB->getInstList();
+//   errs()<<"BB->getSinglePredecessor() after 3.1:\n";
+//   make_early_inc_range(BB->getInstList());
+//   errs()<<"BB->getSinglePredecessor() after 3.2:\n";
+//   for (Instruction &Inst : make_early_inc_range(BB->getInstList())) {break;}
+//   errs()<<"BB->getSinglePredecessor() after 3.3:\n";
+//   errs()<<"bb name?= "<<BB->getName()<<"\n";
+//   if (BB->getInstList().begin() == BB->getInstList().end()) {
+//     errs() << "BB's instruction list is empty\n";
+//   }
+//   for (Instruction &Inst : BB->getInstList()) {
+//     errs()<<"check inst: "<<"\n";
+//     bool inst_null = &Inst==nullptr;
+//     errs()<<"inst parent?= "<<Inst.getParent()<<"\n";
+//     errs()<<"inst null?= "<<inst_null<<"\n";
+//     errs()<<Inst.getType()<<"\n";
+//     for (Use &U : Inst.operands()) {
+//         if (U.get() == nullptr) {
+//             errs() << "Invalid operand in instruction\n";
+//             break;
+//         }
+//     }
+//     if (Inst.getParent() != BB) {
+//         errs() << "Invalid instruction in BB's instruction list\n";
+//         break;
+//     }
+// }
+//   bool bb_null = BB==nullptr;
+//   errs()<<"bb null?= "<<bb_null<<"\n";
+//   errs()<<"inst_size: "<<BB->getInstList().size()<<"\n";
+//   int counter2 = 0;
+//   BB->print(errs());
+//   errs()<<"print BB end \n";
+//   for(Instruction &Inst: *BB){
+//     errs()<<"loop0: "<<counter2++<<"\n";
+//   }
+//   errs()<<"loop0 end: "<<counter2<<"\n";
+  // -----------------------------
+  //feisen 
+
   for (Instruction &Inst : make_early_inc_range(BB->getInstList())) {
+
+    //feisen:debug
+    // errs()<<"BB->getSinglePredecessor() after 4:\n";
+
+    //feisen:debug
+    // errs()<<"int loop: "<<counter++<<"\n";
+
     // Dead instructions should just be removed.
     if (isInstructionTriviallyDead(&Inst, &TLI)) {
       LLVM_DEBUG(dbgs() << "EarlyCSE DCE: " << Inst << '\n');
@@ -1596,6 +1657,8 @@ bool EarlyCSE::processNode(DomTreeNode *Node) {
       }
     }
   }
+  // feisen:debug
+  // errs()<<"loop end : "<< counter<<"\n";
 
   return Changed;
 }
@@ -1618,8 +1681,14 @@ bool EarlyCSE::run() {
 
   assert(!CurrentGeneration && "Create a new EarlyCSE instance to rerun it.");
 
+  //feisen:debug bbb
+  // int nodeCounter = 0;
+
   // Process the stack.
   while (!nodesToProcess.empty()) {
+    //feisen:debug bbb
+    // errs()<<"---nodeCounter: "<<nodeCounter++<<"\n";
+
     // Grab the first item off the stack. Set the current generation, remove
     // the node from the stack, and process it.
     StackNode *NodeToProcess = nodesToProcess.back();
@@ -1661,12 +1730,34 @@ PreservedAnalyses EarlyCSEPass::run(Function &F,
       UseMemorySSA ? &AM.getResult<MemorySSAAnalysis>(F).getMSSA() : nullptr;
 
   EarlyCSE CSE(F.getParent()->getDataLayout(), TLI, TTI, DT, AC, MSSA);
+  //feisen:debug aaaa
+  // errs()<<"EarlyCSEPass::run1\n";
+  // -----------------------------
+  // errs()<<"----------------------\n";
+  // F.print(errs());
+  // errs()<<"----------------------\n";
+  // int counter = 0;
+  // for(BasicBlock &BB : F){
+  //   BB.setName(F.getName()+"_"+std::to_string(counter++));
+  //   errs()<<"----\n";
+  //   BB.print(errs());
+  //   errs()<<"----\n";
+  // }
+  // errs()<<"2----------------------\n";
+  // -----------------------------
 
   if (!CSE.run())
     return PreservedAnalyses::all();
 
+  //feisen:debug
+  // errs()<<"EarlyCSEPass::run2\n";
+
   PreservedAnalyses PA;
   PA.preserveSet<CFGAnalyses>();
+
+  //feisen:debug
+  // errs()<<"EarlyCSEPass::run3\n";
+
   if (UseMemorySSA)
     PA.preserve<MemorySSAAnalysis>();
   return PA;

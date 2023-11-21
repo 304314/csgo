@@ -53,6 +53,11 @@
 
 using namespace llvm;
 
+static cl::opt<bool> EnableCodeSizeMO(
+    "enable-code-size-MO", cl::init(true), cl::Hidden,
+    cl::desc("Enable optimizations for code size as part of the optimization "
+             "pipeline"));
+
 static cl::opt<bool>
     EnableIPRA("enable-ipra", cl::init(false), cl::Hidden,
                cl::desc("Enable interprocedural register allocation "
@@ -1268,6 +1273,11 @@ void TargetPassConfig::addMachinePasses() {
   addPass(&StackMapLivenessID);
   addPass(&LiveDebugValuesID);
 
+  //======  code size ===
+  if(EnableCodeSizeMO && TM->Options.SupportsDefaultOutlining){
+    addPass(createMachineOutlinerPass(true));
+  }else{
+  //====================
   if (TM->Options.EnableMachineOutliner && getOptLevel() != CodeGenOpt::None &&
       EnableMachineOutliner != RunOutliner::NeverOutline) {
     bool RunOnAllFunctions =
@@ -1276,6 +1286,7 @@ void TargetPassConfig::addMachinePasses() {
         RunOnAllFunctions || TM->Options.SupportsDefaultOutlining;
     if (AddOutliner)
       addPass(createMachineOutlinerPass(RunOnAllFunctions));
+  }
   }
 
   // Machine function splitter uses the basic block sections feature. Both

@@ -2265,6 +2265,10 @@ bool SCEVExpander::isHighCostExpansionHelper(
           ? TargetTransformInfo::TCK_CodeSize
           : TargetTransformInfo::TCK_RecipThroughput;
 
+  // =======code size=======
+  CostKind = TargetTransformInfo::TCK_CodeSize;
+  // =======code size=======
+
   switch (S->getSCEVType()) {
   case scCouldNotCompute:
     llvm_unreachable("Attempt to use a SCEVCouldNotCompute object!");

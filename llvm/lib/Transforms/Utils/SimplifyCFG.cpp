@@ -2646,6 +2646,10 @@ static bool validateAndCostRequiredSelects(BasicBlock *BB, BasicBlock *ThenBB,
     BB->getParent()->hasMinSize()
     ? TargetTransformInfo::TCK_CodeSize
     : TargetTransformInfo::TCK_SizeAndLatency;
+  
+  // =======code size=======
+  CostKind = TargetTransformInfo::TCK_CodeSize;
+  // =======code size=======
 
   bool HaveRewritablePHIs = false;
   for (PHINode &PN : EndBB->phis()) {
@@ -3555,6 +3559,10 @@ bool llvm::FoldBranchToCommonDest(BranchInst *BI, DomTreeUpdater *DTU,
   TargetTransformInfo::TargetCostKind CostKind =
     BB->getParent()->hasMinSize() ? TargetTransformInfo::TCK_CodeSize
                                   : TargetTransformInfo::TCK_SizeAndLatency;
+
+  // =======code size=======
+  CostKind = TargetTransformInfo::TCK_CodeSize;
+  // =======code size=======
 
   Instruction *Cond = dyn_cast<Instruction>(BI->getCondition());
 

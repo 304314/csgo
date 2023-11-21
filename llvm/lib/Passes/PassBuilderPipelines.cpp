@@ -47,6 +47,7 @@
 #include "llvm/Transforms/IPO/ElimAvailExtern.h"
 #include "llvm/Transforms/IPO/ForceFunctionAttrs.h"
 #include "llvm/Transforms/IPO/FunctionAttrs.h"
+#include "llvm/Transforms/IPO/FunctionMerging.h" //func-merging
 #include "llvm/Transforms/IPO/GlobalDCE.h"
 #include "llvm/Transforms/IPO/GlobalOpt.h"
 #include "llvm/Transforms/IPO/GlobalSplit.h"
@@ -55,6 +56,7 @@
 #include "llvm/Transforms/IPO/InferFunctionAttrs.h"
 #include "llvm/Transforms/IPO/Inliner.h"
 #include "llvm/Transforms/IPO/LowerTypeTests.h"
+#include "llvm/Transforms/IPO/MergeFunctions.h" //run before func-merging
 #include "llvm/Transforms/IPO/MergeFunctions.h"
 #include "llvm/Transforms/IPO/ModuleInliner.h"
 #include "llvm/Transforms/IPO/OpenMPOpt.h"
@@ -130,6 +132,10 @@
 
 using namespace llvm;
 
+static cl::opt<int> EnableFuncMerging(
+    "enable-func-merging", cl::init(0), cl::Hidden,
+    cl::desc("Enable function merging as part of the optimization pipeline"));
+
 static cl::opt<InliningAdvisorMode> UseInlineAdvisor(
     "enable-ml-inliner", cl::init(InliningAdvisorMode::Default), cl::Hidden,
     cl::desc("Enable ML policy for inliner. Currently trained for -Oz only"),
@@ -181,6 +187,11 @@ static cl::opt<bool> EnableNoRerunSimplificationPipeline(
 static cl::opt<bool> EnableMergeFunctions(
     "enable-merge-functions", cl::init(false), cl::Hidden,
     cl::desc("Enable function merging as part of the optimization pipeline"));
+
+static cl::opt<bool> EnableCodeSize(
+    "enable-code-size", cl::init(true), cl::Hidden,
+    cl::desc("Enable optimizations for code size as part of the optimization "
+             "pipeline"));
 
 PipelineTuningOptions::PipelineTuningOptions() {
   LoopInterleaving = true;
@@ -481,9 +492,24 @@ PassBuilder::buildFunctionSimplificationPipeline(OptimizationLevel Level,
   LPM1.addPass(LICMPass(PTO.LicmMssaOptCap, PTO.LicmMssaNoAccForPromotionCap,
                         /*AllowSpeculation=*/false));
 
+  //====for size====================
+  if (EnableCodeSize && false) {
+    if (Level == OptimizationLevel::O2) {
+      LPM1.addPass(LoopRotatePass(false, isLTOPreLink(Phase)));
+    } else {
+      LPM1.addPass(
+          LoopRotatePass(Level != OptimizationLevel::Oz, isLTOPreLink(Phase)));
+    }
+  } else {
+    LPM1.addPass(
+        LoopRotatePass(Level != OptimizationLevel::Oz, isLTOPreLink(Phase)));
+  }
+  //========================
   // Disable header duplication in loop rotation at -Oz.
-  LPM1.addPass(
-      LoopRotatePass(Level != OptimizationLevel::Oz, isLTOPreLink(Phase)));
+  if (!EnableCodeSize) {
+    LPM1.addPass(
+        LoopRotatePass(Level != OptimizationLevel::Oz, isLTOPreLink(Phase)));
+  }
   // TODO: Investigate promotion cap for O1.
   LPM1.addPass(LICMPass(PTO.LicmMssaOptCap, PTO.LicmMssaNoAccForPromotionCap,
                         /*AllowSpeculation=*/true));
@@ -708,6 +734,12 @@ void PassBuilder::addPGOInstrPassesForO0(ModulePassManager &MPM,
 }
 
 static InlineParams getInlineParamsFromOptLevel(OptimizationLevel Level) {
+  //===for size====================
+  if (EnableCodeSize) {
+    if (Level == OptimizationLevel::O2)
+      return getInlineParams(2, 1);
+  }
+  //===for size====================
   return getInlineParams(Level.getSpeedupLevel(), Level.getSizeLevel());
 }
 
@@ -1086,7 +1118,8 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
   }
 
   // Optimize parallel scalar instruction chains into SIMD instructions.
-  if (PTO.SLPVectorization) {
+  //======== code size
+  if (PTO.SLPVectorization && !EnableCodeSize) {
     FPM.addPass(SLPVectorizerPass());
     if (Level.getSpeedupLevel() > 1 && ExtraVectorizerPasses) {
       FPM.addPass(EarlyCSEPass());
@@ -1212,9 +1245,19 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
     C(OptimizePM, Level);
 
   LoopPassManager LPM;
+  //====for size====================
+  if (EnableCodeSize && false) {
+    if (Level == OptimizationLevel::O2) {
+      LPM.addPass(LoopRotatePass(false, LTOPreLink));
+    } else {
+      LPM.addPass(LoopRotatePass(Level != OptimizationLevel::Oz, LTOPreLink));
+    }
+  } else {
+    LPM.addPass(LoopRotatePass(Level != OptimizationLevel::Oz, LTOPreLink));
+  }
+  //========================
   // First rotate loops that may have been un-rotated by prior passes.
   // Disable header duplication at -Oz.
-  LPM.addPass(LoopRotatePass(Level != OptimizationLevel::Oz, LTOPreLink));
   // Some loops may have become dead by now. Try to delete them.
   // FIXME: see discussion in https://reviews.llvm.org/D112851,
   //        this may need to be revisited once we run GVN before loop deletion
@@ -1324,6 +1367,11 @@ PassBuilder::buildPerModuleDefaultPipeline(OptimizationLevel Level,
   const ThinOrFullLTOPhase LTOPhase = LTOPreLink
                                           ? ThinOrFullLTOPhase::FullLTOPreLink
                                           : ThinOrFullLTOPhase::None;
+
+  if (EnableCodeSize) {
+    MPM.addPass(MergeFunctionsPass());
+    MPM.addPass(FunctionMergingPass());
+  }
   // Add the core simplification pipeline.
   MPM.addPass(buildModuleSimplificationPipeline(Level, LTOPhase));
 
@@ -1688,7 +1736,6 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
   // Nuke dead stores.
   MainFPM.addPass(DSEPass());
   MainFPM.addPass(MergedLoadStoreMotionPass());
-
 
   if (EnableConstraintElimination)
     MainFPM.addPass(ConstraintEliminationPass());
