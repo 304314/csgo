@@ -65,6 +65,10 @@ namespace {
 #include "AArch64GenGlobalISel.inc"
 #undef GET_GLOBALISEL_PREDICATE_BITSET
 
+static cl::opt<bool> DisableLargeGlobalGroupReloc(
+  "mno-large-global-group-reloc",
+  cl::desc("Disable group relocation type for global value and symbol when code model is large"),
+  cl::init(false));
 
 class AArch64InstructionSelector : public InstructionSelector {
 public:
@@ -2810,7 +2814,7 @@ bool AArch64InstructionSelector::select(MachineInstr &I) {
     if (OpFlags & AArch64II::MO_GOT) {
       I.setDesc(TII.get(AArch64::LOADgot));
       I.getOperand(1).setTargetFlags(OpFlags);
-    } else if (TM.getCodeModel() == CodeModel::Large) {
+    } else if (TM.getCodeModel() == CodeModel::Large && !DisableLargeGlobalGroupReloc) {
       // Materialize the global using movz/movk instructions.
       materializeLargeCMVal(I, GV, OpFlags);
       I.eraseFromParent();
