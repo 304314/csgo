@@ -1122,6 +1122,8 @@ def e : JoinedOrSeparate<["-"], "e">, Flags<[LinkerInput]>, Group<Link_Group>;
 def fmax_tokens_EQ : Joined<["-"], "fmax-tokens=">, Group<f_Group>, Flags<[CC1Option]>,
   HelpText<"Max total number of preprocessed tokens for -Wmax-tokens.">,
   MarshallingInfoInt<LangOpts<"MaxTokens">>;
+def mno_large_global_group_reloc: Flag<["-"], "mno-large-global-group-reloc">, Group<m_aarch64_Features_Group>,
+  HelpText<"Disable group relocation type for global value and symbol when code model is large">;
 def fPIC : Flag<["-"], "fPIC">, Group<f_Group>;
 def fno_PIC : Flag<["-"], "fno-PIC">, Group<f_Group>;
 def fPIE : Flag<["-"], "fPIE">, Group<f_Group>;
