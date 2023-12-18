@@ -19,7 +19,7 @@
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za8_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_hor_za8_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za8, _s8, _m)(0, slice_base, pg, zn);
 }
 
@@ -30,7 +30,7 @@ void test_svwrite_hor_za8_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __ar
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv16i8(i32 0, i32 [[TILESLICE]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za8_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_hor_za8_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
    uint32_t slice = slice_base + 15;
   SME_ACLE_FUNC(svwrite_hor_za8, _s8, _m)(0, slice, pg, zn);
 }
@@ -42,7 +42,7 @@ void test_svwrite_hor_za8_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za16, _s16, _m)(0, slice_base, pg, zn);
 }
 
@@ -54,7 +54,7 @@ void test_svwrite_hor_za16_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8i16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_hor_za16, _s16, _m)(1, slice, pg, zn);
 }
@@ -66,7 +66,7 @@ void test_svwrite_hor_za16_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za32_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_hor_za32_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za32, _s32, _m)(0, slice_base, pg, zn);
 }
 
@@ -78,7 +78,7 @@ void test_svwrite_hor_za32_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv4i32(i32 3, i32 [[TILESLICE]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za32_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_hor_za32_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 3;
   SME_ACLE_FUNC(svwrite_hor_za32, _s32, _m)(3, slice, pg, zn);
 }
@@ -90,7 +90,7 @@ void test_svwrite_hor_za32_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za64_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_hor_za64_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za64, _s64, _m)(0, slice_base, pg, zn);
 }
 
@@ -102,7 +102,7 @@ void test_svwrite_hor_za64_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv2i64(i32 7, i32 [[TILESLICE]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za64_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_hor_za64_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 1;
   SME_ACLE_FUNC(svwrite_hor_za64, _s64, _m)(7, slice, pg, zn);
 }
@@ -113,7 +113,7 @@ void test_svwrite_hor_za64_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za8_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_hor_za8_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za8, _u8, _m)(0, slice_base, pg, zn);
 }
 
@@ -124,7 +124,7 @@ void test_svwrite_hor_za8_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __a
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv16i8(i32 0, i32 [[TILESLICE]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za8_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_hor_za8_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 15;
   SME_ACLE_FUNC(svwrite_hor_za8, _u8, _m)(0, slice, pg, zn);
 }
@@ -136,7 +136,7 @@ void test_svwrite_hor_za8_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za16, _u16, _m)(0, slice_base, pg, zn);
 }
 
@@ -148,7 +148,7 @@ void test_svwrite_hor_za16_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8i16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_hor_za16, _u16, _m)(1, slice, pg, zn);
 }
@@ -160,7 +160,7 @@ void test_svwrite_hor_za16_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za32_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_hor_za32_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za32, _u32, _m)(0, slice_base, pg, zn);
 }
 
@@ -172,7 +172,7 @@ void test_svwrite_hor_za32_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv4i32(i32 3, i32 [[TILESLICE]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za32_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_hor_za32_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 3;
   SME_ACLE_FUNC(svwrite_hor_za32, _u32, _m)(3, slice, pg, zn);
 }
@@ -184,7 +184,7 @@ void test_svwrite_hor_za32_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za64_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_hor_za64_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za64, _u64, _m)(0, slice_base, pg, zn);
 }
 
@@ -196,7 +196,7 @@ void test_svwrite_hor_za64_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv2i64(i32 7, i32 [[TILESLICE]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za64_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_hor_za64_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 1;
   SME_ACLE_FUNC(svwrite_hor_za64, _u64, _m)(7, slice, pg, zn);
 }
@@ -208,7 +208,7 @@ void test_svwrite_hor_za64_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8f16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za16, _f16, _m)(0, slice_base, pg, zn);
 }
 
@@ -220,7 +220,7 @@ void test_svwrite_hor_za16_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8f16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_hor_za16, _f16, _m)(1, slice, pg, zn);
 }
@@ -232,7 +232,7 @@ void test_svwrite_hor_za16_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8bf16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za16, _bf16, _m)(0, slice_base, pg, zn);
 }
 
@@ -244,7 +244,7 @@ void test_svwrite_hor_za16_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv8bf16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za16_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za16_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
    uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_hor_za16, _bf16, _m)(1, slice, pg, zn);
 }
@@ -256,7 +256,7 @@ void test_svwrite_hor_za16_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv4f32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za32_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_hor_za32_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za32, _f32, _m)(0, slice_base, pg, zn);
 }
 
@@ -268,7 +268,7 @@ void test_svwrite_hor_za32_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv4f32(i32 3, i32 [[TILESLICE]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za32_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_hor_za32_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 3;
   SME_ACLE_FUNC(svwrite_hor_za32, _f32, _m)(3, slice, pg, zn);
 }
@@ -280,7 +280,7 @@ void test_svwrite_hor_za32_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv2f64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za64_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_hor_za64_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za64, _f64, _m)(0, slice_base, pg, zn);
 }
 
@@ -292,7 +292,7 @@ void test_svwrite_hor_za64_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.horiz.nxv2f64(i32 7, i32 [[TILESLICE]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za64_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_hor_za64_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 1;
   SME_ACLE_FUNC(svwrite_hor_za64, _f64, _m)(7, slice, pg, zn);
 }
@@ -303,7 +303,7 @@ void test_svwrite_hor_za64_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s8, _m)(0, slice_base, pg, zn);
 }
 
@@ -313,7 +313,7 @@ void test_svwrite_hor_za128_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv16i8(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s8, _m)(15, slice_base, pg, zn);
 }
 
@@ -324,7 +324,7 @@ void test_svwrite_hor_za128_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s16, _m)(0, slice_base, pg, zn);
 }
 
@@ -335,7 +335,7 @@ void test_svwrite_hor_za128_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8i16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s16, _m)(15, slice_base, pg, zn);
 }
 
@@ -346,7 +346,7 @@ void test_svwrite_hor_za128_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s32, _m)(0, slice_base, pg, zn);
 }
 
@@ -357,7 +357,7 @@ void test_svwrite_hor_za128_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv4i32(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s32, _m)(15, slice_base, pg, zn);
 }
 
@@ -368,7 +368,7 @@ void test_svwrite_hor_za128_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s64, _m)(0, slice_base, pg, zn);
 }
 
@@ -379,7 +379,7 @@ void test_svwrite_hor_za128_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv2i64(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_hor_za128_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _s64, _m)(15, slice_base, pg, zn);
 }
 
@@ -389,7 +389,7 @@ void test_svwrite_hor_za128_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u8, _m)(0, slice_base, pg, zn);
 }
 
@@ -399,7 +399,7 @@ void test_svwrite_hor_za128_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv16i8(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u8, _m)(15, slice_base, pg, zn);
 }
 
@@ -410,7 +410,7 @@ void test_svwrite_hor_za128_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u16, _m)(0, slice_base, pg, zn);
 }
 
@@ -421,7 +421,7 @@ void test_svwrite_hor_za128_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8i16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u16, _m)(15, slice_base, pg, zn);
 }
 
@@ -432,7 +432,7 @@ void test_svwrite_hor_za128_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u32, _m)(0, slice_base, pg, zn);
 }
 
@@ -443,7 +443,7 @@ void test_svwrite_hor_za128_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv4i32(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u32, _m)(15, slice_base, pg, zn);
 }
 
@@ -454,7 +454,7 @@ void test_svwrite_hor_za128_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u64, _m)(0, slice_base, pg, zn);
 }
 
@@ -465,7 +465,7 @@ void test_svwrite_hor_za128_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv2i64(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_hor_za128_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _u64, _m)(15, slice_base, pg, zn);
 }
 
@@ -476,7 +476,7 @@ void test_svwrite_hor_za128_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8f16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _f16, _m)(0, slice_base, pg, zn);
 }
 
@@ -487,7 +487,7 @@ void test_svwrite_hor_za128_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8f16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _f16, _m)(15, slice_base, pg, zn);
 }
 
@@ -498,7 +498,7 @@ void test_svwrite_hor_za128_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8bf16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _bf16, _m)(0, slice_base, pg, zn);
 }
 
@@ -509,7 +509,7 @@ void test_svwrite_hor_za128_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv8bf16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_hor_za128_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _bf16, _m)(15, slice_base, pg, zn);
 }
 
@@ -520,7 +520,7 @@ void test_svwrite_hor_za128_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv4f32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_hor_za128_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _f32, _m)(0, slice_base, pg, zn);
 }
 
@@ -531,7 +531,7 @@ void test_svwrite_hor_za128_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv4f32(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_hor_za128_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _f32, _m)(15, slice_base, pg, zn);
 }
 
@@ -542,7 +542,7 @@ void test_svwrite_hor_za128_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv2f64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_hor_za128_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _f64, _m)(0, slice_base, pg, zn);
 }
 
@@ -553,7 +553,7 @@ void test_svwrite_hor_za128_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.horiz.nxv2f64(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_hor_za128_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_hor_za128_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_hor_za128, _f64, _m)(15, slice_base, pg, zn);
 }
 
@@ -563,7 +563,7 @@ void test_svwrite_hor_za128_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za8_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_ver_za8_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za8, _s8, _m)(0, slice_base, pg, zn);
 }
 
@@ -574,7 +574,7 @@ void test_svwrite_ver_za8_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __ar
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv16i8(i32 0, i32 [[TILESLICE]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za8_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_ver_za8_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 15;
   SME_ACLE_FUNC(svwrite_ver_za8, _s8, _m)(0, slice, pg, zn);
 }
@@ -586,7 +586,7 @@ void test_svwrite_ver_za8_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za16, _s16, _m)(0, slice_base, pg, zn);
 }
 
@@ -598,7 +598,7 @@ void test_svwrite_ver_za16_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8i16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_ver_za16, _s16, _m)(1, slice, pg, zn);
 }
@@ -610,7 +610,7 @@ void test_svwrite_ver_za16_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za32_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_ver_za32_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za32, _s32, _m)(0, slice_base, pg, zn);
 }
 
@@ -622,7 +622,7 @@ void test_svwrite_ver_za32_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv4i32(i32 3, i32 [[TILESLICE]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za32_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_ver_za32_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 3;
   SME_ACLE_FUNC(svwrite_ver_za32, _s32, _m)(3, slice, pg, zn);
 }
@@ -634,7 +634,7 @@ void test_svwrite_ver_za32_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za64_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_ver_za64_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za64, _s64, _m)(0, slice_base, pg, zn);
 }
 
@@ -646,7 +646,7 @@ void test_svwrite_ver_za64_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv2i64(i32 7, i32 [[TILESLICE]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za64_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_ver_za64_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 1;
   SME_ACLE_FUNC(svwrite_ver_za64, _s64, _m)(7, slice, pg, zn);
 }
@@ -657,7 +657,7 @@ void test_svwrite_ver_za64_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za8_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_ver_za8_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za8, _u8, _m)(0, slice_base, pg, zn);
 }
 
@@ -668,7 +668,7 @@ void test_svwrite_ver_za8_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __a
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv16i8(i32 0, i32 [[TILESLICE]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za8_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_ver_za8_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 15;
   SME_ACLE_FUNC(svwrite_ver_za8, _u8, _m)(0, slice, pg, zn);
 }
@@ -680,7 +680,7 @@ void test_svwrite_ver_za8_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za16, _u16, _m)(0, slice_base, pg, zn);
 }
 
@@ -692,7 +692,7 @@ void test_svwrite_ver_za16_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8i16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_ver_za16, _u16, _m)(1, slice, pg, zn);
 }
@@ -704,7 +704,7 @@ void test_svwrite_ver_za16_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za32_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_ver_za32_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za32, _u32, _m)(0, slice_base, pg, zn);
 }
 
@@ -716,7 +716,7 @@ void test_svwrite_ver_za32_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv4i32(i32 3, i32 [[TILESLICE]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za32_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_ver_za32_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 3;
   SME_ACLE_FUNC(svwrite_ver_za32, _u32, _m)(3, slice, pg, zn);
 }
@@ -728,7 +728,7 @@ void test_svwrite_ver_za32_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za64_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_ver_za64_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za64, _u64, _m)(0, slice_base, pg, zn);
 }
 
@@ -740,7 +740,7 @@ void test_svwrite_ver_za64_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv2i64(i32 7, i32 [[TILESLICE]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za64_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_ver_za64_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 1;
   SME_ACLE_FUNC(svwrite_ver_za64, _u64, _m)(7, slice, pg, zn);
 }
@@ -752,7 +752,7 @@ void test_svwrite_ver_za64_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8f16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za16, _f16, _m)(0, slice_base, pg, zn);
 }
 
@@ -764,7 +764,7 @@ void test_svwrite_ver_za16_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8f16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_ver_za16, _f16, _m)(1, slice, pg, zn);
 }
@@ -776,7 +776,7 @@ void test_svwrite_ver_za16_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8bf16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za16, _bf16, _m)(0, slice_base, pg, zn);
 }
 
@@ -788,7 +788,7 @@ void test_svwrite_ver_za16_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv8bf16(i32 1, i32 [[TILESLICE]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za16_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za16_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 7;
   SME_ACLE_FUNC(svwrite_ver_za16, _bf16, _m)(1, slice, pg, zn);
 }
@@ -800,7 +800,7 @@ void test_svwrite_ver_za16_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv4f32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za32_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_ver_za32_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za32, _f32, _m)(0, slice_base, pg, zn);
 }
 
@@ -812,7 +812,7 @@ void test_svwrite_ver_za32_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv4f32(i32 3, i32 [[TILESLICE]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za32_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_ver_za32_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 3;
   SME_ACLE_FUNC(svwrite_ver_za32, _f32, _m)(3, slice, pg, zn);
 }
@@ -824,7 +824,7 @@ void test_svwrite_ver_za32_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv2f64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za64_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_ver_za64_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za64, _f64, _m)(0, slice_base, pg, zn);
 }
 
@@ -836,7 +836,7 @@ void test_svwrite_ver_za64_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.write.vert.nxv2f64(i32 7, i32 [[TILESLICE]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za64_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_ver_za64_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   uint32_t slice = slice_base + 1;
   SME_ACLE_FUNC(svwrite_ver_za64, _f64, _m)(7, slice, pg, zn);
 }
@@ -847,7 +847,7 @@ void test_svwrite_ver_za64_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s8, _m)(0, slice_base, pg, zn);
 }
 
@@ -857,7 +857,7 @@ void test_svwrite_ver_za128_s8(uint32_t slice_base, svbool_t pg, svint8_t zn) __
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv16i8(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s8, _m)(15, slice_base, pg, zn);
 }
 
@@ -868,7 +868,7 @@ void test_svwrite_ver_za128_s8_1(uint32_t slice_base, svbool_t pg, svint8_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s16, _m)(0, slice_base, pg, zn);
 }
 
@@ -879,7 +879,7 @@ void test_svwrite_ver_za128_s16(uint32_t slice_base, svbool_t pg, svint16_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8i16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s16, _m)(15, slice_base, pg, zn);
 }
 
@@ -890,7 +890,7 @@ void test_svwrite_ver_za128_s16_1(uint32_t slice_base, svbool_t pg, svint16_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s32, _m)(0, slice_base, pg, zn);
 }
 
@@ -901,7 +901,7 @@ void test_svwrite_ver_za128_s32(uint32_t slice_base, svbool_t pg, svint32_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv4i32(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s32, _m)(15, slice_base, pg, zn);
 }
 
@@ -912,7 +912,7 @@ void test_svwrite_ver_za128_s32_1(uint32_t slice_base, svbool_t pg, svint32_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s64, _m)(0, slice_base, pg, zn);
 }
 
@@ -923,7 +923,7 @@ void test_svwrite_ver_za128_s64(uint32_t slice_base, svbool_t pg, svint64_t zn) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv2i64(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming {
+void test_svwrite_ver_za128_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _s64, _m)(15, slice_base, pg, zn);
 }
 
@@ -933,7 +933,7 @@ void test_svwrite_ver_za128_s64_1(uint32_t slice_base, svbool_t pg, svint64_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv16i8(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u8, _m)(0, slice_base, pg, zn);
 }
 
@@ -943,7 +943,7 @@ void test_svwrite_ver_za128_u8(uint32_t slice_base, svbool_t pg, svuint8_t zn) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv16i8(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 16 x i1> [[PG:%.*]], <vscale x 16 x i8> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u8, _m)(15, slice_base, pg, zn);
 }
 
@@ -954,7 +954,7 @@ void test_svwrite_ver_za128_u8_1(uint32_t slice_base, svbool_t pg, svuint8_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8i16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u16, _m)(0, slice_base, pg, zn);
 }
 
@@ -965,7 +965,7 @@ void test_svwrite_ver_za128_u16(uint32_t slice_base, svbool_t pg, svuint16_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8i16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i16> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u16, _m)(15, slice_base, pg, zn);
 }
 
@@ -976,7 +976,7 @@ void test_svwrite_ver_za128_u16_1(uint32_t slice_base, svbool_t pg, svuint16_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv4i32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u32, _m)(0, slice_base, pg, zn);
 }
 
@@ -987,7 +987,7 @@ void test_svwrite_ver_za128_u32(uint32_t slice_base, svbool_t pg, svuint32_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv4i32(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u32, _m)(15, slice_base, pg, zn);
 }
 
@@ -998,7 +998,7 @@ void test_svwrite_ver_za128_u32_1(uint32_t slice_base, svbool_t pg, svuint32_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv2i64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u64, _m)(0, slice_base, pg, zn);
 }
 
@@ -1009,7 +1009,7 @@ void test_svwrite_ver_za128_u64(uint32_t slice_base, svbool_t pg, svuint64_t zn)
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv2i64(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming {
+void test_svwrite_ver_za128_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _u64, _m)(15, slice_base, pg, zn);
 }
 
@@ -1020,7 +1020,7 @@ void test_svwrite_ver_za128_u64_1(uint32_t slice_base, svbool_t pg, svuint64_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8f16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _f16, _m)(0, slice_base, pg, zn);
 }
 
@@ -1031,7 +1031,7 @@ void test_svwrite_ver_za128_f16(uint32_t slice_base, svbool_t pg, svfloat16_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8f16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x half> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _f16, _m)(15, slice_base, pg, zn);
 }
 
@@ -1042,7 +1042,7 @@ void test_svwrite_ver_za128_f16_1(uint32_t slice_base, svbool_t pg, svfloat16_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8bf16(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _bf16, _m)(0, slice_base, pg, zn);
 }
 
@@ -1053,7 +1053,7 @@ void test_svwrite_ver_za128_bf16(uint32_t slice_base, svbool_t pg, svbfloat16_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv8bf16(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 8 x i1> [[TMP0]], <vscale x 8 x bfloat> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming {
+void test_svwrite_ver_za128_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _bf16, _m)(15, slice_base, pg, zn);
 }
 
@@ -1064,7 +1064,7 @@ void test_svwrite_ver_za128_bf16_1(uint32_t slice_base, svbool_t pg, svbfloat16_
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv4f32(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_ver_za128_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _f32, _m)(0, slice_base, pg, zn);
 }
 
@@ -1075,7 +1075,7 @@ void test_svwrite_ver_za128_f32(uint32_t slice_base, svbool_t pg, svfloat32_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv4f32(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 4 x i1> [[TMP0]], <vscale x 4 x float> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming {
+void test_svwrite_ver_za128_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _f32, _m)(15, slice_base, pg, zn);
 }
 
@@ -1086,7 +1086,7 @@ void test_svwrite_ver_za128_f32_1(uint32_t slice_base, svbool_t pg, svfloat32_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv2f64(i32 0, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_ver_za128_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _f64, _m)(0, slice_base, pg, zn);
 }
 
@@ -1097,6 +1097,6 @@ void test_svwrite_ver_za128_f64(uint32_t slice_base, svbool_t pg, svfloat64_t zn
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.writeq.vert.nxv2f64(i32 15, i32 [[SLICE_BASE:%.*]], <vscale x 2 x i1> [[TMP0]], <vscale x 2 x double> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svwrite_ver_za128_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming {
+void test_svwrite_ver_za128_f64_1(uint32_t slice_base, svbool_t pg, svfloat64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svwrite_ver_za128, _f64, _m)(15, slice_base, pg, zn);
 }

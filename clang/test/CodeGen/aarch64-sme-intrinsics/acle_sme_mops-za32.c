@@ -19,7 +19,7 @@
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.smops.wide.nxv16i8(i32 0, <vscale x 16 x i1> [[PN:%.*]], <vscale x 16 x i1> [[PM:%.*]], <vscale x 16 x i8> [[ZN:%.*]], <vscale x 16 x i8> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za32_s8(svbool_t pn, svbool_t pm, svint8_t zn, svint8_t zm) __arm_streaming {
+void test_svmops_za32_s8(svbool_t pn, svbool_t pm, svint8_t zn, svint8_t zm) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svmops_za32, _s8, _m)(0, pn, pm, zn, zm);
 }
 
@@ -29,7 +29,7 @@ void test_svmops_za32_s8(svbool_t pn, svbool_t pm, svint8_t zn, svint8_t zm) __a
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.umops.wide.nxv16i8(i32 0, <vscale x 16 x i1> [[PN:%.*]], <vscale x 16 x i1> [[PM:%.*]], <vscale x 16 x i8> [[ZN:%.*]], <vscale x 16 x i8> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za32_u8(svbool_t pn, svbool_t pm, svuint8_t zn, svuint8_t zm) __arm_streaming {
+void test_svmops_za32_u8(svbool_t pn, svbool_t pm, svuint8_t zn, svuint8_t zm) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svmops_za32, _u8, _m)(0, pn, pm, zn, zm);
 }
 
@@ -41,7 +41,7 @@ void test_svmops_za32_u8(svbool_t pn, svbool_t pm, svuint8_t zn, svuint8_t zm) _
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.mops.wide.nxv8bf16(i32 0, <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i1> [[TMP1]], <vscale x 8 x bfloat> [[ZN:%.*]], <vscale x 8 x bfloat> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za32_bf16(svbool_t pn, svbool_t pm, svbfloat16_t zn, svbfloat16_t zm) __arm_streaming {
+void test_svmops_za32_bf16(svbool_t pn, svbool_t pm, svbfloat16_t zn, svbfloat16_t zm) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svmops_za32, _bf16, _m)(0, pn, pm, zn, zm);
 }
 
@@ -53,7 +53,7 @@ void test_svmops_za32_bf16(svbool_t pn, svbool_t pm, svbfloat16_t zn, svbfloat16
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.mops.wide.nxv8f16(i32 1, <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i1> [[TMP1]], <vscale x 8 x half> [[ZN:%.*]], <vscale x 8 x half> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za32_f16(svbool_t pn, svbool_t pm, svfloat16_t zn, svfloat16_t zm) __arm_streaming {
+void test_svmops_za32_f16(svbool_t pn, svbool_t pm, svfloat16_t zn, svfloat16_t zm) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svmops_za32, _f16, _m)(1, pn, pm, zn, zm);
 }
 
@@ -65,7 +65,7 @@ void test_svmops_za32_f16(svbool_t pn, svbool_t pm, svfloat16_t zn, svfloat16_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.mops.nxv4f32(i32 1, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x float> [[ZN:%.*]], <vscale x 4 x float> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za32_f32(svbool_t pn, svbool_t pm, svfloat32_t zn, svfloat32_t zm) __arm_streaming {
+void test_svmops_za32_f32(svbool_t pn, svbool_t pm, svfloat32_t zn, svfloat32_t zm) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svmops_za32, _f32, _m)(1, pn, pm, zn, zm);
 }
 
@@ -75,7 +75,7 @@ void test_svmops_za32_f32(svbool_t pn, svbool_t pm, svfloat32_t zn, svfloat32_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.sumops.wide.nxv16i8(i32 0, <vscale x 16 x i1> [[PN:%.*]], <vscale x 16 x i1> [[PM:%.*]], <vscale x 16 x i8> [[ZN:%.*]], <vscale x 16 x i8> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svsumops_za32_s8(svbool_t pn, svbool_t pm, svint8_t zn, svuint8_t zm) __arm_streaming {
+void test_svsumops_za32_s8(svbool_t pn, svbool_t pm, svint8_t zn, svuint8_t zm) __arm_streaming __arm_shared_za {
  SME_ACLE_FUNC(svsumops_za32, _s8, _m)(0, pn, pm, zn, zm);
 }
 
@@ -85,6 +85,6 @@ void test_svsumops_za32_s8(svbool_t pn, svbool_t pm, svint8_t zn, svuint8_t zm) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.usmops.wide.nxv16i8(i32 0, <vscale x 16 x i1> [[PN:%.*]], <vscale x 16 x i1> [[PM:%.*]], <vscale x 16 x i8> [[ZN:%.*]], <vscale x 16 x i8> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svusmops_za32_u8(svbool_t pn, svbool_t pm, svuint8_t zn, svint8_t zm) __arm_streaming {
+void test_svusmops_za32_u8(svbool_t pn, svbool_t pm, svuint8_t zn, svint8_t zm) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svusmops_za32, _u8, _m)(0, pn, pm, zn, zm);
 }

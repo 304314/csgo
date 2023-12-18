@@ -21,7 +21,7 @@
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv2i64(i32 0, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za64_u64(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming {
+void test_svaddha_za64_u64(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddha_za64, _u64, _m)(0, pn, pm, zn);
 }
 
@@ -33,7 +33,7 @@ void test_svaddha_za64_u64(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_stream
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv2i64(i32 7, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za64_u64_1(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming {
+void test_svaddha_za64_u64_1(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddha_za64, _u64, _m)(7, pn, pm, zn);
 }
 
@@ -45,7 +45,7 @@ void test_svaddha_za64_u64_1(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_stre
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv2i64(i32 0, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za64_s64(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming {
+void test_svaddha_za64_s64(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddha_za64, _s64, _m)(0, pn, pm, zn);
 }
 
@@ -57,7 +57,7 @@ void test_svaddha_za64_s64(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streami
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv2i64(i32 7, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za64_s64_1(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming {
+void test_svaddha_za64_s64_1(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddha_za64, _s64, _m)(7, pn, pm, zn);
 }
 
@@ -69,7 +69,7 @@ void test_svaddha_za64_s64_1(svbool_t pn, svbool_t pm, svint64_t zn) __arm_strea
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv2i64(i32 0, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za64_u64(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming {
+void test_svaddva_za64_u64(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddva_za64, _u64, _m)(0, pn, pm, zn);
 }
 
@@ -81,7 +81,7 @@ void test_svaddva_za64_u64(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_stream
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv2i64(i32 7, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za64_u64_1(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming {
+void test_svaddva_za64_u64_1(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddva_za64, _u64, _m)(7, pn, pm, zn);
 }
 
@@ -93,7 +93,7 @@ void test_svaddva_za64_u64_1(svbool_t pn, svbool_t pm, svuint64_t zn) __arm_stre
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv2i64(i32 0, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za64_s64(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming {
+void test_svaddva_za64_s64(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddva_za64, _s64, _m)(0, pn, pm, zn);
 }
 
@@ -105,6 +105,6 @@ void test_svaddva_za64_s64(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streami
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv2i64(i32 7, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x i64> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za64_s64_1(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming {
+void test_svaddva_za64_s64_1(svbool_t pn, svbool_t pm, svint64_t zn) __arm_streaming __arm_shared_za {
   SME_ACLE_FUNC(svaddva_za64, _s64, _m)(7, pn, pm, zn);
 }
