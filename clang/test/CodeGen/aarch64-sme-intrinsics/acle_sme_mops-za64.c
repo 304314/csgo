@@ -21,7 +21,7 @@
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.smops.wide.nxv8i16(i32 7, <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i1> [[TMP1]], <vscale x 8 x i16> [[ZN:%.*]], <vscale x 8 x i16> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za64_s16(svbool_t pn, svbool_t pm, svint16_t zn, svint16_t zm) {
+void test_svmops_za64_s16(svbool_t pn, svbool_t pm, svint16_t zn, svint16_t zm) __arm_streaming {
   SME_ACLE_FUNC(svmops_za64, _s16, _m)(7, pn, pm, zn, zm);
 }
 
@@ -33,7 +33,7 @@ void test_svmops_za64_s16(svbool_t pn, svbool_t pm, svint16_t zn, svint16_t zm) 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.umops.wide.nxv8i16(i32 0, <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i1> [[TMP1]], <vscale x 8 x i16> [[ZN:%.*]], <vscale x 8 x i16> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za64_u16(svbool_t pn, svbool_t pm, svuint16_t zn, svuint16_t zm) {
+void test_svmops_za64_u16(svbool_t pn, svbool_t pm, svuint16_t zn, svuint16_t zm) __arm_streaming {
   SME_ACLE_FUNC(svmops_za64, _u16, _m)(0, pn, pm, zn, zm);
 }
 
@@ -45,7 +45,7 @@ void test_svmops_za64_u16(svbool_t pn, svbool_t pm, svuint16_t zn, svuint16_t zm
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.mops.nxv2f64(i32 7, <vscale x 2 x i1> [[TMP0]], <vscale x 2 x i1> [[TMP1]], <vscale x 2 x double> [[ZN:%.*]], <vscale x 2 x double> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svmops_za64_f64(svbool_t pn, svbool_t pm, svfloat64_t zn, svfloat64_t zm) {
+void test_svmops_za64_f64(svbool_t pn, svbool_t pm, svfloat64_t zn, svfloat64_t zm) __arm_streaming {
   SME_ACLE_FUNC(svmops_za64, _f64, _m)(7, pn, pm, zn, zm);
 }
 
@@ -57,7 +57,7 @@ void test_svmops_za64_f64(svbool_t pn, svbool_t pm, svfloat64_t zn, svfloat64_t 
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.sumops.wide.nxv8i16(i32 0, <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i1> [[TMP1]], <vscale x 8 x i16> [[ZN:%.*]], <vscale x 8 x i16> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svsumops_za64_s16(svbool_t pn, svbool_t pm, svint16_t zn, svuint16_t zm) {
+void test_svsumops_za64_s16(svbool_t pn, svbool_t pm, svint16_t zn, svuint16_t zm) __arm_streaming {
  SME_ACLE_FUNC(svsumops_za64, _s16, _m)(0, pn, pm, zn, zm);
 }
 
@@ -69,6 +69,6 @@ void test_svsumops_za64_s16(svbool_t pn, svbool_t pm, svint16_t zn, svuint16_t z
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.usmops.wide.nxv8i16(i32 7, <vscale x 8 x i1> [[TMP0]], <vscale x 8 x i1> [[TMP1]], <vscale x 8 x i16> [[ZN:%.*]], <vscale x 8 x i16> [[ZM:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svusmops_za64_u16(svbool_t pn, svbool_t pm, svuint16_t zn, svint16_t zm) {
+void test_svusmops_za64_u16(svbool_t pn, svbool_t pm, svuint16_t zn, svint16_t zm) __arm_streaming {
   SME_ACLE_FUNC(svusmops_za64, _u16, _m)(7, pn, pm, zn, zm);
 }
