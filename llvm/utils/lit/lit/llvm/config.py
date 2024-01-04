@@ -12,6 +12,17 @@ from lit.llvm.subst import ToolSubst
 
 lit_path_displayed = False
 
+def user_is_root():
+    # os.getuid() is not available on all platforms
+    try:
+        if os.getuid() == 0:
+            return True
+    except:
+        pass
+
+    return False
+
+
 class LLVMConfig(object):
 
     def __init__(self, lit_config, config):
@@ -134,6 +145,9 @@ class LLVMConfig(object):
                 features.add('target-aarch64')
             elif re.match(r'^arm.*', target_triple):
                 features.add('target-arm')
+
+        if not user_is_root():
+            features.add("non-root-user")
 
         use_gmalloc = lit_config.params.get('use_gmalloc', None)
         if lit.util.pythonize_bool(use_gmalloc):
