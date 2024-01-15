@@ -11,7 +11,7 @@
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.zero(i32 0)
 // CHECK-NEXT:    ret void
 //
-void test_svzero_mask_za(void) __arm_shared_za {
+void test_svzero_mask_za(void) __arm_inout("za") {
   svzero_mask_za(0);
 }
 
@@ -21,7 +21,7 @@ void test_svzero_mask_za(void) __arm_shared_za {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.zero(i32 176)
 // CHECK-NEXT:    ret void
 //
-void test_svzero_mask_za_1(void) __arm_shared_za {
+void test_svzero_mask_za_1(void) __arm_inout("za") {
   svzero_mask_za(176);
 }
 
@@ -31,7 +31,7 @@ void test_svzero_mask_za_1(void) __arm_shared_za {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.zero(i32 255)
 // CHECK-NEXT:    ret void
 //
-void test_svzero_mask_za_2(void) __arm_shared_za {
+void test_svzero_mask_za_2(void) __arm_inout("za") {
   svzero_mask_za(255);
 }
 
@@ -41,6 +41,6 @@ void test_svzero_mask_za_2(void) __arm_shared_za {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.zero(i32 255)
 // CHECK-NEXT:    ret void
 //
-void test_svzero_za(void) __arm_shared_za {
+void test_svzero_za(void) __arm_out("za") {
   svzero_za();
 }

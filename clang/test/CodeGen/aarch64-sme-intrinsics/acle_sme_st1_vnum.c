@@ -16,7 +16,7 @@
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1b.horiz(<vscale x 16 x i1> [[PG]], [[PTRTY]] [[TMP1]], i32 0, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_vnum_za8(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_hor_vnum_za8(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_hor_vnum_za8(0, slice_base, pg, ptr, vnum);
   svst1_hor_vnum_za8(0, slice_base + 15, pg, ptr, vnum);
 }
@@ -33,7 +33,7 @@ void test_svst1_hor_vnum_za8(uint32_t slice_base, svbool_t pg, void *ptr, int64_
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1h.horiz(<vscale x 8 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 1, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_vnum_za16(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_hor_vnum_za16(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_hor_vnum_za16(0, slice_base, pg, ptr, vnum);
   svst1_hor_vnum_za16(1, slice_base + 7, pg, ptr, vnum);
 }
@@ -50,7 +50,7 @@ void test_svst1_hor_vnum_za16(uint32_t slice_base, svbool_t pg, void *ptr, int64
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1w.horiz(<vscale x 4 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 3, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_vnum_za32(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_hor_vnum_za32(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_hor_vnum_za32(0, slice_base, pg, ptr, vnum);
   svst1_hor_vnum_za32(3, slice_base + 3, pg, ptr, vnum);
 }
@@ -67,7 +67,7 @@ void test_svst1_hor_vnum_za32(uint32_t slice_base, svbool_t pg, void *ptr, int64
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1d.horiz(<vscale x 2 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 7, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_vnum_za64(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_hor_vnum_za64(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_hor_vnum_za64(0, slice_base, pg, ptr, vnum);
   svst1_hor_vnum_za64(7, slice_base + 1, pg, ptr, vnum);
 }
@@ -83,7 +83,7 @@ void test_svst1_hor_vnum_za64(uint32_t slice_base, svbool_t pg, void *ptr, int64
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1q.horiz(<vscale x 1 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 15, i32 [[SLICE_BASE]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_vnum_za128(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_hor_vnum_za128(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_hor_vnum_za128(0, slice_base, pg, ptr, vnum);
   svst1_hor_vnum_za128(15, slice_base, pg, ptr, vnum);
 }
@@ -99,7 +99,7 @@ void test_svst1_hor_vnum_za128(uint32_t slice_base, svbool_t pg, void *ptr, int6
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1b.vert(<vscale x 16 x i1> [[PG]], [[PTRTY]] [[TMP1]], i32 0, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_vnum_za8(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_ver_vnum_za8(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_ver_vnum_za8(0, slice_base, pg, ptr, vnum);
   svst1_ver_vnum_za8(0, slice_base + 15, pg, ptr, vnum);
 }
@@ -116,7 +116,7 @@ void test_svst1_ver_vnum_za8(uint32_t slice_base, svbool_t pg, void *ptr, int64_
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1h.vert(<vscale x 8 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 1, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_vnum_za16(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_ver_vnum_za16(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_ver_vnum_za16(0, slice_base, pg, ptr, vnum);
   svst1_ver_vnum_za16(1, slice_base + 7, pg, ptr, vnum);
 }
@@ -133,7 +133,7 @@ void test_svst1_ver_vnum_za16(uint32_t slice_base, svbool_t pg, void *ptr, int64
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1w.vert(<vscale x 4 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 3, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_vnum_za32(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_ver_vnum_za32(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_ver_vnum_za32(0, slice_base, pg, ptr, vnum);
   svst1_ver_vnum_za32(3, slice_base + 3, pg, ptr, vnum);
 }
@@ -150,7 +150,7 @@ void test_svst1_ver_vnum_za32(uint32_t slice_base, svbool_t pg, void *ptr, int64
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1d.vert(<vscale x 2 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 7, i32 [[TILESLICE2]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_vnum_za64(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_ver_vnum_za64(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_ver_vnum_za64(0, slice_base, pg, ptr, vnum);
   svst1_ver_vnum_za64(7, slice_base + 1, pg, ptr, vnum);
 }
@@ -166,7 +166,7 @@ void test_svst1_ver_vnum_za64(uint32_t slice_base, svbool_t pg, void *ptr, int64
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1q.vert(<vscale x 1 x i1> [[TMP0]], [[PTRTY]] [[TMP2]], i32 15, i32 [[SLICE_BASE]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_vnum_za128(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_shared_za {
+void test_svst1_ver_vnum_za128(uint32_t slice_base, svbool_t pg, void *ptr, int64_t vnum) __arm_streaming __arm_in("za") {
   svst1_ver_vnum_za128(0, slice_base, pg, ptr, vnum);
   svst1_ver_vnum_za128(15, slice_base, pg, ptr, vnum);
 }
