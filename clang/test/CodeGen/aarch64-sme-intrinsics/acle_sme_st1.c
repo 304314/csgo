@@ -13,7 +13,7 @@
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1b.horiz(<vscale x 16 x i1> [[PG]], [[PTRTY]] [[PTR]], i32 0, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_za8(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_hor_za8(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_hor_za8(0, slice_base, pg, ptr);
   svst1_hor_za8(0, slice_base + 15, pg, ptr);
 }
@@ -27,7 +27,7 @@ void test_svst1_hor_za8(uint32_t slice_base, svbool_t pg, void *ptr) __arm_strea
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1h.horiz(<vscale x 8 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 1, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_za16(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_hor_za16(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_hor_za16(0, slice_base, pg, ptr);
   svst1_hor_za16(1, slice_base + 7, pg, ptr);
 }
@@ -41,7 +41,7 @@ void test_svst1_hor_za16(uint32_t slice_base, svbool_t pg, void *ptr) __arm_stre
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1w.horiz(<vscale x 4 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 3, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_za32(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_hor_za32(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_hor_za32(0, slice_base, pg, ptr);
   svst1_hor_za32(3, slice_base + 3, pg, ptr);
 }
@@ -55,7 +55,7 @@ void test_svst1_hor_za32(uint32_t slice_base, svbool_t pg, void *ptr) __arm_stre
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1d.horiz(<vscale x 2 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 7, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_za64(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_hor_za64(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_hor_za64(0, slice_base, pg, ptr);
   svst1_hor_za64(7, slice_base + 1, pg, ptr);
 }
@@ -68,7 +68,7 @@ void test_svst1_hor_za64(uint32_t slice_base, svbool_t pg, void *ptr) __arm_stre
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1q.horiz(<vscale x 1 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 15, i32 [[SLICE_BASE]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_hor_za128(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_hor_za128(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_hor_za128(0, slice_base, pg, ptr);
   svst1_hor_za128(15, slice_base, pg, ptr);
 }
@@ -81,7 +81,7 @@ void test_svst1_hor_za128(uint32_t slice_base, svbool_t pg, void *ptr) __arm_str
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1b.vert(<vscale x 16 x i1> [[PG]], [[PTRTY]] [[PTR]], i32 0, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_za8(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_ver_za8(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_ver_za8(0, slice_base, pg, ptr);
   svst1_ver_za8(0, slice_base + 15, pg, ptr);
 }
@@ -95,7 +95,7 @@ void test_svst1_ver_za8(uint32_t slice_base, svbool_t pg, void *ptr) __arm_strea
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1h.vert(<vscale x 8 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 1, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_za16(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_ver_za16(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_ver_za16(0, slice_base, pg, ptr);
   svst1_ver_za16(1, slice_base + 7, pg, ptr);
 }
@@ -109,7 +109,7 @@ void test_svst1_ver_za16(uint32_t slice_base, svbool_t pg, void *ptr) __arm_stre
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1w.vert(<vscale x 4 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 3, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_za32(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_ver_za32(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_ver_za32(0, slice_base, pg, ptr);
   svst1_ver_za32(3, slice_base + 3, pg, ptr);
 }
@@ -123,7 +123,7 @@ void test_svst1_ver_za32(uint32_t slice_base, svbool_t pg, void *ptr) __arm_stre
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1d.vert(<vscale x 2 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 7, i32 [[TILESLICE1]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_za64(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_ver_za64(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_ver_za64(0, slice_base, pg, ptr);
   svst1_ver_za64(7, slice_base + 1, pg, ptr);
 }
@@ -136,7 +136,7 @@ void test_svst1_ver_za64(uint32_t slice_base, svbool_t pg, void *ptr) __arm_stre
 // CHECK-NEXT:        tail call void @llvm.aarch64.sme.st1q.vert(<vscale x 1 x i1> [[TMP0]], [[PTRTY]] [[PTR]], i32 15, i32 [[SLICE_BASE]])
 // CHECK-NEXT:        ret void
 //
-void test_svst1_ver_za128(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_shared_za {
+void test_svst1_ver_za128(uint32_t slice_base, svbool_t pg, void *ptr) __arm_streaming __arm_in("za") {
   svst1_ver_za128(0, slice_base, pg, ptr);
   svst1_ver_za128(15, slice_base, pg, ptr);
 }
