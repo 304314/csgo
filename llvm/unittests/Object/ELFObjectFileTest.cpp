@@ -514,8 +514,11 @@ Sections:
             Metadata:      0x2
 )";
 
-  DoCheck(UnsupportedVersionYamlString,
-          "unsupported SHT_LLVM_BB_ADDR_MAP version: 3");
+  {
+    SCOPED_TRACE("unsupported version");
+    DoCheck(UnsupportedVersionYamlString,
+            "unsupported SHT_LLVM_BB_ADDR_MAP version: 3");
+  }
 
   SmallString<128> CommonVersionedYamlString(CommonYamlString);
   CommonVersionedYamlString += R"(
@@ -533,8 +536,12 @@ Sections:
   TruncatedYamlString += R"(
     ShSize: 0xb
 )";
-  DoCheck(TruncatedYamlString, "unable to decode LEB128 at offset 0x0000000b: "
-                               "malformed uleb128, extends past end");
+  {
+    SCOPED_TRACE("truncated section");
+    DoCheck(TruncatedYamlString,
+            "unable to decode LEB128 at offset 0x0000000b: "
+            "malformed uleb128, extends past end");
+  }
 
   // Check that we can detect when the encoded BB entry fields exceed the UINT32
   // limit.
@@ -561,12 +568,15 @@ Sections:
             Metadata:      0x100000000
 )";
 
-  DoCheck(OverInt32LimitYamlStrings[0],
-          "ULEB128 value at offset 0x10 exceeds UINT32_MAX (0x100000000)");
-  DoCheck(OverInt32LimitYamlStrings[1],
-          "ULEB128 value at offset 0x15 exceeds UINT32_MAX (0x100000000)");
-  DoCheck(OverInt32LimitYamlStrings[2],
-          "ULEB128 value at offset 0x1a exceeds UINT32_MAX (0x100000000)");
+  {
+    SCOPED_TRACE("overlimit fields");
+    DoCheck(OverInt32LimitYamlStrings[0],
+            "ULEB128 value at offset 0x10 exceeds UINT32_MAX (0x100000000)");
+    DoCheck(OverInt32LimitYamlStrings[1],
+            "ULEB128 value at offset 0x15 exceeds UINT32_MAX (0x100000000)");
+    DoCheck(OverInt32LimitYamlStrings[2],
+            "ULEB128 value at offset 0x1a exceeds UINT32_MAX (0x100000000)");
+  }
 
   // Check the proper error handling when the section has fields exceeding
   // UINT32 and is also truncated. This is for checking that we don't generate
@@ -586,13 +596,16 @@ Sections:
     ShSize: 0x1b
 )";
 
-  DoCheck(OverInt32LimitAndTruncated[0],
-          "unable to decode LEB128 at offset 0x00000015: malformed uleb128, "
-          "extends past end");
-  DoCheck(OverInt32LimitAndTruncated[1],
-          "ULEB128 value at offset 0x15 exceeds UINT32_MAX (0x100000000)");
-  DoCheck(OverInt32LimitAndTruncated[2],
-          "ULEB128 value at offset 0x15 exceeds UINT32_MAX (0x100000000)");
+  {
+    SCOPED_TRACE("overlimit fields, truncated section");
+    DoCheck(OverInt32LimitAndTruncated[0],
+            "unable to decode LEB128 at offset 0x00000015: malformed uleb128, "
+            "extends past end");
+    DoCheck(OverInt32LimitAndTruncated[1],
+            "ULEB128 value at offset 0x15 exceeds UINT32_MAX (0x100000000)");
+    DoCheck(OverInt32LimitAndTruncated[2],
+            "ULEB128 value at offset 0x15 exceeds UINT32_MAX (0x100000000)");
+  }
 
   // Check for proper error handling when the 'NumBlocks' field is overridden
   // with an out-of-range value.
@@ -601,8 +614,11 @@ Sections:
         NumBlocks: 0x100000000
 )";
 
-  DoCheck(OverLimitNumBlocks,
-          "ULEB128 value at offset 0xa exceeds UINT32_MAX (0x100000000)");
+  {
+    SCOPED_TRACE("overlimit 'NumBlocks' field");
+    DoCheck(OverLimitNumBlocks,
+            "ULEB128 value at offset 0xa exceeds UINT32_MAX (0x100000000)");
+  }
 }
 
 // Test for the ELFObjectFile::readBBAddrMap API.
@@ -675,6 +691,9 @@ Sections:
   auto DoCheckSucceeds = [&](StringRef YamlString,
                              std::optional<unsigned> TextSectionIndex,
                              std::vector<BBAddrMap> ExpectedResult) {
+    SCOPED_TRACE("for TextSectionIndex: " +
+                 (TextSectionIndex ? llvm::Twine(*TextSectionIndex) : "{}") +
+                 " and object yaml:\n" + YamlString);
     SmallString<0> Storage;
     Expected<ELFObjectFile<ELF64LE>> ElfOrErr =
         toBinary<ELF64LE>(Storage, YamlString);
@@ -691,6 +710,9 @@ Sections:
   auto DoCheckFails = [&](StringRef YamlString,
                           std::optional<unsigned> TextSectionIndex,
                           const char *ErrMsg) {
+    SCOPED_TRACE("for TextSectionIndex: " +
+                 (TextSectionIndex ? llvm::Twine(*TextSectionIndex) : "{}") +
+                 " and object yaml:\n" + YamlString);
     SmallString<0> Storage;
     Expected<ELFObjectFile<ELF64LE>> ElfOrErr =
         toBinary<ELF64LE>(Storage, YamlString);
@@ -703,15 +725,21 @@ Sections:
                       FailedWithMessage(ErrMsg));
   };
 
-  // Check that we can retrieve the data in the normal case.
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/std::nullopt,
-                  AllBBAddrMaps);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/0, Section0BBAddrMaps);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/2, Section1BBAddrMaps);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/1, Section2BBAddrMaps);
-  // Check that when no bb-address-map section is found for a text section,
-  // we return an empty result.
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/3, {});
+  {
+    SCOPED_TRACE("normal sections");
+    // Check that we can retrieve the data in the normal case.
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/std::nullopt,
+                    AllBBAddrMaps);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/0,
+                    Section0BBAddrMaps);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/2,
+                    Section1BBAddrMaps);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/1,
+                    Section2BBAddrMaps);
+    // Check that when no bb-address-map section is found for a text section,
+    // we return an empty result.
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/3, {});
+  }
 
   // Check that we detect when a bb-addr-map section is linked to an invalid
   // (not present) section.
@@ -724,10 +752,13 @@ Sections:
                "unable to get the linked-to section for "
                "SHT_LLVM_BB_ADDR_MAP_V0 section with index 4: invalid section "
                "index: 10");
-  // Linked sections are not checked when we don't target a specific text
-  // section.
-  DoCheckSucceeds(InvalidLinkedYamlString, /*TextSectionIndex=*/std::nullopt,
-                  AllBBAddrMaps);
+  {
+    SCOPED_TRACE("invalid linked section");
+    // Linked sections are not checked when we don't target a specific text
+    // section.
+    DoCheckSucceeds(InvalidLinkedYamlString, /*TextSectionIndex=*/std::nullopt,
+                    AllBBAddrMaps);
+  }
 
   // Check that we can detect when bb-address-map decoding fails.
   SmallString<128> TruncatedYamlString(CommonYamlString);
@@ -735,14 +766,18 @@ Sections:
     ShSize: 0x8
 )";
 
-  DoCheckFails(TruncatedYamlString, /*TextSectionIndex=*/std::nullopt,
-               "unable to read SHT_LLVM_BB_ADDR_MAP_V0 section with index 4: "
-               "unable to decode LEB128 at offset 0x00000008: malformed "
-               "uleb128, extends past end");
-  // Check that we can read the other section's bb-address-maps which are
-  // valid.
-  DoCheckSucceeds(TruncatedYamlString, /*TextSectionIndex=*/2,
-                  Section1BBAddrMaps);
+  {
+    SCOPED_TRACE("truncated section");
+    DoCheckFails(TruncatedYamlString, /*TextSectionIndex=*/std::nullopt,
+                 "unable to read SHT_LLVM_BB_ADDR_MAP_V0 section with index 4: "
+                 "unable to decode LEB128 at offset 0x00000008: malformed "
+                 "uleb128, extends past end");
+
+    // Check that we can read the other section's bb-address-maps which are
+    // valid.
+    DoCheckSucceeds(TruncatedYamlString, /*TextSectionIndex=*/2,
+                    Section1BBAddrMaps);
+  }
 }
 
 // Tests for error paths of the ELFFile::decodeBBAddrMap with PGOAnalysisMap
@@ -792,9 +827,12 @@ Sections:
             Metadata:      0x2
 )";
 
-  DoCheck(UnsupportedLowVersionYamlString,
-          "version should be >= 2 for SHT_LLVM_BB_ADDR_MAP when PGO features "
-          "are enabled: version = 1 feature = 4");
+  {
+    SCOPED_TRACE("unsupported version");
+    DoCheck(UnsupportedLowVersionYamlString,
+            "version should be >= 2 for SHT_LLVM_BB_ADDR_MAP when PGO features "
+            "are enabled: version = 1 feature = 4");
+  }
 
   SmallString<128> CommonVersionedYamlString(CommonYamlString);
   CommonVersionedYamlString += R"(
@@ -813,9 +851,12 @@ Sections:
         Feature: 0x01
 )";
 
-  DoCheck(MissingFuncEntryCount,
-          "unable to decode LEB128 at offset 0x0000000b: malformed uleb128, "
-          "extends past end");
+  {
+    SCOPED_TRACE("missing function entry count");
+    DoCheck(MissingFuncEntryCount,
+            "unable to decode LEB128 at offset 0x0000000b: malformed uleb128, "
+            "extends past end");
+  }
 
   // Check that we fail when basic block frequency is enabled but not provided.
   SmallString<128> MissingBBFreq(CommonYamlString);
@@ -829,8 +870,11 @@ Sections:
             Metadata:      0x2
 )";
 
-  DoCheck(MissingBBFreq, "unable to decode LEB128 at offset 0x0000000f: "
-                         "malformed uleb128, extends past end");
+  {
+    SCOPED_TRACE("missing bb frequency");
+    DoCheck(MissingBBFreq, "unable to decode LEB128 at offset 0x0000000f: "
+                           "malformed uleb128, extends past end");
+  }
 
   // Check that we fail when branch probability is enabled but not provided.
   SmallString<128> MissingBrProb(CommonYamlString);
@@ -862,8 +906,11 @@ Sections:
               BrProb:      0xF0000000
 )";
 
-  DoCheck(MissingBrProb, "unable to decode LEB128 at offset 0x00000017: "
-                         "malformed uleb128, extends past end");
+  {
+    SCOPED_TRACE("missing branch probability");
+    DoCheck(MissingBrProb, "unable to decode LEB128 at offset 0x00000017: "
+                           "malformed uleb128, extends past end");
+  }
 }
 
 // Test for the ELFObjectFile::readBBAddrMap API with PGOAnalysisMap.
@@ -1046,6 +1093,10 @@ Sections:
       [&](StringRef YamlString, std::optional<unsigned> TextSectionIndex,
           std::vector<BBAddrMap> ExpectedResult,
           std::optional<std::vector<PGOAnalysisMap>> ExpectedPGO) {
+        SCOPED_TRACE(
+            "for TextSectionIndex: " +
+            (TextSectionIndex ? llvm::Twine(*TextSectionIndex) : "{}") +
+            " and object yaml:\n" + YamlString);
         SmallString<0> Storage;
         Expected<ELFObjectFile<ELF64LE>> ElfOrErr =
             toBinary<ELF64LE>(Storage, YamlString);
@@ -1073,6 +1124,9 @@ Sections:
   auto DoCheckFails = [&](StringRef YamlString,
                           std::optional<unsigned> TextSectionIndex,
                           const char *ErrMsg) {
+    SCOPED_TRACE("for TextSectionIndex: " +
+                 (TextSectionIndex ? llvm::Twine(*TextSectionIndex) : "{}") +
+                 " and object yaml:\n" + YamlString);
     SmallString<0> Storage;
     Expected<ELFObjectFile<ELF64LE>> ElfOrErr =
         toBinary<ELF64LE>(Storage, YamlString);
@@ -1087,29 +1141,32 @@ Sections:
         FailedWithMessage(ErrMsg));
   };
 
-  // Check that we can retrieve the data in the normal case.
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/std::nullopt,
-                  AllBBAddrMaps, std::nullopt);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/0, Section0BBAddrMaps,
-                  std::nullopt);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/2, Section1BBAddrMaps,
-                  std::nullopt);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/1, Section2BBAddrMaps,
-                  std::nullopt);
+  {
+    SCOPED_TRACE("normal sections");
+    // Check that we can retrieve the data in the normal case.
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/std::nullopt,
+                    AllBBAddrMaps, std::nullopt);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/0,
+                    Section0BBAddrMaps, std::nullopt);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/2,
+                    Section1BBAddrMaps, std::nullopt);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/1,
+                    Section2BBAddrMaps, std::nullopt);
 
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/std::nullopt,
-                  AllBBAddrMaps, AllPGOAnalysisMaps);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/0, Section0BBAddrMaps,
-                  Section0PGOAnalysisMaps);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/2, Section1BBAddrMaps,
-                  Section1PGOAnalysisMaps);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/1, Section2BBAddrMaps,
-                  Section2PGOAnalysisMaps);
-  // Check that when no bb-address-map section is found for a text section,
-  // we return an empty result.
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/3, {}, std::nullopt);
-  DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/3, {},
-                  std::vector<PGOAnalysisMap>{});
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/std::nullopt,
+                    AllBBAddrMaps, AllPGOAnalysisMaps);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/0,
+                    Section0BBAddrMaps, Section0PGOAnalysisMaps);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/2,
+                    Section1BBAddrMaps, Section1PGOAnalysisMaps);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/1,
+                    Section2BBAddrMaps, Section2PGOAnalysisMaps);
+    // Check that when no bb-address-map section is found for a text section,
+    // we return an empty result.
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/3, {}, std::nullopt);
+    DoCheckSucceeds(CommonYamlString, /*TextSectionIndex=*/3, {},
+                    std::vector<PGOAnalysisMap>{});
+  }
 
   // Check that we detect when a bb-addr-map section is linked to an invalid
   // (not present) section.
@@ -1118,16 +1175,20 @@ Sections:
     Link: 10
 )";
 
-  DoCheckFails(InvalidLinkedYamlString, /*TextSectionIndex=*/5,
-               "unable to get the linked-to section for "
-               "SHT_LLVM_BB_ADDR_MAP section with index 5: invalid section "
-               "index: 10");
-  // Linked sections are not checked when we don't target a specific text
-  // section.
-  DoCheckSucceeds(InvalidLinkedYamlString, /*TextSectionIndex=*/std::nullopt,
-                  AllBBAddrMaps, std::nullopt);
-  DoCheckSucceeds(InvalidLinkedYamlString, /*TextSectionIndex=*/std::nullopt,
-                  AllBBAddrMaps, AllPGOAnalysisMaps);
+  {
+    SCOPED_TRACE("invalid linked section");
+    DoCheckFails(InvalidLinkedYamlString, /*TextSectionIndex=*/5,
+                 "unable to get the linked-to section for "
+                 "SHT_LLVM_BB_ADDR_MAP section with index 5: invalid section "
+                 "index: 10");
+
+    // Linked sections are not checked when we don't target a specific text
+    // section.
+    DoCheckSucceeds(InvalidLinkedYamlString, /*TextSectionIndex=*/std::nullopt,
+                    AllBBAddrMaps, std::nullopt);
+    DoCheckSucceeds(InvalidLinkedYamlString, /*TextSectionIndex=*/std::nullopt,
+                    AllBBAddrMaps, AllPGOAnalysisMaps);
+  }
 
   // Check that we can detect when bb-address-map decoding fails.
   SmallString<128> TruncatedYamlString(CommonYamlString);
@@ -1135,16 +1196,19 @@ Sections:
     ShSize: 0xa
 )";
 
-  DoCheckFails(TruncatedYamlString, /*TextSectionIndex=*/std::nullopt,
-               "unable to read SHT_LLVM_BB_ADDR_MAP section with index 5: "
-               "unable to decode LEB128 at offset 0x0000000a: malformed "
-               "uleb128, extends past end");
-  // Check that we can read the other section's bb-address-maps which are
-  // valid.
-  DoCheckSucceeds(TruncatedYamlString, /*TextSectionIndex=*/2,
-                  Section1BBAddrMaps, std::nullopt);
-  DoCheckSucceeds(TruncatedYamlString, /*TextSectionIndex=*/2,
-                  Section1BBAddrMaps, Section1PGOAnalysisMaps);
+  {
+    SCOPED_TRACE("truncated section");
+    DoCheckFails(TruncatedYamlString, /*TextSectionIndex=*/std::nullopt,
+                 "unable to read SHT_LLVM_BB_ADDR_MAP section with index 5: "
+                 "unable to decode LEB128 at offset 0x0000000a: malformed "
+                 "uleb128, extends past end");
+    // Check that we can read the other section's bb-address-maps which are
+    // valid.
+    DoCheckSucceeds(TruncatedYamlString, /*TextSectionIndex=*/2,
+                    Section1BBAddrMaps, std::nullopt);
+    DoCheckSucceeds(TruncatedYamlString, /*TextSectionIndex=*/2,
+                    Section1BBAddrMaps, Section1PGOAnalysisMaps);
+  }
 }
 
 // Test for ObjectFile::getRelocatedSection: check that it returns a relocated
