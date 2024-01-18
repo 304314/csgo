@@ -196,6 +196,10 @@ class AArch64FunctionInfo final : public MachineFunctionInfo {
 
   int64_t StackProbeSize = 0;
 
+  // Holds a register containing pstate.sm. This is set
+  // on function entry to record the initial pstate of a function.
+  Register PStateSMReg = MCRegister::NoRegister;
+
 public:
   AArch64FunctionInfo(const Function &F, const AArch64Subtarget *STI);
 
@@ -203,6 +207,9 @@ public:
   clone(BumpPtrAllocator &Allocator, MachineFunction &DestMF,
         const DenseMap<MachineBasicBlock *, MachineBasicBlock *> &Src2DstMBB)
       const override;
+
+  Register getPStateSMReg() const { return PStateSMReg; };
+  void setPStateSMReg(Register Reg) { PStateSMReg = Reg; };
 
   bool isSVECC() const { return IsSVECC; };
   void setIsSVECC(bool s) { IsSVECC = s; };
