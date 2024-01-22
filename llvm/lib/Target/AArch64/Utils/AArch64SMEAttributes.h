@@ -29,14 +29,13 @@ public:
   // Enum with bitmasks for each individual SME feature.
   enum Mask {
     Normal = 0,
-    SM_Enabled = 1 << 0,    // aarch64_pstate_sm_enabled
-    SM_Compatible = 1 << 1, // aarch64_pstate_sm_compatible
-    SM_Body = 1 << 2,       // aarch64_pstate_sm_body
-    ZA_Shared = 1 << 3,     // aarch64_pstate_sm_shared
-    ZA_New = 1 << 4,        // aarch64_pstate_sm_new
-    ZA_Preserved = 1 << 5,  // aarch64_pstate_sm_preserved
-    ZA_NoLazySave = 1 << 6, // Used for SME ABI routines to avoid lazy saves
-    All = ZA_Preserved - 1
+    SM_Enabled = 1 << 0,      // aarch64_pstate_sm_enabled
+    SM_Compatible = 1 << 1,   // aarch64_pstate_sm_compatible
+    SM_Body = 1 << 2,         // aarch64_pstate_sm_body
+    ZA_Shared = 1 << 3,       // aarch64_pstate_sm_shared
+    ZA_New = 1 << 4,          // aarch64_pstate_sm_new
+    ZA_Preserved = 1 << 5,    // aarch64_pstate_sm_preserved
+    SME_ABI_Routine = 1 << 6, // Used for SME ABI routines to avoid lazy saves
   };
 
   SMEAttrs(unsigned Mask = Normal) : Bitmask(0) { set(Mask); }
@@ -77,7 +76,7 @@ public:
   }
   bool requiresLazySave(const SMEAttrs &Callee) const {
     return hasZAState() && Callee.hasPrivateZAInterface() &&
-           !(Callee.Bitmask & ZA_NoLazySave);
+           !(Callee.Bitmask & SME_ABI_Routine);
   }
 };
 
