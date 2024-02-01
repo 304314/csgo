@@ -26,16 +26,24 @@ class SMEAttrs {
   unsigned Bitmask;
 
 public:
+  enum class StateValue {
+    None = 0,
+    In = 1,        //aarch64_in_zt0
+    Out = 2,       //aarch64_out_zt0
+    InOut = 3,     //aarch64_inout_zt0
+    Preserved = 4, //aarch64_preserves_zt0
+    New = 5        //aarch64_new_zt0
+  };
+
   // Enum with bitmasks for each individual SME feature.
   enum Mask {
     Normal = 0,
     SM_Enabled = 1 << 0,      // aarch64_pstate_sm_enabled
     SM_Compatible = 1 << 1,   // aarch64_pstate_sm_compatible
     SM_Body = 1 << 2,         // aarch64_pstate_sm_body
-    ZA_Shared = 1 << 3,       // aarch64_pstate_sm_shared
-    ZA_New = 1 << 4,          // aarch64_pstate_sm_new
-    ZA_Preserved = 1 << 5,    // aarch64_pstate_sm_preserved
-    SME_ABI_Routine = 1 << 6, // Used for SME ABI routines to avoid lazy saves
+    SME_ABI_Routine = 1 << 3, // Used for SME ABI routines to avoid lazy saves
+    ZA_Shift = 4,
+    ZA_Mask = 0b111 << ZA_Shift,
   };
 
   SMEAttrs(unsigned Mask = Normal) : Bitmask(0) { set(Mask); }
@@ -66,14 +74,29 @@ public:
   /// streaming mode.
   bool requiresSMChange(const SMEAttrs &Callee) const;
 
-  // Interfaces to query PSTATE.ZA
-  bool hasNewZABody() const { return Bitmask & ZA_New; }
-  bool hasSharedZAInterface() const { return Bitmask & ZA_Shared; }
-  bool hasPrivateZAInterface() const { return !hasSharedZAInterface(); }
-  bool preservesZA() const { return Bitmask & ZA_Preserved; }
-  bool hasZAState() const {
-    return hasNewZABody() || hasSharedZAInterface();
+  // Interfaces to query ZA
+  static StateValue decodeZAState(unsigned Bitmask) {
+    return static_cast<StateValue>((Bitmask & ZA_Mask) >> ZA_Shift);
   }
+  static unsigned encodeZAState(StateValue S) {
+    return static_cast<unsigned>(S) << ZA_Shift;
+  }
+
+  bool isNewZA() const { return decodeZAState(Bitmask) == StateValue::New; }
+  bool isInZA() const { return decodeZAState(Bitmask) == StateValue::In; }
+  bool isOutZA() const { return decodeZAState(Bitmask) == StateValue::Out; }
+  bool isInOutZA() const { return decodeZAState(Bitmask) == StateValue::InOut; }
+  bool isPreservesZA() const {
+    return decodeZAState(Bitmask) == StateValue::Preserved;
+  }
+  bool sharesZA() const {
+    StateValue State = decodeZAState(Bitmask);
+    return State == StateValue::In || State == StateValue::Out ||
+           State == StateValue::InOut || State == StateValue::Preserved;
+  }
+  bool hasSharedZAInterface() const { return sharesZA() || sharesZT0(); }
+  bool hasPrivateZAInterface() const { return !hasSharedZAInterface(); }
+  bool hasZAState() const { return isNewZA() || sharesZA(); }
   bool requiresLazySave(const SMEAttrs &Callee) const {
     return hasZAState() && Callee.hasPrivateZAInterface() &&
            !(Callee.Bitmask & SME_ABI_Routine);

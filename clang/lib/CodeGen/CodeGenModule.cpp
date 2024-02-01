@@ -2308,7 +2308,7 @@ void CodeGenModule::SetLLVMFunctionAttributesForDefinition(const Decl *D,
 
   if (auto *Attr = D->getAttr<ArmNewAttr>()) {
     if (Attr->isNewZA())
-      B.addAttribute("aarch64_pstate_za_new");
+      B.addAttribute("aarch64_new_za");
   }
 
   // Track whether we need to add the optnone LLVM attribute,
