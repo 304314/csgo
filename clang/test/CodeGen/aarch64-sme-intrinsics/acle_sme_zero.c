@@ -35,11 +35,17 @@ void test_svzero_mask_za_2(void) __arm_inout("za") {
   svzero_mask_za(255);
 }
 
-// CHECK-C-LABEL: @test_svzero_za(
-// CHECK-CXX-LABEL: @_Z14test_svzero_zav(
-// CHECK-NEXT:  entry:
-// CHECK-NEXT:    tail call void @llvm.aarch64.sme.zero(i32 255)
-// CHECK-NEXT:    ret void
+// CHECK-C-LABEL: define dso_local void @test_svzero_za(
+// CHECK-C-SAME: ) local_unnamed_addr #[[ATTR2:[0-9]+]] {
+// CHECK-C-NEXT:  entry:
+// CHECK-C-NEXT:    tail call void @llvm.aarch64.sme.zero(i32 255)
+// CHECK-C-NEXT:    ret void
+//
+// CHECK-CXX-LABEL: define dso_local void @_Z14test_svzero_zav(
+// CHECK-CXX-SAME: ) local_unnamed_addr #[[ATTR2:[0-9]+]] {
+// CHECK-CXX-NEXT:  entry:
+// CHECK-CXX-NEXT:    tail call void @llvm.aarch64.sme.zero(i32 255)
+// CHECK-CXX-NEXT:    ret void
 //
 void test_svzero_za(void) __arm_out("za") {
   svzero_za();
