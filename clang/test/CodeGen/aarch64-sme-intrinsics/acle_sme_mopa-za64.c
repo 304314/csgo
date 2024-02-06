@@ -1,9 +1,9 @@
 // REQUIRES: aarch64-registered-target
-// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +sve -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
-// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +sve -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
-// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +sve -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
-// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +sve -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
-// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +sve -target-feature +bf16 -S -O1 -Werror -o /dev/null %s
+// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
+// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
+// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
+// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +bf16 -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
+// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme-f64f64 -target-feature +sme-i16i64 -target-feature +bf16 -S -O1 -Werror -o /dev/null %s
 
 #include <arm_sme.h>
 
