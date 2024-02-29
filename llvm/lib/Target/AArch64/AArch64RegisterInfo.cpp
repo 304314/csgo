@@ -440,6 +440,9 @@ AArch64RegisterInfo::getStrictlyReservedRegs(const MachineFunction &MF) const {
       Reserved.set(SubReg);
   }
 
+  // VG cannot be allocated
+  Reserved.set(AArch64::VG);
+
   markSuperRegs(Reserved, AArch64::FPCR);
 
   assert(checkAllSuperRegsMarked(Reserved));
