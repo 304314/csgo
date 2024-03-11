@@ -30,6 +30,10 @@ static cl::opt<TargetLibraryInfoImpl::VectorLibrary> ClVectorLibrary(
                           "GLIBC Vector Math library"),
                clEnumValN(TargetLibraryInfoImpl::MASSV, "MASSV",
                           "IBM MASS vector library"),
+#ifdef ENABLE_CLASSIC_FLANG
+               clEnumValN(TargetLibraryInfoImpl::PGMATH, "PGMATH",
+                          "PGI math library"),
+#endif
                clEnumValN(TargetLibraryInfoImpl::SVML, "SVML",
                           "Intel SVML library"),
                clEnumValN(TargetLibraryInfoImpl::SLEEFGNUABI, "sleefgnuabi",
@@ -867,14 +871,14 @@ static void initialize(TargetLibraryInfoImpl &TLI, const Triple &T,
   TLI.addVectorizableFunctionsFromVecLib(ClVectorLibrary, T);
 }
 
-TargetLibraryInfoImpl::TargetLibraryInfoImpl() {
+TargetLibraryInfoImpl::TargetLibraryInfoImpl() : T(Triple()) {
   // Default to everything being available.
   memset(AvailableArray, -1, sizeof(AvailableArray));
 
-  initialize(*this, Triple(), StandardNames);
+  initialize(*this, T, StandardNames);
 }
 
-TargetLibraryInfoImpl::TargetLibraryInfoImpl(const Triple &T) {
+TargetLibraryInfoImpl::TargetLibraryInfoImpl(const Triple &T) : T(T) {
   // Default to everything being available.
   memset(AvailableArray, -1, sizeof(AvailableArray));
 
@@ -886,7 +890,7 @@ TargetLibraryInfoImpl::TargetLibraryInfoImpl(const TargetLibraryInfoImpl &TLI)
       ShouldExtI32Return(TLI.ShouldExtI32Return),
       ShouldSignExtI32Param(TLI.ShouldSignExtI32Param),
       ShouldSignExtI32Return(TLI.ShouldSignExtI32Return),
-      SizeOfInt(TLI.SizeOfInt) {
+      SizeOfInt(TLI.SizeOfInt), T(TLI.T) {
   memcpy(AvailableArray, TLI.AvailableArray, sizeof(AvailableArray));
   VectorDescs = TLI.VectorDescs;
   ScalarDescs = TLI.ScalarDescs;
@@ -898,7 +902,7 @@ TargetLibraryInfoImpl::TargetLibraryInfoImpl(TargetLibraryInfoImpl &&TLI)
       ShouldExtI32Return(TLI.ShouldExtI32Return),
       ShouldSignExtI32Param(TLI.ShouldSignExtI32Param),
       ShouldSignExtI32Return(TLI.ShouldSignExtI32Return),
-      SizeOfInt(TLI.SizeOfInt) {
+      SizeOfInt(TLI.SizeOfInt), T(TLI.T) {
   std::move(std::begin(TLI.AvailableArray), std::end(TLI.AvailableArray),
             AvailableArray);
   VectorDescs = TLI.VectorDescs;
@@ -912,6 +916,7 @@ TargetLibraryInfoImpl &TargetLibraryInfoImpl::operator=(const TargetLibraryInfoI
   ShouldSignExtI32Param = TLI.ShouldSignExtI32Param;
   ShouldSignExtI32Return = TLI.ShouldSignExtI32Return;
   SizeOfInt = TLI.SizeOfInt;
+  T = TLI.T;
   memcpy(AvailableArray, TLI.AvailableArray, sizeof(AvailableArray));
   return *this;
 }
@@ -923,6 +928,7 @@ TargetLibraryInfoImpl &TargetLibraryInfoImpl::operator=(TargetLibraryInfoImpl &&
   ShouldSignExtI32Param = TLI.ShouldSignExtI32Param;
   ShouldSignExtI32Return = TLI.ShouldSignExtI32Return;
   SizeOfInt = TLI.SizeOfInt;
+  T = TLI.T;
   std::move(std::begin(TLI.AvailableArray), std::end(TLI.AvailableArray),
             AvailableArray);
   return *this;
@@ -1234,6 +1240,28 @@ void TargetLibraryInfoImpl::addVectorizableFunctionsFromVecLib(
     }
     break;
   }
+#ifdef ENABLE_CLASSIC_FLANG
+  // NOTE: All routines listed here are not available on all the architectures.
+  // Based on the size of vector registers available and the size of data, the
+  // vector width should be chosen correctly.
+  case PGMATH: {
+    if (T.getArch() == Triple::aarch64) {
+      const VecDesc VecFuncs[] = {
+      #define TLI_DEFINE_PGMATH_AARCH64_VECFUNCS
+      #include "llvm/Analysis/VecFuncs.def"
+      };
+      addVectorizableFunctions(VecFuncs);
+    } else if (T.getArch() == Triple::x86_64) {
+      const VecDesc VecFuncs[] = {
+      #define TLI_DEFINE_PGMATH_X86_VECFUNCS
+      #include "llvm/Analysis/VecFuncs.def"
+      };
+      addVectorizableFunctions(VecFuncs);
+    }
+    break;
+  }
+#endif
+
   case NoLibrary:
     break;
   }
