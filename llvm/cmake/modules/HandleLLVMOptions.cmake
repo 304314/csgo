@@ -97,6 +97,14 @@ else()
   set(LLVM_ENABLE_CLASSIC_FLANG 0)
 endif()
 
+option(LLVM_ENABLE_AUTOTUNER "Enable BiSheng Auto-Tuning features" OFF)
+if (LLVM_ENABLE_AUTOTUNER)
+  set(LLVM_ENABLE_AUTOTUNER 1)
+  add_definitions( -DENABLE_AUTOTUNER )
+else()
+  set(LLVM_ENABLE_AUTOTUNER 0)
+endif()
+
 if(LLVM_ENABLE_EXPENSIVE_CHECKS)
   add_compile_definitions(EXPENSIVE_CHECKS)
 
