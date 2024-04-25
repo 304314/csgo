@@ -120,6 +120,14 @@ else()
   set(LLVM_ENABLE_AUTOTUNER 0)
 endif()
 
+option(LLVM_PUB_COMMON "" OFF)
+if(LLVM_PUB_COMMON)
+  set(LLVM_PUB_COMMON 1)
+  add_definitions( -DPUB_COMMON )
+else()
+  set(LLVM_PUB_COMMON 0)
+endif()
+
 if(LLVM_ENABLE_EXPENSIVE_CHECKS)
   add_compile_definitions(EXPENSIVE_CHECKS)
 
