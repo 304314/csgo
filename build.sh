@@ -9,6 +9,7 @@ buildtype=RelWithDebInfo
 backends="ARM;AArch64;X86"
 build_for_openeuler="0"
 enabled_projects="clang;lld;compiler-rt;openmp;clang-tools-extra"
+enable_bisheng_autotuner="1"
 embedded_toolchain="0"
 split_dwarf=on
 use_ccache="0"
@@ -47,6 +48,7 @@ Usage: $0 [options]
 Build the compiler under $build_prefix, then install under $install_prefix.
 
 Options:
+  -a       Enable BiSheng Autotuner.
   -b type  Specify CMake build type (default: $buildtype).
   -c       Use ccache (default: $use_ccache).
   -e       Build for embedded cross tool chain.
@@ -67,8 +69,11 @@ EOF
 
 # Process command-line options. Remember the options for passing to the
 # containerized build script.
-while getopts :b:ceEhiI:j:orstvfX: optchr; do
+while getopts :ab:ceEhiI:j:orstvfX: optchr; do
   case "$optchr" in
+    a)
+      enable_bisheng_autotuner="1"
+      ;;
     b)
       buildtype="$OPTARG"
       case "${buildtype,,}" in
@@ -193,6 +198,11 @@ fi
 if [ $build_for_openeuler == "1" ]; then
   echo "Build for openEuler"
   CMAKE_OPTIONS="$CMAKE_OPTIONS -DBUILD_FOR_OPENEULER=ON"
+fi
+
+if [ $enable_bisheng_autotuner == "1" ]; then
+  echo "Build with BiSheng Autotuner"
+  CMAKE_OPTIONS="$CMAKE_OPTIONS -DLLVM_ENABLE_AUTOTUNER=ON"
 fi
 
 # Build and install
