@@ -3127,6 +3127,36 @@ static bool ParseHeaderSearchArgs(HeaderSearchOptions &Opts, ArgList &Args,
     IsIndexHeaderMap = false;
   }
 
+#ifdef BUILD_FOR_OPENEULER
+  // Add -iprefix/-iwithprefix/-iwithprefixbefore options.
+  StringRef Prefix = ""; // FIXME: This isn't the correct default prefix.
+  if (Args.hasFlag(options::OPT_fgcc_compatible, options::OPT_fno_gcc_compatible, false)) {
+    Prefix = Opts.ResourceDir; // default prefix.
+  }
+  for (const auto *A :
+    Args.filtered(OPT_iprefix, OPT_iwithprefix, OPT_iwithprefixbefore)) {
+      llvm::SmallString<128> searchPath(Prefix.str());
+    if (Args.hasFlag(options::OPT_fgcc_compatible, options::OPT_fno_gcc_compatible, false)) {
+      llvm::sys::path::append(searchPath, A->getValue());
+    }
+    if (A->getOption().matches(OPT_iprefix))
+      Prefix = A->getValue();
+    else if (A->getOption().matches(OPT_iwithprefix)) {
+      if (Args.hasFlag(options::OPT_fgcc_compatible, options::OPT_fno_gcc_compatible, false)) {
+        Opts.AddPath(searchPath, frontend::After, false, true);
+      } else {
+        Opts.AddPath(Prefix.str() + A->getValue(), frontend::After, false, true);
+      }
+    }
+    else {
+      if (Args.hasFlag(options::OPT_fgcc_compatible, options::OPT_fno_gcc_compatible, false)) {
+        Opts.AddPath(searchPath, frontend::Angled, false, true);
+      } else {
+        Opts.AddPath(Prefix.str() + A->getValue(), frontend::Angled, false, true);
+      }
+    }
+  }
+#else
   // Add -iprefix/-iwithprefix/-iwithprefixbefore options.
   StringRef Prefix = ""; // FIXME: This isn't the correct default prefix.
   for (const auto *A :
@@ -3138,6 +3168,7 @@ static bool ParseHeaderSearchArgs(HeaderSearchOptions &Opts, ArgList &Args,
     else
       Opts.AddPath(Prefix.str() + A->getValue(), frontend::Angled, false, true);
   }
+#endif
 
   for (const auto *A : Args.filtered(OPT_idirafter))
     Opts.AddPath(A->getValue(), frontend::After, false, true);
