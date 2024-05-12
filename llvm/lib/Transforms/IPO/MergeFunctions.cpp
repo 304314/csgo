@@ -325,6 +325,13 @@ ModulePass *llvm::createMergeFunctionsPass() {
 PreservedAnalyses MergeFunctionsPass::run(Module &M,
                                           ModuleAnalysisManager &AM) {
   MergeFunctions MF;
+  if(M.getName().find("/gold")!=std::string::npos
+  || M.getName().find("/binutils")!=std::string::npos
+  || M.getName().find("xlog")!=std::string::npos
+  || M.getName().find("xcommon")!=std::string::npos
+  || M.getName().find("exportfs")!=std::string::npos){
+    return PreservedAnalyses::all();
+  }
   if (!MF.runOnModule(M))
     return PreservedAnalyses::all();
   return PreservedAnalyses::none();

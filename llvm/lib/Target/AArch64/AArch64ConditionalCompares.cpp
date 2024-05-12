@@ -942,6 +942,10 @@ bool AArch64ConditionalCompares::runOnMachineFunction(MachineFunction &MF) {
   MinInstr = nullptr;
   MinSize = MF.getFunction().hasMinSize();
 
+  //========== code size ==============
+  MinSize=true;
+  //========== code size ==============
+
   bool Changed = false;
   CmpConv.runOnMachineFunction(MF, MBPI);
 

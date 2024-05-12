@@ -134,6 +134,11 @@ static constexpr unsigned InstCombineDefaultInfiniteLoopThreshold = 100;
 static constexpr unsigned InstCombineDefaultInfiniteLoopThreshold = 1000;
 #endif
 
+static cl::opt<bool> EnableCodeSizeInst(
+    "enable-code-size-inst", cl::init(true), cl::Hidden,
+    cl::desc("Enable optimizations for code size as part of the optimization "
+             "pipeline"));
+
 static cl::opt<bool>
 EnableCodeSinking("instcombine-code-sinking", cl::desc("Enable code sinking"),
                                               cl::init(true));
@@ -4568,12 +4573,28 @@ static bool combineInstructionsOverFunction(
 
     MadeIRChange |= prepareICWorklistFromFunction(F, DL, &TLI, Worklist);
 
-    InstCombinerImpl IC(Worklist, Builder, F.hasMinSize(), AA, AC, TLI, TTI, DT,
+    // ======== code size =======
+    if(EnableCodeSizeInst) {
+      InstCombinerImpl IC(Worklist, Builder, true, AA, AC, TLI, TTI, DT,
                         ORE, BFI, PSI, DL, LI);
-    IC.MaxArraySizeForCombine = MaxArraySize;
+      IC.MaxArraySizeForCombine = MaxArraySize;
+      if (!IC.run())
+        break;           
+    }
+    else {
+      InstCombinerImpl IC(Worklist, Builder, F.hasMinSize(), AA, AC, TLI, TTI, DT,
+                        ORE, BFI, PSI, DL, LI);
+      IC.MaxArraySizeForCombine = MaxArraySize;
+      if (!IC.run())
+        break; 
+    }
+    // ==========================
+    // InstCombinerImpl IC(Worklist, Builder, F.hasMinSize(), AA, AC, TLI, TTI, DT,
+    //                     ORE, BFI, PSI, DL, LI);
+    //IC.MaxArraySizeForCombine = MaxArraySize;
 
-    if (!IC.run())
-      break;
+    //if (!IC.run())
+    //  break;
 
     MadeIRChange = true;
   }

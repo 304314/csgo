@@ -213,6 +213,10 @@ void BreakFalseDeps::processDefs(MachineInstr *MI) {
   if (MF->getFunction().hasMinSize())
     return;
 
+  //========== code size ==============
+  return;
+  //========== code size ==============
+
   for (unsigned i = 0,
     e = MI->isVariadic() ? MI->getNumOperands() : MCID.getNumDefs();
     i != e; ++i) {
@@ -236,6 +240,10 @@ void BreakFalseDeps::processUndefReads(MachineBasicBlock *MBB) {
   // dependence. That opposes the goal of minimizing size, so bail out now.
   if (MF->getFunction().hasMinSize())
     return;
+
+  //========== code size ==============
+  return;
+  //========== code size ==============
 
   // Collect this block's live out register units.
   LiveRegSet.init(*TRI);

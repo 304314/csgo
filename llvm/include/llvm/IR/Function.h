@@ -662,7 +662,9 @@ public:
 
   /// Optimize this function for size (-Os) or minimum size (-Oz).
   bool hasOptSize() const {
-    return hasFnAttribute(Attribute::OptimizeForSize) || hasMinSize();
+    //for size
+    return true;
+    //return hasFnAttribute(Attribute::OptimizeForSize) || hasMinSize();
   }
 
   /// Returns the denormal handling type for the default rounding mode of the

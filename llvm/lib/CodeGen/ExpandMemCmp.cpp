@@ -747,6 +747,10 @@ static bool expandMemCmp(CallInst *CI, const TargetTransformInfo *TTI,
   if (CI->getFunction()->hasMinSize())
     return false;
 
+  // ========= code size
+  return false;
+  //============
+
   // Early exit from expansion if size is not a constant.
   ConstantInt *SizeCast = dyn_cast<ConstantInt>(CI->getArgOperand(2));
   if (!SizeCast) {
