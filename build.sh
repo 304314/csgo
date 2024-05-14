@@ -142,7 +142,8 @@ CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$install_prefix \
                -DCMAKE_BUILD_TYPE=$buildtype \
                -DCMAKE_C_COMPILER=$C_COMPILER_PATH \
                -DCMAKE_CXX_COMPILER=$CXX_COMPILER_PATH \
-               -DLLVM_TARGETS_TO_BUILD=$backends "
+               -DLLVM_TARGETS_TO_BUILD=$backends \
+               -DLLVM_PUB_COMMON=ON "
 
 gold=$(type -p ld.gold)
 if [ -z "$gold" -o ! -x "$gold" ]; then
