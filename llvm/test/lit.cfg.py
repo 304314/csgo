@@ -648,3 +648,6 @@ if "system-aix" in config.available_features:
 
 if config.use_classic_flang:
     config.available_features.add("classic_flang")
+
+if config.has_logf128:
+    config.available_features.add("has_logf128")
