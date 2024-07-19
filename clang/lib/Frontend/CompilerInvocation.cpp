@@ -3825,6 +3825,11 @@ void CompilerInvocationBase::GenerateLangArgs(const LangOptions &Opts,
 
   if (!Opts.RandstructSeed.empty())
     GenerateArg(Consumer, OPT_frandomize_layout_seed_EQ, Opts.RandstructSeed);
+
+#ifdef BUILD_FOR_OPENEULER
+  if (Opts.GccCompatible)
+    GenerateArg(Consumer, OPT_fgcc_compatible);
+#endif
 }
 
 bool CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
@@ -4453,6 +4458,10 @@ bool CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
     } else
       Diags.Report(diag::err_drv_hlsl_unsupported_target) << T.str();
   }
+
+#ifdef BUILD_FOR_OPENEULER
+  Opts.GccCompatible = Args.hasArg(options::OPT_fgcc_compatible);
+#endif
 
   return Diags.getNumErrors() == NumErrorsBefore;
 }
