@@ -139,6 +139,7 @@ while getopts :b:ceEhiI:j:orstvfX: optchr; do
 done
 
 CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$install_prefix \
+               -DLLVM_ENABLE_AUTOTUNER=ON \
                -DCMAKE_BUILD_TYPE=$buildtype \
                -DCMAKE_C_COMPILER=$C_COMPILER_PATH \
                -DCMAKE_CXX_COMPILER=$CXX_COMPILER_PATH \
