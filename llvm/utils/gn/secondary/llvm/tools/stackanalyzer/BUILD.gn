@@ -1,0 +1,10 @@
+executable("stackanalyzer") {
+  deps = [
+    "//llvm/lib/Analysis",
+    "//llvm/lib/Core",
+    "//llvm/lib/Passes",
+    "//llvm/lib/Bitcode/Reader",
+    "//llvm/lib/Support",
+  ]
+  sources = [ "stackanalyzer.cpp" ]
+}
