@@ -7,5 +7,7 @@ set(LLVM_LINK_COMPONENTS
 )
 
 add_llvm_tool(stackanalyzer
+  CallGraphGen.cpp
   stackanalyzer.cpp   
+  StackUsage.cpp
 )

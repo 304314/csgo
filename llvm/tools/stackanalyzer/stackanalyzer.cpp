@@ -1,5 +1,7 @@
+#include "CallGraphGen.h"
+#include "StackUsage.h"
 #include "llvm/Analysis/CallGraph.h"
-#include "llvm/Bitcode/BitcodeReader.h" 
+#include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
@@ -44,7 +46,7 @@ static cl::opt<bool>
              cl::cat(StackAnalyzerCategory));
 static cl::opt<std::string> InputSUFilename(
     "sufile", cl::desc("Input .su file to be analyzed, given the .bc file"),
-    cl::init("/tmp/output.su"), cl::cat(StackAnalyzerCategory));
+    cl::init("./output.su"), cl::cat(StackAnalyzerCategory));
 static cl::opt<std::string> OutputFilename(
     "o",
     cl::desc("Output callgraph in .dot format with stack cost information"),
@@ -71,12 +73,12 @@ int main(int argc, char **argv) {
   auto MB = ExitOnErr(openBitcodeFile(InputFilename));
   auto M = ExitOnErr(parseBitcodeFile(MB->getMemBufferRef(), Context));
 
-  // auto Config = PointerAnalysisCLIConfig{UseAnders, UseDebug};
+  auto Config = PointerAnalysisCLIConfig{UseAnders, UseDebug};
 
   ModuleAnalysisManager MAM;
   PassBuilder PB;
   PB.registerModuleAnalyses(MAM);
-  MAM.registerPass([/*Config*/] { return CallGraphAnalysis(); });
+  MAM.registerPass([Config] { return PACallGraphAnalysis(Config); });
   ModulePassManager MPM;
   MPM.addPass(RequireAnalysisPass<CallGraphAnalysis, Module>());
   MPM.run(*M, MAM);
@@ -85,14 +87,13 @@ int main(int argc, char **argv) {
   for (auto &F : *M) {
     StackSize.insert(std::make_pair(&F, 0));
   }
-  // writeModuleToFile(M.get());
-  // parseStackSizeFromSU(InputSUFilename, *M, StackSize);
+  parseStackSizeFromSU(InputSUFilename, *M, StackSize);
 
   const auto &Graph = MAM.getResult<CallGraphAnalysis>(*M);
 
   if (UseCallGraph) {
     std::error_code EC;
-    raw_fd_ostream File("./test/callgraph/callgraph.dot", EC, sys::fs::OF_Text);
+    raw_fd_ostream File(OutputFilename, EC, sys::fs::OF_Text);
 
     if (!EC) {
       File << "digraph \"CallGraph\" {\n";
@@ -126,9 +127,9 @@ int main(int argc, char **argv) {
   }
   if (UseAnalysis) {
 
-    // StackOverflowDetector Detector{LimitSize};
-    // Detector.analyze(Graph, StackSize);
-    // Detector.printResults(outs());
+    StackOverflowDetector Detector{LimitSize};
+    Detector.analyze(Graph, StackSize);
+    Detector.printResults(outs());
   }
 
   return 0;

@@ -6,5 +6,9 @@ executable("stackanalyzer") {
     "//llvm/lib/Bitcode/Reader",
     "//llvm/lib/Support",
   ]
-  sources = [ "stackanalyzer.cpp" ]
+  sources = [
+    "CallGraphGen.cpp",
+    "StackUsage.cpp",
+    "stackanalyzer.cpp",
+  ]
 }
