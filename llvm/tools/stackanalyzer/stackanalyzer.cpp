@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
   }
   parseStackSizeFromSU(InputSUFilename, *M, StackSize);
 
-  const auto &Graph = MAM.getResult<CallGraphAnalysis>(*M);
+  const auto &Graph = MAM.getResult<PACallGraphAnalysis>(*M);
 
   if (UseCallGraph) {
     std::error_code EC;
