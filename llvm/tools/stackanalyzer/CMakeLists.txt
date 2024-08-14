@@ -4,6 +4,7 @@ set(LLVM_LINK_COMPONENTS
   Core
   Passes
   Support
+  ${LLVM_TARGETS_TO_BUILD}
 )
 
 add_llvm_tool(stackanalyzer

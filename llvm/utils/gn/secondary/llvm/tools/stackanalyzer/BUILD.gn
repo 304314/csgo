@@ -5,6 +5,7 @@ executable("stackanalyzer") {
     "//llvm/lib/Passes",
     "//llvm/lib/Bitcode/Reader",
     "//llvm/lib/Support",
+    "//llvm/lib/Target:TargetsToBuild",
   ]
   sources = [
     "CallGraphGen.cpp",

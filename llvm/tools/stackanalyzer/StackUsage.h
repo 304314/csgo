@@ -35,6 +35,18 @@ void parseStackSizeFromSU(
     llvm::MapVector<const llvm::Function *, unsigned> &StackSizeMap);
 
 /**
+ * @brief Emits a stack usage file for the given module.
+ *
+ * This function generates a stack usage file for the specified module. The
+ * stack usage file contains information about the stack usage of the functions
+ * in the module.
+ *
+ * @param Filename The path to the output file.
+ * @param Module The LLVM module for which the stack usage file is generated.
+ */
+void emitSUFile(llvm::StringRef Filename, llvm::Module &Module);
+
+/**
  * @class StackOverflowDetector
  * @brief A class that detects stack overflow in a program.
  *
