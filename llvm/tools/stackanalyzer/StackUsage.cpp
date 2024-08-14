@@ -12,7 +12,6 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/MC/TargetRegistry.h"
-#include "llvm/Support/Host.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/VirtualFileSystem.h"
@@ -25,8 +24,8 @@ using namespace llvm;
 using namespace llvm::sys;
 
 void llvm::parseStackSizeFromSU(
-    StringRef Filename, llvm::Module &Module,
-    MapVector<const llvm::Function *, unsigned> &StackSizeMap) {
+    StringRef Filename, Module &Module,
+    MapVector<const Function *, unsigned> &StackSizeMap) {
   emitSUFile(Filename, Module);
   // Open the file and read its contents
   auto BufferOrError = MemoryBuffer::getFile(Filename);
@@ -110,7 +109,7 @@ void llvm::emitSUFile(llvm::StringRef SUFilename, llvm::Module &Module) {
   Module.setDataLayout(TargetMachine->createDataLayout());
   Module.setTargetTriple(TargetTriple);
 
-  auto *Filename = "/tmp/stackanalyzer/output.o";
+  auto *Filename = "./output.o";
   std::error_code EC;
   raw_fd_ostream Dest(Filename, EC, sys::fs::OF_None);
 
