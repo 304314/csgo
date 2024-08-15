@@ -535,6 +535,9 @@ public:
   PointerAnalysisVisitor(Module &Module);
   void solveConstraint();
 
+private:
+  void canonicalizeCallGraph();
+
 public:
   void merge(PAAnalysisDataflowFacts *Facts,
              const PAAnalysisDataflowFacts &OtherFacts) override;

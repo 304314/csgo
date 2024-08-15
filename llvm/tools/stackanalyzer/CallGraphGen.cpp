@@ -77,6 +77,7 @@ PACallGraphAnalysis::Result PACallGraphAnalysis::run(Module &M,
     compForwardDataflow(&(*FI), &PAVisitor, &ResultFact, InitFact);
     PAVisitor.solveConstraint();
   }
+  PAVisitor.canonicalizeCallGraph();
   if (Config.UseDebug) {
     PAVisitor.printConstraintGraph(outs());
     PAVisitor.printPointToSetMap(outs());
@@ -181,7 +182,6 @@ void PointerAnalysisVisitor::transfer(StoreInst *Inst,
 void PointerAnalysisVisitor::transfer(CallInst *Inst,
                                       PAAnalysisDataflowFacts *Dfval) {
   auto *Callee = Inst->getCalledFunction();
-  auto *PrevFunction = CurrentFunction;
   if (!Callee) {
     auto *CalleeValue = Inst->getCalledOperand();
     auto *Constraint =
@@ -196,6 +196,7 @@ void PointerAnalysisVisitor::transfer(CallInst *Inst,
     Constraints.push_back(Constraint);
     ConstraintFunctionMap[Constraint] = CurrentFunction;
   } else {
+    auto *PrevFunction = CurrentFunction;
     if (Callee->isIntrinsic() || Callee->isDeclaration())
       return;
     for (unsigned I = 0, NumOperands = Inst->arg_size(); I != NumOperands;
@@ -327,11 +328,35 @@ void PointerAnalysisVisitor::solveUnsolvedConstraint(const Constraint *Cstrt) {
   }
 }
 
+/**
+ * @brief Canonicalizes the call graph by removing redundant self-loops.
+ *
+ * This function iterates over all nodes in the call graph and checks if there
+ * are multiple self-loop edges (calls where a function calls itself). If more
+ * than one self-loop edge is found, the redundant edges are removed, leaving
+ * only one self-loop per node.
+ */
+void PointerAnalysisVisitor::canonicalizeCallGraph() {
+  for (auto &Node : CG) {
+    auto *CallGraphNode = Node.second.get();
+    unsigned Cycles = 0;
+    for (auto CI = CallGraphNode->begin(), CE = CallGraphNode->end(); CI != CE;
+         CI++) {
+      auto *CallRecord = CI->second;
+      auto *Callee = CallRecord->getFunction();
+      if (Callee == CallGraphNode->getFunction()) {
+        Cycles++;
+        if (Cycles > 1)
+          CallGraphNode->removeCallEdge(CI);
+      }
+    }
+  }
+}
+
 std::array<std::string, static_cast<unsigned>(ConstraintKind::Init)>
     ConstraintKindToString = {"Copy", "GetAddr", "Load", "Store", "Unresolved"};
 
-/**
- * @brief Prints the constraint graph.
+/** * @brief Prints the constraint graph.
  *
  * This function prints the constraint graph in the DOT format. The graph
  * represents the constraints between different values in the analysis. The

@@ -66,8 +66,9 @@ class StackOverflowDetector {
   std::set<Function *> Visited;
   unsigned Threshold;
 
-  bool dfs(Function *F, const CallGraph &CG,
-           const MapVector<const Function *, unsigned> &StackSizes);
+  bool traverse(Function *F, const CallGraph &CG,
+                const MapVector<const Function *, unsigned> &StackSizes);
+  bool evaluateCurrentPath();
 
 public:
   StackOverflowDetector(unsigned Limit) : Threshold(Limit) {}

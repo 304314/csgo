@@ -141,7 +141,7 @@ void StackOverflowDetector::analyze(
       continue;
     if (!Visited.count(F)) {
       if (F->getName() == "main")
-        dfs(F, CG, StackSizes);
+        traverse(F, CG, StackSizes);
     }
   }
 }
@@ -156,12 +156,7 @@ void StackOverflowDetector::printResults(raw_ostream &OS) const {
   }
 }
 
-bool StackOverflowDetector::dfs(
-    Function *F, const CallGraph &CG,
-    const MapVector<const Function *, unsigned> &StackSizes) {
-  Visited.insert(F);
-  unsigned CurrentStackSize = StackSizes.lookup(F);
-  PathStack.insert({F, CurrentStackSize});
+bool StackOverflowDetector::evaluateCurrentPath() {
   unsigned CumulativeStackSize = 0;
   for (auto &Entry : PathStack) {
     CumulativeStackSize += Entry.second;
@@ -174,17 +169,50 @@ bool StackOverflowDetector::dfs(
     OverflowPaths.push_back(Path);
     return true;
   }
+  return false;
+}
 
+bool StackOverflowDetector::traverse(
+    Function *F, const CallGraph &CG,
+    const MapVector<const Function *, unsigned> &StackSizes) {
+  // Check for loop detection: if we revisit a node that is in the PathStack,
+  // it's a loop
+  if (PathStack.count(F)) {
+    unsigned LoopStackSize = 0;
+    for (auto PI = PathStack.find(F), PE = PathStack.end(); PI != PE; ++PI) {
+      LoopStackSize += PI->second;
+    }
+
+    // If the loop's stack cost is zero, treat it as a single node and evaluate
+    // current path
+    if (LoopStackSize == 0) {
+      return evaluateCurrentPath();
+    }
+    // Otherwise, consider it a potential overflow path
+    std::vector<const Function *> Path;
+    for (auto &Entry : PathStack) {
+      Path.push_back(Entry.first);
+    }
+    OverflowPaths.push_back(Path);
+    return true;
+  }
+
+  Visited.insert(F);
+  unsigned CurrentStackSize = StackSizes.lookup(F);
+  PathStack.insert({F, CurrentStackSize});
+  if (evaluateCurrentPath()) {
+    return true;
+  }
   auto *CGNode = CG[F];
+
+  bool FindOverflowPath = false;
   for (auto &Callee : *CGNode) {
     Function *CalleeF = Callee.second->getFunction();
-    if (CalleeF && !Visited.count(CalleeF) && !CalleeF->isDeclaration()) {
-      if (dfs(CalleeF, CG, StackSizes)) {
-        return true;
-      }
+    if (CalleeF && !CalleeF->isDeclaration()) {
+      FindOverflowPath = traverse(CalleeF, CG, StackSizes) || FindOverflowPath;
     }
   }
 
   PathStack.pop_back();
-  return false;
+  return FindOverflowPath;
 }
