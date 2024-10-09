@@ -149,7 +149,7 @@ while getopts :aAb:ceEhiI:j:orstvfX: optchr; do
 done
 
 CMAKE_OPTIONS="-DCMAKE_INSTALL_PREFIX=$install_prefix \
-               -DCMAKE_BUILD_TYPE=$buildtype \
+               -DCMAKE_BUILD_TYPE=relwithdebinfo \
                -DCMAKE_C_COMPILER=$C_COMPILER_PATH \
                -DCMAKE_CXX_COMPILER=$CXX_COMPILER_PATH \
                -DLLVM_TARGETS_TO_BUILD=$backends "
