@@ -2597,6 +2597,14 @@ void Driver::BuildUniversalActions(Compilation &C, const ToolChain &TC,
   }
 }
 
+llvm::DenseSet<StringRef> ZArgsList{
+    "defs", "muldefs", "execstack", "noexecstack", "globalaudit", "combreloc",
+    "nocombreloc", "global", "initfirst", "interpose", "lazy", "loadfltr",
+    "nocopyreloc", "nodefaultlib", "nodelete", "nodlopen", "nodump", "now",
+    "origin", "relro", "norelro", "separate-code", "noseparate-code", "common",
+    "nocommon", "text", "notext", "textoff"
+};
+
 bool Driver::DiagnoseInputExistence(const DerivedArgList &Args, StringRef Value,
                                     types::ID Ty, bool TypoCorrect) const {
   if (!getCheckInputsExist())
@@ -2671,6 +2679,11 @@ bool Driver::DiagnoseInputExistence(const DerivedArgList &Args, StringRef Value,
   // in cc mode. (We can in cl mode because cl.exe itself only warns on
   // unknown flags.)
   if (IsCLMode() && Ty == types::TY_Object && !Value.startswith("/"))
+    return true;
+
+  if (ZArgsList.find(Value) != ZArgsList.end() ||
+      Value.starts_with("common-page-size=") ||
+      Value.starts_with("max-page-size=") || Value.starts_with("stack-size="))
     return true;
 
   Diag(clang::diag::err_drv_no_such_file) << Value;
