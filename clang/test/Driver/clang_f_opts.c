@@ -610,3 +610,10 @@
 // CHECK-INT-OBJEMITTER-NOT: unsupported option '-fintegrated-objemitter' for target
 // RUN: %clang -### -fno-integrated-objemitter -target x86_64 %s 2>&1 | FileCheck -check-prefix=CHECK-NOINT-OBJEMITTER %s
 // CHECK-NOINT-OBJEMITTER: unsupported option '-fno-integrated-objemitter' for target
+
+#ifdef BUILD_FOR_OPENEULER
+// RUN: %clang -###
+// RUN: -ftree-loop-if-convert
+// RUN: %s 2>&1 | FileCheck -check-prefix=CHECK-WARNING %s
+// CHECK-WARNING-DAG: GNU optimization flag '-ftree-loop-if-convert' is not supported and ignored.
+#endif
