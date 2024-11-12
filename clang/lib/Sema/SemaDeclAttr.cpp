@@ -5001,6 +5001,40 @@ static void handleOptimizeNoneAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
     D->addAttr(Optnone);
 }
 
+#ifdef BUILD_FOR_OPENEULER
+static void handleOptimizeAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+  StringRef Arg;
+  Expr *ArgExpr = AL.getArgAsExpr(0);
+  const auto *SL = dyn_cast<StringLiteral>(ArgExpr->IgnoreParenCasts());
+  if (!SL || !SL->isOrdinary()) {
+    llvm::APSInt ArgInt;
+    if (const auto *IL = dyn_cast<IntegerLiteral>(ArgExpr))
+      ArgInt = IL->getValue();
+    else {
+      S.Diag(ArgExpr->getBeginLoc(), diag::err_attribute_argument_either_type)
+	    << AL << AANT_ArgumentString << AANT_ArgumentIntegerConstant;
+      return;
+    }
+    if (ArgInt.isZero()) {
+      if (OptimizeNoneAttr *Optnone = S.mergeOptimizeNoneAttr(D, AL))
+	D->addAttr(Optnone);
+    }
+    else
+      S.Diag(AL.getLoc(), diag::warn_invalid_optimize_attr_level)
+            << toString(ArgInt, 10);
+    return;
+  }
+  Arg = SL->getString();
+  if (Arg.str() == "O0") {
+    if (OptimizeNoneAttr *Optnone = S.mergeOptimizeNoneAttr(D, AL))
+      D->addAttr(Optnone);
+  }
+  else
+    S.Diag(AL.getLoc(), diag::warn_invalid_optimize_attr_level) << Arg;
+  return;
+}
+#endif
+
 static void handleConstantAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   const auto *VD = cast<VarDecl>(D);
   if (VD->hasLocalStorage()) {
@@ -8956,6 +8990,11 @@ ProcessDeclAttribute(Sema &S, Scope *scope, Decl *D, const ParsedAttr &AL,
   case ParsedAttr::AT_OptimizeNone:
     handleOptimizeNoneAttr(S, D, AL);
     break;
+#ifdef BUILD_FOR_OPENEULER
+  case ParsedAttr::AT_Optimize:
+    handleOptimizeAttr(S, D, AL);
+    break;
+#endif
   case ParsedAttr::AT_EnumExtensibility:
     handleEnumExtensibilityAttr(S, D, AL);
     break;

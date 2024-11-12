@@ -3618,6 +3618,19 @@ attributes.
   }];
 }
 
+#ifdef BUILD_FOR_OPENEULER
+def OptimizeDocs : Documentation {
+  let Category = DocCatFunction;
+  let Content = [{
+The ``optimize`` attribute, when attached to a function, indicates that the
+function should be compiled with a different optimization level then specified
+on the command line. See the Function Attributes documentation on GCC's docs for
+more information. Currently, the attribute differs from GCC in that Clang only
+supports 'O0' and 0.
+}];
+}
+#endif
+
 def LoopHintDocs : Documentation {
   let Category = DocCatStmt;
   let Heading = "#pragma clang loop";
