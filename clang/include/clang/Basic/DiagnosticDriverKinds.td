@@ -16,6 +16,11 @@ def err_drv_unsupported_opt_with_suggestion : Error<
   "unsupported option '%0'; did you mean '%1'?">;
 def err_drv_unsupported_opt_for_target : Error<
   "unsupported option '%0' for target '%1'">;
+#ifdef BUILD_FOR_OPENEULER
+def warning_drv_unsupported_target_compability : Warning<"unsuportted option '%0'"
+  "for target '%1', ignored since -fgcc-compatible is enabled">,
+  InGroup<IgnoredOptimizationArgumnet>;
+#endif
 def err_drv_unsupported_opt_for_language_mode : Error<
   "unsupported option '%0' for language mode '%1'">;
 def err_drv_unsupported_option_argument : Error<
