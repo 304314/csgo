@@ -5181,6 +5181,11 @@ multiclass BooleanFFlag<string name> {
   def fno_#NAME : Flag<["-"], "fno-"#name>;
 }
 
+multiclass BooleanICompatibilityFlag<string name> {
+  def NAME : Flag<["-"], name>;
+  def no_#NAME : Flag<["-"], "no-"#name>;
+}
+
 multiclass FlangIgnoredDiagOpt<string name> {
   def unsupported_warning_w#NAME : Flag<["-", "--"], "W"#name>, Group<flang_ignored_w_Group>;
 }
@@ -7688,6 +7693,16 @@ def Mqq_EQ : Joined<["-"], "Mqq,">, Group<pgi_fortran_Group>;
 def Hqq_EQ : Joined<["-"], "Hqq,">, Group<pgi_fortran_Group>;
 def Wh_EQ : Joined<["-"], "Wh,">, Group<pgi_fortran_Group>;
 #endif
+
+#ifdef BUILD_FOR_OPENEULER
+// Ignored GNU optimization
+// Handle all -ftree-/-fno-tree- options since it's only for GNU
+def ftree_all_option : Joined<["-"], "ftree">,
+  Group<clang_ignored_gcc_optimization_f_Group>;
+def fno_tree_all_option : Joined<["-"], "fno-tree">,
+  Group<clang_ignored_gcc_optimization_f_Group>;
+#endif
+
 def hlsl_entrypoint : Option<["-"], "hlsl-entry", KIND_SEPARATE>,
                       Group<dxc_Group>,
                       Flags<[CC1Option]>,
