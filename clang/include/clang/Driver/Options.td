@@ -274,7 +274,11 @@ def enable_trivial_var_init_zero : Flag<["-"], "enable-trivial-auto-var-init-zer
 // Group that ignores all gcc optimizations that won't be implemented
 def clang_ignored_gcc_optimization_f_Group : OptionGroup<
   "<clang_ignored_gcc_optimization_f_Group>">, Group<f_Group>, Flags<[Ignored]>;
+#ifdef BUILD_FOR_OPENEULER
+def clang_ignored_gnu_functionality_Group : OptionGroup<
+  "<clang_ignored_gnu_functionality_Group>">, Flags<[Ignored]>;
 
+#endif
 class DiagnosticOpts<string base>
   : KeyPathAndMacro<"DiagnosticOpts->", base, "DIAG_"> {}
 class LangOpts<string base>
@@ -7698,3 +7702,7 @@ def dxc_validator_path_EQ : Joined<["--"], "dxv-path=">, Group<dxc_Group>,
   HelpText<"DXIL validator installation path">;
 def dxc_disable_validation : DXCFlag<"Vd">,
   HelpText<"Disable validation">;
+#ifdef BUILD_FOR_OPENEULER
+defm canonical_system_headers_option : BooleanFFlag<"canonical-system-headers">,
+  Group<clang_ignored_gnu_functionality_Group>;
+#endif

@@ -218,7 +218,9 @@ public:
 
   std::string AutoTuneOptions;
 #endif
-
+#ifdef BUILD_FOR_OPENEULER
+  bool EnableGccCompatible = false;
+#endif
   /// The file to log CC_PRINT_PROC_STAT_FILE output to, if enabled.
   std::string CCPrintStatReportFilename;
 

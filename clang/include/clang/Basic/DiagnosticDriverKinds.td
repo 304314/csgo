@@ -387,6 +387,11 @@ def err_drv_print_header_env_var_combination_cc1 : Error<
 def warn_O4_is_O3 : Warning<"-O4 is equivalent to -O3">, InGroup<Deprecated>;
 def warn_drv_optimization_value : Warning<"optimization level '%0' is not supported; using '%1%2' instead">,
   InGroup<InvalidCommandLineArgument>;
+def warn_ignored_gnu_functionality : Warning<"GNU functionality flag '%0' is not supported "
+  "Since -fgcc-compatible is enabled, the compiler will ignore it automatically">,
+  InGroup<IgnoredOptimizationArgument>;
+def error_ignored_gnu_functionality : Error<"GNU functionality flag '%0' is not supported, "
+  "Try -fgcc-compatible to ignore it.">;
 def warn_ignored_gcc_optimization : Warning<"optimization flag '%0' is not supported">,
   InGroup<IgnoredOptimizationArgument>;
 def warn_ignored_clang_option : Warning<"the flag '%0' has been deprecated and will be ignored">,

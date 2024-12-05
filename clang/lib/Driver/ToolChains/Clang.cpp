@@ -6096,6 +6096,17 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     D.Diag(diag::warn_ignored_gcc_optimization) << A->getAsString(Args);
     A->claim();
   }
+#ifdef BUILD_FOR_OPENEULER
+  // Warn about ignored GNU functionality
+  for (const Arg &A :
+       Args.filtered(options::OPT_clang_ignored_gnu_functionality_Group)) {
+    if (Args.hasArg(options::OPT_fgcc_compatible))
+      D.Diag(diag::warn_ignored_gnu_functionality) << A->getAsString(Args);
+    else
+      D.Diag(diag::error_ignored_gnu_functionality) << A->getAsString(Args);
+    A->claim();
+  }
+#endif
 
   for (const Arg *A :
        Args.filtered(options::OPT_clang_ignored_legacy_options_Group)) {
