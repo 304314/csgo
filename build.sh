@@ -5,7 +5,6 @@ C_COMPILER_PATH=gcc
 CXX_COMPILER_PATH=g++
 
 # Initialize our own variables:
-enable_acpo="1"
 enable_autotuner="1"
 buildtype=RelWithDebInfo
 backends="all"
@@ -26,7 +25,34 @@ build_dir_name="build"
 install_dir_name="install"
 build_prefix="$dir/$build_dir_name"
 install_prefix="$dir/$install_dir_name"
+host_arch="$(uname -m)"
+# ACPO specific flags
+enable_acpo="1"
+acpo_aot=0
+override_aot=1
+acpo_aot_models="fi"
+acpo_aot_cmake_flags=""
+export OPENEULER_ACPO_DIR=""
 
+if [ $acpo_aot -eq 1 ] && [ $enable_acpo -eq 0 ]; then
+  echo "$0: acpo_aot need enable_acpo eq 1."
+  exit 1
+fi
+
+if [ $acpo_aot -eq 1 ]; then
+  if [ "$host_arch" = "aarch64" ]; then
+    aot_arch=${host_arch}
+    echo "$0: ACPO will be built for aarch64 architecture"
+  elif [ "$host_arch" = "x86_64" ]; then
+    aot_arch="x86"
+    echo "$0: ACPO will be built for x86 architecture"
+  else
+    echo "$0: ${host_arch} is not yet a supported architecture for ACPO.
+    Currently supporting aarch64 and x86 only.
+    Please use '-a' to disable ACPO for building BiSheng compiler."
+    exit 1
+  fi
+fi
 # Use 8 threads for builds and tests by default. Use more threads if possible,
 # but avoid overloading the system by using up to 50% of available cores.
 threads=8
@@ -79,6 +105,10 @@ while getopts :aAb:d:ceEhiI:j:orstvfX: optchr; do
       ;;
     A)
       enable_acpo="0"
+      acpo_aot=0
+      acpo_aot_models=""
+      override_aot=0
+      echo "$0: ACPO project is disabled!"
       ;;
     b)
       buildtype="$OPTARG"
@@ -175,6 +205,100 @@ else
     exit 1
   fi
   llvm_binutils_incdir="-DLLVM_BINUTILS_INCDIR=$incdir"
+fi
+
+# TensorFlow environment variables must be set if AOT is requested.
+# If the user didn't specify them, try to determine the proper values.
+if [ $acpo_aot -eq 1 ]; then
+  if [ -z "$TENSORFLOW_AOT_PATH" ]; then
+    python_full_version=$(python3 -V 2>&1 | grep -o '3\.[0-9]\+\.[0-9]\+')
+    python_version=$(python3 -V 2>&1 | grep -o '3\.[0-9]\+')
+    echo "$0: $python_full_version"
+    echo "$0: $python_version"
+    echo "$0: $HOME"
+    if [ -d "/usr/local/lib64/python${python_version}/site-packages/tensorflow" ]; then
+      export TENSORFLOW_AOT_PATH="/usr/local/lib64/python${python_version}/site-packages/tensorflow"
+    elif [ -d "$HOME/.local/lib/python${python_version}/site-packages/tensorflow" ]; then
+      export TENSORFLOW_AOT_PATH="$HOME/.local/lib/python${python_version}/site-packages/tensorflow"
+    elif [ -d "/opt/python-${python_full_version}/lib/python${python_version}/site-packages/tensorflow" ]; then
+      export TENSORFLOW_AOT_PATH="/opt/python-${python_full_version}/lib/python${python_version}/site-packages/tensorflow"
+    elif [ -d "/opt/buildtools/python-${python_full_version}/lib/python${python_version}/site-packages/tensorflow" ]; then
+      export TENSORFLOW_AOT_PATH="/opt/buildtools/python-${python_full_version}/lib/python${python_version}/site-packages/tensorflow"
+    else
+      echo "$0: TENSORFLOW_AOT_PATH not set"
+      exit 1
+    fi
+  fi
+fi
+
+if [ $acpo_aot -eq 1 ] && [ $enable_acpo -eq 1 ]; then
+  echo "$0: ACPO AOT compilation enabled."
+
+  if [ -z "$OPENEULER_ACPO_DIR" ]; then
+    echo "$0: OPENEULER_ACPO_DIR not set"
+    echo "$OPENEULER_ACPO_DIR"
+    exit 1
+  fi
+  echo "$0: ACPO directory is found at $OPENEULER_ACPO_DIR"
+  full_model_paths=""
+  acpo_aot_model_names=""
+  model_signatures=""
+  model_override_headers=""
+  override_dir=""
+
+  if [ $override_aot -eq 1 ] && [ -d ${OPENEULER_ACPO_DIR}/overrides/ ]; then
+    if [ -d "${OPENEULER_ACPO_DIR}/overrides/" ]; then
+      override_dir="${OPENEULER_ACPO_DIR}/overrides/"
+    else
+      echo "$0: ACPO overrrides directory for pre-compiled models is not found!"
+      exit 1
+    fi
+  fi
+
+  for model in $acpo_aot_models; do
+    acpo_file="${OPENEULER_ACPO_DIR}/model-${model}.acpo"
+    if [ -z "${acpo_file}" ]; then
+      echo "$0: Error loading model ${model}: Could not find ${acpo_file}"
+      exit 1
+    fi
+
+    full_path="${OPENEULER_ACPO_DIR}/$(grep ModelDirectory ${acpo_file} | cut -d= -f2)"
+    if [ -z "${full_path}" ]; then
+      echo "$0: Error loading model ${model}: Could not find ModelDirectory in ${acpo_file}"
+      exit 1
+    fi
+
+    model_name="$(grep ModelName ${acpo_file} | cut -d= -f2)"
+    if [ -z "${model_name}" ]; then
+      echo "$0: Error loading model ${model}: Could not find ModelName in ${acpo_file}"
+      exit 1
+    fi
+
+    model_signature="$(grep Signature ${acpo_file} | cut -d= -f2)"
+    if [ -z "${model_signature}" ]; then
+      echo "$0: Error loading model ${model}: Could not find Signature in ${acpo_file}"
+      exit 1
+    fi
+
+    full_model_paths="${full_model_paths}${full_path};"
+    acpo_aot_model_names="${acpo_aot_model_names}${model_name};"
+    model_signatures="${model_signatures}${model_signature};"
+  done
+
+  # Remove trailing characters
+  full_model_paths=${full_model_paths%?}
+  acpo_aot_model_names=${acpo_aot_model_names%?}
+  model_signatures=${model_signatures%?}
+
+  acpo_aot_cmake_flags="-DACPO_AOT=ON \
+                        -DTENSORFLOW_AOT_PATH=${TENSORFLOW_AOT_PATH} \
+                        -DLLVM_ACPO_MODEL_PATHS=${full_model_paths} \
+                        -DLLVM_ACPO_MODEL_NAMES=${acpo_aot_model_names} \
+                        -DLLVM_ACPO_MODEL_SIGNATURES=${model_signatures} \
+                        -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=True \
+                        -DLLVM_ACPO_OVERRIDE=${override_aot} \
+                        -DLLVM_ACPO_OVERRIDE_PATH=${override_dir} \
+                        -DLLVM_ACPO_OVERRIDE_ARCH=${aot_arch}"
 fi
 
 # Warning: the -DLLVM_ENABLE_PROJECTS option is specified with cmake
@@ -274,6 +398,7 @@ cmake $CMAKE_OPTIONS \
       -DLIBOMP_INSTALL_ALIASES=OFF \
       $llvm_binutils_incdir \
       $verbose \
+      $acpo_aot_cmake_flags \
       ../llvm
 
 make -j$threads
