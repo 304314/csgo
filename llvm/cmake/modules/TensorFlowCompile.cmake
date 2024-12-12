@@ -82,6 +82,8 @@ function(tf_find_and_compile model default_url default_path test_model_generator
   if (EXISTS "${override_header}" AND EXISTS "${override_object}")
     configure_file(${override_header} ${hdr_file} COPYONLY)
     configure_file(${override_object} ${obj_file} COPYONLY)
+    string(REPLACE "lib" "include/llvm" new_hdr_file "${hdr_file}")
+    configure_file(${override_header} ${new_hdr_file} COPYONLY)
     message(STATUS "Using provided header " ${hdr_file} " and object " ${obj_file} "
       files for model " ${fname})  
     set(GENERATED_OBJS ${GENERATED_OBJS} ${obj_file})
