@@ -1,0 +1,20 @@
+
+  // Add -iprefix/-iwithprefix/-iwithprefixbefore options.
+  StringRef Prefix = ""; // FIXME: This isn't the correct default prefix.
+  bool iprefixEmpty = true;
+  for (const auto *A :
+       Args.filtered(OPT_iprefix, OPT_iwithprefix, OPT_iwithprefixbefore)) {
+    if (A->getOption().matches(OPT_iprefix)) {
+      Prefix = A->getValue();
+      iprefixEmpty = false;
+    } else if (A->getOption().matches(OPT_iwithprefix)) {
+      if (Args.hasFlag(options::OPT_fgcc_compatible, options::OPT_fno_gcc_compatible, false) && iprefixEmpty) {
+        SmallString<256> path;
+        llvm::sys::path::append(path, Opts.ResourceDir, A->getValue());
+        Opts.AddPath(path, frontend::Angled, false, true);
+      } else {
+        Opts.AddPath(Prefix.str() + A->getValue(), frontend::After, false, true);
+      }
+    } else
+      Opts.AddPath(Prefix.str() + A->getValue(), frontend::Angled, false, true);
+  } 
