@@ -50,8 +50,12 @@ if [ $acpo_aot -eq 1 ]; then
   else
     echo "$0: ${host_arch} is not yet a supported architecture for ACPO.
     Currently supporting aarch64 and x86 only.
-    Please use '-A' to disable ACPO for building BiSheng compiler."
-    exit 1
+    ACPO will not building for openEuler LLVM compiler."
+    enable_acpo="0"
+    acpo_aot=0
+    acpo_aot_models=""
+    override_aot=0
+    export TENSORFLOW_AOT_PATH=""
   fi
 fi
 # Use 8 threads for builds and tests by default. Use more threads if possible,
