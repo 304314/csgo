@@ -5,6 +5,9 @@ if (DEFINED LLVM_HAVE_TF_AOT OR LLVM_HAVE_TFLITE)
   set(LLVM_INLINER_MODEL_CURRENT_URL "<UNSPECIFIED>" CACHE STRING "URL to download the LLVM inliner model")
 
   if (ACPO_AOT)
+    if (ACPO_AOT_COMPILE STREQUAL "ON")
+      include(AcpoAot)
+    endif()
     foreach (model_name model_path model_signature IN ZIP_LISTS LLVM_ACPO_MODEL_NAMES LLVM_ACPO_MODEL_PATHS LLVM_ACPO_MODEL_SIGNATURES)
       set(fname ${model_name}CompiledModel)
       string(TOUPPER ${fname} fname_allcaps)
@@ -15,17 +18,26 @@ if (DEFINED LLVM_HAVE_TF_AOT OR LLVM_HAVE_TFLITE)
         set(LLVM_OVERRIDE_MODEL_OBJECT_${fname_allcaps}
           ${LLVM_ACPO_OVERRIDE_PATH}/${fname}-${arch_allcaps}.o)
       endif()
-
-      tf_find_and_compile(
-        ${model_path}
-        ${LLVM_INLINER_MODEL_CURRENT_URL}
-        ${LLVM_INLINER_MODEL_PATH_DEFAULT}
-        ""
-        serve
-        "${model_signature}"
-        "${fname}"
-        "llvm::${fname}"
-      )
+        if (ACPO_AOT_COMPILE STREQUAL "ON")
+          acpo_tf_find_and_compile(
+          ${model_path}
+          serve
+          "${model_signature}"
+          "${fname}"
+          "llvm::${fname}"
+        )
+      else()
+        tf_find_and_compile(
+          ${model_path}
+          ${LLVM_INLINER_MODEL_CURRENT_URL}
+          ${LLVM_INLINER_MODEL_PATH_DEFAULT}
+          ""
+          serve
+          "${model_signature}"
+          "${fname}"
+          "llvm::${fname}"
+        )
+      endif()
     endforeach()
   endif()
   if (DEFINED LLVM_HAVE_TF_AOT)
