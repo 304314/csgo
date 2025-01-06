@@ -172,7 +172,7 @@ if [ -z "$gold" -o ! -x "$gold" ]; then
 fi
 
 if [ $acpo_aot -eq 1 ] && [ $enable_acpo -eq 0 ]; then
-  echo "$0: acpo_aot need enable_acpo eq 1."
+  echo "$0: when use '-A' to disable acpo cant' use '-O' to enable acpo_aot."
   exit 1
 fi
 

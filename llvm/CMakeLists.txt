@@ -1007,7 +1007,7 @@ set(ACPO_AOT OFF CACHE BOOL "Whether or not ACPO AOT is enabled")
 if (ACPO_AOT_COMPILE STREQUAL "ON")
   find_file(TENSORFLOW_XLA_PATH xla_aot_runtime_src ${TENSORFLOW_AOT_PATH})
   if(TENSORFLOW_XLA_PATH STREQUAL "")
-    message(FATAL_ERROR "PATH:${TENSORFLOW_AOT_PATH} don't exist")
+    message(FATAL_ERROR "TENSORFLOW_AOT_PATH:${TENSORFLOW_AOT_PATH} don't exist")
   endif()
 endif()
 
