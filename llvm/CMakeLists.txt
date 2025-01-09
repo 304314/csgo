@@ -1004,6 +1004,13 @@ set(TENSORFLOW_AOT_PATH "" CACHE PATH "Path to TensorFlow pip install dir")
 set(LLVM_INLINER_MODEL_PATH "" CACHE PATH "Path to the inliner model")
 set(ACPO_AOT OFF CACHE BOOL "Whether or not ACPO AOT is enabled")
 
+if (ACPO_AOT_COMPILE STREQUAL "ON")
+  find_file(TENSORFLOW_XLA_PATH xla_aot_runtime_src ${TENSORFLOW_AOT_PATH})
+  if(TENSORFLOW_XLA_PATH STREQUAL "")
+    message(FATAL_ERROR "TENSORFLOW_AOT_PATH:${TENSORFLOW_AOT_PATH} don't exist")
+  endif()
+endif()
+
 if (NOT TENSORFLOW_AOT_PATH STREQUAL "")
   set(LLVM_HAVE_TF_AOT "ON" CACHE BOOL "Tensorflow AOT available")
   set(TENSORFLOW_AOT_COMPILER

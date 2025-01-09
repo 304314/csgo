@@ -5,7 +5,6 @@ C_COMPILER_PATH=gcc
 CXX_COMPILER_PATH=g++
 
 # Initialize our own variables:
-enable_acpo="1"
 enable_autotuner="1"
 buildtype=RelWithDebInfo
 backends="all"
@@ -26,6 +25,9 @@ build_dir_name="build"
 install_dir_name="install"
 build_prefix="$dir/$build_dir_name"
 install_prefix="$dir/$install_dir_name"
+# ACPO specific flags
+enable_acpo="1" # Support ACPO. 0: disable 1: enable
+acpo_aot=0      # Support ACPO AOT recompile. 0: disable 1: enable
 
 # Use 8 threads for builds and tests by default. Use more threads if possible,
 # but avoid overloading the system by using up to 50% of available cores.
@@ -72,13 +74,15 @@ EOF
 
 # Process command-line options. Remember the options for passing to the
 # containerized build script.
-while getopts :aAb:d:ceEhiI:j:orstvfX: optchr; do
+while getopts :aAb:d:ceEhiI:j:oOrstvfX: optchr; do
   case "$optchr" in
     a)
       enable_autotuner="0"
       ;;
     A)
       enable_acpo="0"
+      acpo_aot=0
+      echo "$0: ACPO project is disabled!"
       ;;
     b)
       buildtype="$OPTARG"
@@ -126,6 +130,9 @@ while getopts :aAb:d:ceEhiI:j:orstvfX: optchr; do
     o)
       install_toolchain_only=1
       ;;
+    O)
+      acpo_aot=1
+      ;;
     r)
       clean=1
       ;;
@@ -162,6 +169,20 @@ gold=$(type -p ld.gold)
 if [ -z "$gold" -o ! -x "$gold" ]; then
   echo "$0: no usable ld.gold"
   exit 1
+fi
+
+if [ $acpo_aot -eq 1 ] && [ $enable_acpo -eq 0 ]; then
+  echo "$0: when use '-A' to disable acpo cant' use '-O' to enable acpo_aot."
+  exit 1
+fi
+
+if [ $acpo_aot -eq "1" ]; then
+  echo "enable ACPO aot"
+  # TensorFlow environment variables must be set if AOT is requested.
+  CMAKE_OPTIONS="$CMAKE_OPTIONS \
+              -DACPO_AOT=ON \
+              -DACPO_AOT_COMPILE=ON \
+              -DTENSORFLOW_AOT_PATH=${TENSORFLOW_AOT_PATH}"
 fi
 
 # If the invocation does not force a particular binutils installation, check
