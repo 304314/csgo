@@ -4689,6 +4689,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 #ifdef BUILD_FOR_OPENEULER
   if (Args.hasFlag(options::OPT_fgcc_compatible,
                    options::OPT_fno_gcc_compatible, false)) {
+    if (Args.hasArg(options::OPT_nostdinc) && !Args.hasArg(options::OPT_iprefix)) {
+      SmallString<128> P(D.ResourceDir);
+      P += llvm::sys::path::get_separator();
+      CmdArgs.insert(CmdArgs.begin() + 1, "-iprefix");
+      CmdArgs.insert(CmdArgs.begin() + 2, Args.MakeArgString(P));
+    }
     // compatibility relevent warnings
     CmdArgs.push_back("-Wno-error=unknown-warning-option");
     CmdArgs.push_back("-Wno-error=ignored-attributes");
