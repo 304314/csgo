@@ -173,6 +173,11 @@ inline BENCHMARK_ALWAYS_INLINE int64_t Now() {
   struct timeval tv;
   gettimeofday(&tv, nullptr);
   return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
+#elif defined(__sw_64__)
+  // FIXME: SW CPU get cycle time
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
 #elif defined(__loongarch__)
   struct timeval tv;
   gettimeofday(&tv, nullptr);

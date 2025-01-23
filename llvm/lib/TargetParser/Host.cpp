@@ -486,6 +486,10 @@ StringRef sys::detail::getHostCPUNameForBPF() {
 #endif
 }
 
+StringRef sys::detail::getHostCPUNameForSW64(StringRef ProcCpuinfoContent) {
+  return "sw_64";
+}
+
 #if defined(__i386__) || defined(_M_IX86) || \
     defined(__x86_64__) || defined(_M_X64)
 
@@ -1459,6 +1463,12 @@ StringRef sys::getHostCPUName() {
   default:
     return "generic";
   }
+}
+#elif defined(__linux__) && defined(__sw_64__)
+StringRef sys::getHostCPUName() {
+  std::unique_ptr<llvm::MemoryBuffer> P = getProcCpuinfoContent();
+  StringRef Content = P ? P->getBuffer() : "";
+  return detail::getHostCPUNameForSW64(Content);
 }
 #elif defined(__loongarch__)
 StringRef sys::getHostCPUName() {

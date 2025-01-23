@@ -220,6 +220,7 @@ add_llvm_component_library(LLVMSupport
   StringRef.cpp
   SuffixTreeNode.cpp
   SuffixTree.cpp
+  Sw64TargetParser.cpp
   SystemUtils.cpp
   TarWriter.cpp
   ThreadPool.cpp

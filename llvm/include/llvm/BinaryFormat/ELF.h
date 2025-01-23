@@ -320,6 +320,7 @@ enum {
   EM_VE = 251,            // NEC SX-Aurora VE
   EM_CSKY = 252,          // C-SKY 32-bit processor
   EM_LOONGARCH = 258,     // LoongArch
+  EM_SW64 = 0x9916,       // SW64
 };
 
 // Object file classes.
@@ -602,6 +603,31 @@ enum {
   ODK_GP_GROUP = 9,   // GP group to use for text/data sections
   ODK_IDENT = 10,     // ID information
   ODK_PAGESIZE = 11   // Page size information
+};
+
+// SW64 Specific e_flags
+enum {
+
+  EF_SW64_NOREORDER = 0x00000001,  // Don't reorder instructions
+  EF_SW64_PIC = 0x00000002,        // Position independent code
+  EF_SW64_CPIC = 0x00000004,       // Call object with Position independent code
+  EF_SW64_ABI2 = 0x00000020,       // File uses N32 ABI
+  EF_SW64_32BITMODE = 0x00000100,  // Code compiled for a 64-bit machine
+                                   // in 32-bit mode
+  EF_SW64_FP64 = 0x00000200,       // Code compiled for a 32-bit machine
+                                   // but uses 64-bit FP registers
+  EF_SW64_NAN2008 = 0x00000400,    // Uses IEE 754-2008 NaN encoding
+                                   // ABI flags
+  EF_SW64_ABI_EABI64 = 0x00004000, // EABI in 64 bit mode.
+  EF_SW64_ABI = 0x0000f000,        // Mask for selecting EF_SW64_ABI_ variant.
+  EF_SW64_32BIT = 0x00000001,      // All addresses must be below 2GB.
+  EF_SW64_CANRELAX = 0x00000002    // All relocations needed for relaxation with
+                                   // code movement are present.
+};
+
+// ELF Relocation types for Sw64.
+enum {
+#include "ELFRelocs/Sw64.def"
 };
 
 // Hexagon-specific e_flags
@@ -1075,6 +1101,11 @@ enum : unsigned {
 
   SHT_CSKY_ATTRIBUTES = 0x70000001U,
 
+  SHT_SW64_ABIFLAGS = 0x7000002a, // ABI information.
+  SHT_SW64_REGINFO = 0x70000002,  // Register usage information
+  SHT_SW64_OPTIONS = 0x7000000d,  // General options
+  SHT_SW64_DWARF = 0x7000001e,    // DWARF debugging section.
+
   SHT_HIPROC = 0x7fffffff, // Highest processor arch-specific type.
   SHT_LOUSER = 0x80000000, // Lowest type reserved for applications.
   SHT_HIUSER = 0xffffffff  // Highest type reserved for applications.
@@ -1179,6 +1210,9 @@ enum : unsigned {
 
   // Section data is string data by default.
   SHF_MIPS_STRING = 0x80000000,
+
+  // Do not strip this section.
+  SHF_SW64_NOSTRIP = 0x8000000,
 
   // Make code section unreadable when in execute-only mode
   SHF_ARM_PURECODE = 0x20000000

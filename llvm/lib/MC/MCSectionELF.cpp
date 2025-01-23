@@ -153,6 +153,10 @@ void MCSectionELF::printSwitchToSection(const MCAsmInfo &MAI, const Triple &T,
     // Print hex value of the flag while we do not have
     // any standard symbolic representation of the flag.
     OS << "0x7000001e";
+  else if (Type == ELF::SHT_SW64_DWARF)
+    // Print hex value of the flag while we do not have
+    // any standard symbolic representation of the flag.
+    OS << "0x7000001e";
   else if (Type == ELF::SHT_LLVM_ODRTAB)
     OS << "llvm_odrtab";
   else if (Type == ELF::SHT_LLVM_LINKER_OPTIONS)
