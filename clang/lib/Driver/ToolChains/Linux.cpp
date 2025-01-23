@@ -12,6 +12,7 @@
 #include "Arch/Mips.h"
 #include "Arch/PPC.h"
 #include "Arch/RISCV.h"
+#include "Arch/Sw64.h"
 #include "CommonArgs.h"
 #include "clang/Config/config.h"
 #include "clang/Driver/Distro.h"
@@ -164,6 +165,8 @@ std::string Linux::getMultiarchTriple(const Driver &D,
     return "sparc64-linux-gnu";
   case llvm::Triple::systemz:
     return "s390x-linux-gnu";
+  case llvm::Triple::sw_64:
+    return "sw_64-linux-gnu";
   }
   return TargetTriple.str();
 }
@@ -256,6 +259,10 @@ Linux::Linux(const Driver &D, const llvm::Triple &Triple, const ArgList &Args)
   const bool IsHexagon = Arch == llvm::Triple::hexagon;
   const bool IsRISCV = Triple.isRISCV();
   const bool IsCSKY = Triple.isCSKY();
+  const bool IsSw64 = Triple.isSw64();
+
+  if (IsSw64 && !SysRoot.empty())
+    ExtraOpts.push_back("--sysroot=" + SysRoot);
 
   if (IsCSKY && !SelectedMultilibs.empty())
     SysRoot = SysRoot + SelectedMultilibs.back().osSuffix();
@@ -328,6 +335,11 @@ Linux::Linux(const Driver &D, const llvm::Triple &Triple, const ArgList &Args)
     StringRef ABIName = tools::riscv::getRISCVABI(Args, Triple);
     addPathIfExists(D, concat(SysRoot, "/", OSLibDir, ABIName), Paths);
     addPathIfExists(D, concat(SysRoot, "/usr", OSLibDir, ABIName), Paths);
+  }
+
+  if (IsSw64) {
+    addPathIfExists(D, SysRoot + "/usr/lib/gcc/sw_64-sunway-linux-gnu/", Paths);
+    addPathIfExists(D, SysRoot + "/usr/sw_64-sunway-linux-gnu/lib", Paths);
   }
 
   Generic_GCC::AddMultiarchPaths(D, SysRoot, OSLibDir, Paths);
@@ -643,6 +655,10 @@ std::string Linux::getDynamicLinker(const ArgList &Args) const {
     break;
   case llvm::Triple::sparcv9:
     LibDir = "lib64";
+    Loader = "ld-linux.so.2";
+    break;
+  case llvm::Triple::sw_64:
+    LibDir = "lib";
     Loader = "ld-linux.so.2";
     break;
   case llvm::Triple::systemz:

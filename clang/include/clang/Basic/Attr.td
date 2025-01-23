@@ -428,6 +428,7 @@ def TargetX86 : TargetArch<["x86"]>;
 def TargetAnyX86 : TargetArch<["x86", "x86_64"]>;
 def TargetWebAssembly : TargetArch<["wasm32", "wasm64"]>;
 def TargetNVPTX : TargetArch<["nvptx", "nvptx64"]>;
+def TargetSw64 : TargetArch<["sw_64"]>;
 def TargetWindows : TargetSpec {
   let OSes = ["Win32"];
 }
@@ -889,6 +890,17 @@ def AVRSignal : InheritableAttr, TargetSpecificAttr<TargetAVR> {
   let Spellings = [GCC<"signal">];
   let Subjects = SubjectList<[Function]>;
   let Documentation = [AVRSignalDocs];
+}
+
+def Sw64Interrupt : InheritableAttr, TargetSpecificAttr<TargetSw64> {
+  let Spellings = [GCC<"interrupt">];
+  let Subjects = SubjectList<[Function]>;
+  let Args = [EnumArgument<"Interrupt", "InterruptType",
+                           ["user", "supervisor", "machine"],
+                           ["user", "supervisor", "machine"],
+                           1>];
+  let ParseKind = "Interrupt";
+  let Documentation = [Sw64InterruptDocs];
 }
 
 def AsmLabel : InheritableAttr {

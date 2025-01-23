@@ -88,6 +88,9 @@ ITANIUM_CXXABI(GenericAArch64, "aarch64")
 ///   - representation of member function pointers adjusted as in ARM.
 ITANIUM_CXXABI(GenericMIPS, "mips")
 
+/// The generic Sw64 ABI is a modified version of the Itanium ABI.
+ITANIUM_CXXABI(GenericSW64, "sw_64")
+
 /// The WebAssembly ABI is a modified version of the Itanium ABI.
 ///
 /// The changes from the Itanium ABI are:

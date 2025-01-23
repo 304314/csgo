@@ -2008,6 +2008,8 @@ bool Sema::CheckTSBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
   case llvm::Triple::mips64:
   case llvm::Triple::mips64el:
     return CheckMipsBuiltinFunctionCall(TI, BuiltinID, TheCall);
+  case llvm::Triple::sw_64:
+    return CheckSw64BuiltinFunctionCall(BuiltinID, TheCall);
   case llvm::Triple::systemz:
     return CheckSystemZBuiltinFunctionCall(BuiltinID, TheCall);
   case llvm::Triple::x86:
@@ -5797,6 +5799,140 @@ bool Sema::CheckSystemZBuiltinFunctionCall(unsigned BuiltinID,
   case SystemZ::BI__builtin_s390_vcrnfs: i = 2; l = 0; u = 15; break;
   }
   return SemaBuiltinConstantArgRange(TheCall, i, l, u);
+}
+
+bool Sema::CheckSw64VectorMemoryIntr(unsigned BuiltinID, CallExpr *TheCall) {
+  DeclRefExpr *DRE =
+      cast<DeclRefExpr>(TheCall->getCallee()->IgnoreParenCasts());
+  if (BuiltinID == Sw64::BI__builtin_sw_vload ||
+      BuiltinID == Sw64::BI__builtin_sw_vloadu ||
+      BuiltinID == Sw64::BI__builtin_sw_vload_u ||
+      BuiltinID == Sw64::BI__builtin_sw_vloade ||
+      BuiltinID == Sw64::BI__builtin_sw_vloadnc ||
+      BuiltinID == Sw64::BI__builtin_sw_vstore ||
+      BuiltinID == Sw64::BI__builtin_sw_vstoreu ||
+      BuiltinID == Sw64::BI__builtin_sw_vstore_u ||
+      BuiltinID == Sw64::BI__builtin_sw_vstoreuh ||
+      BuiltinID == Sw64::BI__builtin_sw_vstoreul ||
+      BuiltinID == Sw64::BI__builtin_sw_vstorenc) {
+
+    bool isLoad = BuiltinID == Sw64::BI__builtin_sw_vload ||
+                  BuiltinID == Sw64::BI__builtin_sw_vloadu ||
+                  BuiltinID == Sw64::BI__builtin_sw_vload_u ||
+                  BuiltinID == Sw64::BI__builtin_sw_vloade ||
+                  BuiltinID == Sw64::BI__builtin_sw_vloadnc;
+
+    bool isLoadExt = BuiltinID == Sw64::BI__builtin_sw_vloade;
+
+    bool isExtMem = BuiltinID == Sw64::BI__builtin_sw_vloadu ||
+                    BuiltinID == Sw64::BI__builtin_sw_vload_u ||
+                    BuiltinID == Sw64::BI__builtin_sw_vloade ||
+                    BuiltinID == Sw64::BI__builtin_sw_vstoreu ||
+                    BuiltinID == Sw64::BI__builtin_sw_vstore_u ||
+                    BuiltinID == Sw64::BI__builtin_sw_vstoreuh ||
+                    BuiltinID == Sw64::BI__builtin_sw_vstoreul;
+
+    if (checkArgCount(*this, TheCall, isLoad ? 1 : 2))
+      return true;
+
+    Expr *PointerArg = TheCall->getArg(isLoad ? 0 : 1);
+    ExprResult PointerArgRes = DefaultFunctionArrayLvalueConversion(PointerArg);
+    if (PointerArgRes.isInvalid())
+      return true;
+    PointerArg = PointerArgRes.get();
+    TheCall->setArg(isLoad ? 0 : 1, PointerArg);
+
+    const PointerType *pointerType =
+        PointerArg->getType()->getAs<PointerType>();
+    QualType ValType = pointerType->getPointeeType();
+    QualType VecTy;
+    bool isVoidPtr = pointerType->isVoidPointerType();
+    if (isExtMem) {
+      if (Context.getTypeSize(ValType) < 32 && !isVoidPtr) {
+        Diag(DRE->getBeginLoc(), diag::err_invalid_sw64_type_code);
+        return true;
+      }
+    }
+
+    if (ValType->isFloatingType() &&
+        (BuiltinID == Sw64::BI__builtin_sw_vloadnc)) {
+      if (Context.getTypeSize(ValType) <= 32) {
+        Diag(DRE->getBeginLoc(), diag::err_invalid_sw64_type_code);
+        return true;
+      }
+    }
+
+    // if Buitlin is Store, it has noreturn, do noting.
+    if (!isLoad)
+      return false;
+
+    if (ValType->isIntegerType())
+      VecTy =
+          Context.getExtVectorType(ValType, 256 / Context.getTypeSize(ValType));
+    else {
+      assert(ValType->isFloatingType() &&
+             "Builtin Value should be Integer or Floating type!");
+      VecTy = Context.getExtVectorType(ValType, 4);
+    }
+    if (isLoad) {
+      TheCall->setType(VecTy);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Sema::CheckSw64VectorShift(unsigned BuiltinID, CallExpr *TheCall) {
+  DeclRefExpr *DRE =
+      cast<DeclRefExpr>(TheCall->getCallee()->IgnoreParenCasts());
+  if (BuiltinID == Sw64::BI__builtin_sw_vsll ||
+      BuiltinID == Sw64::BI__builtin_sw_vsrl ||
+      BuiltinID == Sw64::BI__builtin_sw_vsra ||
+      BuiltinID == Sw64::BI__builtin_sw_vrol) {
+    Expr *ShiftArg = TheCall->getArg(0);
+    Expr *ShiftImm = TheCall->getArg(1);
+    QualType ValType = ShiftArg->getType();
+    QualType Imm = ShiftImm->getType();
+
+    if (checkArgCount(*this, TheCall, 2))
+      return true;
+
+    if (ValType->isFloatingType() ||
+        !(ValType->isVectorType() && Imm->isIntegerType())) {
+      Diag(DRE->getBeginLoc(), diag::err_invalid_sw64_type_code);
+      return true;
+    }
+
+    TheCall->setType(ValType);
+    return false;
+  }
+  return true;
+}
+
+bool Sema::CheckSw64BuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
+  DeclRefExpr *DRE =
+      cast<DeclRefExpr>(TheCall->getCallee()->IgnoreParenCasts());
+  switch (BuiltinID) {
+  case Sw64::BI__builtin_sw_vload:
+  case Sw64::BI__builtin_sw_vloadu:
+  case Sw64::BI__builtin_sw_vload_u:
+  case Sw64::BI__builtin_sw_vloade:
+  case Sw64::BI__builtin_sw_vloadnc:
+  case Sw64::BI__builtin_sw_vstore:
+  case Sw64::BI__builtin_sw_vstoreu:
+  case Sw64::BI__builtin_sw_vstore_u:
+  case Sw64::BI__builtin_sw_vstoreuh:
+  case Sw64::BI__builtin_sw_vstoreul:
+  case Sw64::BI__builtin_sw_vstorenc:
+    return CheckSw64VectorMemoryIntr(BuiltinID, TheCall);
+  case Sw64::BI__builtin_sw_vsll:
+  case Sw64::BI__builtin_sw_vsrl:
+  case Sw64::BI__builtin_sw_vsra:
+  case Sw64::BI__builtin_sw_vrol:
+    return CheckSw64VectorShift(BuiltinID, TheCall);
+  }
+
+  return false;
 }
 
 bool Sema::CheckWebAssemblyBuiltinFunctionCall(const TargetInfo &TI,

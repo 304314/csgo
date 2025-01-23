@@ -103,6 +103,9 @@ public:
     case GenericMIPS:
       return T.isMIPS();
 
+    case GenericSW64:
+      return T.isSw64();
+
     case WebAssembly:
       return T.isWasm();
 
@@ -165,6 +168,7 @@ public:
     case GenericARM:
     case GenericAArch64:
     case GenericMIPS:
+    case GenericSW64:
       // TODO: ARM-style pointers to member functions put the discriminator in
       //       the this adjustment, so they don't require functions to have any
       //       special alignment and could therefore also return false.
@@ -249,6 +253,7 @@ public:
     case iOS:   // old iOS compilers did not follow this rule
     case Microsoft:
     case GenericMIPS:
+    case GenericSW64:
     case XL:
       return true;
     }
@@ -287,6 +292,7 @@ public:
     case GenericARM:
     case iOS:
     case GenericMIPS:
+    case GenericSW64:
     case XL:
       return UseTailPaddingUnlessPOD03;
 

@@ -11909,4 +11909,8 @@ def err_wasm_builtin_arg_must_match_table_element_type : Error <
   "%ordinal0 argument must match the element type of the WebAssembly table in the %ordinal1 argument">;
 def err_wasm_builtin_arg_must_be_integer_type : Error <
   "%ordinal0 argument must be an integer">;
+
+// Sw64-specific Diagnostics
+def err_invalid_sw64_type_code : Error<
+  "incompatible type for this __builtin_sw64 function">;
 } // end of sema component.

@@ -7744,6 +7744,19 @@ handleWebAssemblyImportNameAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   FD->addAttr(::new (S.Context) WebAssemblyImportNameAttr(S.Context, AL, Str));
 }
 
+static void handleSw64InterruptAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
+	if (!isFunctionOrMethod(D)) {
+    S.Diag(D->getLocation(), diag::warn_attribute_wrong_decl_type)
+        << AL << AL.isRegularKeywordAttribute() << ExpectedFunction;
+    return;
+  }
+
+  if (!AL.checkExactlyNumArgs(S, 0))
+    return;
+
+  handleSimpleAttribute<Sw64InterruptAttr>(S, D, AL);
+}
+
 static void handleRISCVInterruptAttr(Sema &S, Decl *D,
                                      const ParsedAttr &AL) {
   // Warn about repeated attributes.
@@ -7825,6 +7838,9 @@ static void handleInterruptAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
     handleRISCVInterruptAttr(S, D, AL);
+    break;
+  case llvm::Triple::sw_64:
+    handleSw64InterruptAttr(S, D, AL);
     break;
   default:
     handleARMInterruptAttr(S, D, AL);

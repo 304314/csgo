@@ -49,6 +49,7 @@
 #include "ToolChains/RISCVToolchain.h"
 #include "ToolChains/SPIRV.h"
 #include "ToolChains/Solaris.h"
+#include "ToolChains/Sw64Toolchain.h"
 #include "ToolChains/TCE.h"
 #include "ToolChains/VEToolchain.h"
 #include "ToolChains/WebAssembly.h"
@@ -6496,6 +6497,9 @@ const ToolChain &Driver::getToolChain(const ArgList &Args,
         break;
       case llvm::Triple::csky:
         TC = std::make_unique<toolchains::CSKYToolChain>(*this, Target, Args);
+        break;
+      case llvm::Triple::sw_64:
+        TC = std::make_unique<toolchains::Sw64Toolchain>(*this, Target, Args);
         break;
       default:
         if (Target.getVendor() == llvm::Triple::Myriad)
