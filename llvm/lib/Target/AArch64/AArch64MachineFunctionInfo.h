@@ -192,8 +192,6 @@ class AArch64FunctionInfo final : public MachineFunctionInfo {
   /// True if the function need asynchronous unwind information.
   mutable std::optional<bool> NeedsAsyncDwarfUnwindInfo;
 
-  int64_t StackProbeSize = 0;
-
 public:
   AArch64FunctionInfo(const Function &F, const AArch64Subtarget *STI);
 
@@ -448,10 +446,6 @@ public:
 
   bool needsDwarfUnwindInfo(const MachineFunction &MF) const;
   bool needsAsyncDwarfUnwindInfo(const MachineFunction &MF) const;
-
-  bool hasStackProbing() const { return StackProbeSize != 0; }
-
-  int64_t getStackProbeSize() const { return StackProbeSize; }
 
 private:
   // Hold the lists of LOHs.
