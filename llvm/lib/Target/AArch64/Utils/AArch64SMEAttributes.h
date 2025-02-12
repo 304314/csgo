@@ -94,7 +94,7 @@ public:
     return State == StateValue::In || State == StateValue::Out ||
            State == StateValue::InOut || State == StateValue::Preserved;
   }
-  bool hasSharedZAInterface() const { return sharesZA() || sharesZT0(); }
+  bool hasSharedZAInterface() const { return sharesZA(); }
   bool hasPrivateZAInterface() const { return !hasSharedZAInterface(); }
   bool hasZAState() const { return isNewZA() || sharesZA(); }
   bool requiresLazySave(const SMEAttrs &Callee) const {

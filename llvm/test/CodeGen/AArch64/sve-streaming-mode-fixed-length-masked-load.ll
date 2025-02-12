@@ -340,12 +340,12 @@ define <3 x i32> @masked_load_zext_v3i32(ptr %load_ptr, <3 x i1> %pm) {
 ; CHECK:       // %bb.0:
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
-; CHECK-NEXT:    strh w3, [sp, #12]
 ; CHECK-NEXT:    adrp x8, .LCPI13_0
-; CHECK-NEXT:    ptrue p0.s, vl4
+; CHECK-NEXT:    strh w3, [sp, #12]
 ; CHECK-NEXT:    strh w2, [sp, #10]
-; CHECK-NEXT:    ldr d0, [x8, :lo12:.LCPI13_0]
+; CHECK-NEXT:    ptrue p0.s, vl4
 ; CHECK-NEXT:    strh w1, [sp, #8]
+; CHECK-NEXT:    ldr d0, [x8, :lo12:.LCPI13_0]
 ; CHECK-NEXT:    ldr d1, [sp, #8]
 ; CHECK-NEXT:    and z0.d, z1.d, z0.d
 ; CHECK-NEXT:    lsl z0.h, z0.h, #15
@@ -366,12 +366,12 @@ define <3 x i32> @masked_load_sext_v3i32(ptr %load_ptr, <3 x i1> %pm) {
 ; CHECK:       // %bb.0:
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    .cfi_def_cfa_offset 16
-; CHECK-NEXT:    strh w3, [sp, #12]
 ; CHECK-NEXT:    adrp x8, .LCPI14_0
-; CHECK-NEXT:    ptrue p0.s, vl4
+; CHECK-NEXT:    strh w3, [sp, #12]
 ; CHECK-NEXT:    strh w2, [sp, #10]
-; CHECK-NEXT:    ldr d0, [x8, :lo12:.LCPI14_0]
+; CHECK-NEXT:    ptrue p0.s, vl4
 ; CHECK-NEXT:    strh w1, [sp, #8]
+; CHECK-NEXT:    ldr d0, [x8, :lo12:.LCPI14_0]
 ; CHECK-NEXT:    ldr d1, [sp, #8]
 ; CHECK-NEXT:    and z0.d, z1.d, z0.d
 ; CHECK-NEXT:    lsl z0.h, z0.h, #15

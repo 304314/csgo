@@ -139,13 +139,6 @@ bool SMEABI::updateNewStateFunctions(Module *M, Function *F,
                        Builder.getInt32(0xff));
   }
 
-  if (FnAttrs.isNewZT0()) {
-    Function *ClearZT0Intr =
-        Intrinsic::getDeclaration(M, Intrinsic::aarch64_sme_zero_zt);
-    Builder.CreateCall(ClearZT0Intr->getFunctionType(), ClearZT0Intr,
-                       {Builder.getInt32(0)});
-  }
-
   if (FnAttrs.hasPrivateZAInterface()) {
     // Before returning, disable pstate.za
     for (BasicBlock &BB : *F) {
@@ -173,7 +166,7 @@ bool SMEABI::runOnFunction(Function &F) {
 
   bool Changed = false;
   SMEAttrs FnAttrs(F);
-  if (FnAttrs.isNewZA() || FnAttrs.isNewZT0())
+  if (FnAttrs.isNewZA())
     Changed |= updateNewStateFunctions(M, &F, Builder, FnAttrs);
 
   return Changed;

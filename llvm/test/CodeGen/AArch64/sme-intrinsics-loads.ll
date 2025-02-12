@@ -352,14 +352,14 @@ entry:
 define void @ldr_with_off_many_imm_15_18(i32 %tile_slice, ptr %ptr) {
 ; CHECK-LABEL: ldr_with_off_many_imm_15_18:
 ; CHECK:       // %bb.0: // %entry
-; CHECK-NEXT:    rdsvl x8, #1
 ; CHECK-NEXT:    mov w12, w0
+; CHECK-NEXT:    rdsvl x8, #1
 ; CHECK-NEXT:    add x8, x1, x8, lsl #4
+; CHECK-NEXT:    add w13, w0, #16
 ; CHECK-NEXT:    ldr za[w12, 15], [x1, #15, mul vl]
-; CHECK-NEXT:    add w12, w0, #16
-; CHECK-NEXT:    ldr za[w12, 0], [x8]
-; CHECK-NEXT:    ldr za[w12, 1], [x8, #1, mul vl]
-; CHECK-NEXT:    ldr za[w12, 2], [x8, #2, mul vl]
+; CHECK-NEXT:    ldr za[w13, 0], [x8]
+; CHECK-NEXT:    ldr za[w13, 1], [x8, #1, mul vl]
+; CHECK-NEXT:    ldr za[w13, 2], [x8, #2, mul vl]
 ; CHECK-NEXT:    ret
 entry:
   tail call void @llvm.aarch64.sme.ldr(i32 %tile_slice, ptr %ptr, i32 15)
@@ -395,11 +395,11 @@ define void @ldr_with_off_many_imm_31_34(i32 %tile_slice, ptr %ptr) {
 ; CHECK-NEXT:    add w12, w0, #16
 ; CHECK-NEXT:    add x9, x1, x8, lsl #4
 ; CHECK-NEXT:    add x8, x1, x8, lsl #5
+; CHECK-NEXT:    add w13, w0, #32
 ; CHECK-NEXT:    ldr za[w12, 15], [x9, #15, mul vl]
-; CHECK-NEXT:    add w12, w0, #32
-; CHECK-NEXT:    ldr za[w12, 0], [x8]
-; CHECK-NEXT:    ldr za[w12, 1], [x8, #1, mul vl]
-; CHECK-NEXT:    ldr za[w12, 2], [x8, #2, mul vl]
+; CHECK-NEXT:    ldr za[w13, 0], [x8]
+; CHECK-NEXT:    ldr za[w13, 1], [x8, #1, mul vl]
+; CHECK-NEXT:    ldr za[w13, 2], [x8, #2, mul vl]
 ; CHECK-NEXT:    ret
 entry:
   tail call void @llvm.aarch64.sme.ldr(i32 %tile_slice, ptr %ptr, i32 31)
