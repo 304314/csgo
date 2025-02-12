@@ -194,8 +194,6 @@ class AArch64FunctionInfo final : public MachineFunctionInfo {
   /// True if the function need asynchronous unwind information.
   mutable std::optional<bool> NeedsAsyncDwarfUnwindInfo;
 
-  int64_t StackProbeSize = 0;
-
   // Holds a register containing pstate.sm. This is set
   // on function entry to record the initial pstate of a function.
   Register PStateSMReg = MCRegister::NoRegister;
@@ -458,9 +456,6 @@ public:
   bool needsDwarfUnwindInfo(const MachineFunction &MF) const;
   bool needsAsyncDwarfUnwindInfo(const MachineFunction &MF) const;
 
-  bool hasStackProbing() const { return StackProbeSize != 0; }
-
-  int64_t getStackProbeSize() const { return StackProbeSize; }
   bool hasStreamingModeChanges() const { return HasStreamingModeChanges; }
   void setHasStreamingModeChanges(bool HasChanges) {
     HasStreamingModeChanges = HasChanges;
