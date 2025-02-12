@@ -772,6 +772,7 @@ include "AArch64SchedA64FX.td"
 include "AArch64SchedThunderX3T110.td"
 include "AArch64SchedTSV110.td"
 include "AArch64SchedHIP09.td"
+include "AArch64SchedHIP10C.td"
 include "AArch64SchedAmpere1.td"
 include "AArch64SchedNeoverseN1.td"
 include "AArch64SchedNeoverseN2.td"
@@ -1526,8 +1527,7 @@ def : ProcessorModel<"tsv110", TSV110Model, ProcessorFeatures.TSV110,
                      [TuneTSV110]>;
 def : ProcessorModel<"hip09", HIP09Model, ProcessorFeatures.HIP09,
                      [TuneHIP09]>;
-// FIXME: Hisilicon HIP10C is currently modeled as a Cortex-A57
-def : ProcessorModel<"hip10c", CortexA57Model, ProcessorFeatures.HIP10C,
+def : ProcessorModel<"hip10c", HIP10CModel, ProcessorFeatures.HIP10C,
                      [TuneHIP10C]>;
 // FIXME: Hisilicon HIP11 is currently modeled as a Cortex-A57.
 def : ProcessorModel<"hip11", CortexA57Model, ProcessorFeatures.HIP11,
