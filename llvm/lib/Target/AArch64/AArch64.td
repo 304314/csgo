@@ -726,7 +726,7 @@ def FeatureHardenSlsNoComdat : SubtargetFeature<"harden-sls-nocomdat",
 
 class AArch64Unsupported { list<Predicate> F; }
 
-let F = [HasSVE2p1, HasSVE2p1_or_HasSME2, HasSVE2p1_or_HasSME2p1] in
+let F = [HasSVE2p1, HasSVE2p1_or_HasSME2, HasSVE2p1_or_HasSME2p1, HasSVE2p1_or_HasSME] in
 def SVE2p1Unsupported : AArch64Unsupported;
 
 def SVE2Unsupported : AArch64Unsupported {
@@ -749,7 +749,8 @@ def SME2Unsupported : AArch64Unsupported {
 }
 
 def SMEUnsupported : AArch64Unsupported {
-  let F = !listconcat([HasSME, HasSMEI16I64, HasSMEF16F16, HasSMEF64F64, HasSMEFA64],
+  let F = !listconcat([HasSME, HasSMEI16I64, HasSMEF16F16, HasSMEF64F64, HasSMEFA64,
+                       HasSVE2p1_or_HasSME],
                       SME2Unsupported.F);
 }
 
@@ -773,6 +774,7 @@ include "AArch64SchedThunderX3T110.td"
 include "AArch64SchedTSV110.td"
 include "AArch64SchedHIP09.td"
 include "AArch64SchedHIP10C.td"
+include "AArch64SchedHIP11.td"
 include "AArch64SchedAmpere1.td"
 include "AArch64SchedNeoverseN1.td"
 include "AArch64SchedNeoverseN2.td"
@@ -1529,8 +1531,7 @@ def : ProcessorModel<"hip09", HIP09Model, ProcessorFeatures.HIP09,
                      [TuneHIP09]>;
 def : ProcessorModel<"hip10c", HIP10CModel, ProcessorFeatures.HIP10C,
                      [TuneHIP10C]>;
-// FIXME: Hisilicon HIP11 is currently modeled as a Cortex-A57.
-def : ProcessorModel<"hip11", CortexA57Model, ProcessorFeatures.HIP11,
+def : ProcessorModel<"hip11", HIP11Model, ProcessorFeatures.HIP11,
                      [TuneHIP11]>;
 
 // Support cyclone as an alias for apple-a7 so we can still LTO old bitcode.
