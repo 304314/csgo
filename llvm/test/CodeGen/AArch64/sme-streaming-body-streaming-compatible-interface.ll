@@ -27,11 +27,11 @@ define float @sm_body_sm_compatible_simple() "aarch64_pstate_sm_compatible" "aar
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:  .LBB0_4:
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr s0, [sp, #12] // 4-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x30, [sp, #80] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr s0, [sp, #12] // 4-byte Folded Reload
+; CHECK-NEXT:    ldr x30, [sp, #80] // 8-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   ret float zeroinitializer

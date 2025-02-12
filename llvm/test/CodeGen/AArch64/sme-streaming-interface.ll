@@ -396,7 +396,7 @@ entry:
   ret i8 %vecext
 }
 
-define void @call_to_non_streaming_pass_args(ptr nocapture noundef readnone %ptr, i64 %long1, i64 %long2, i32 %int1, i32 %int2, float %float1, float %float2, double %double1, double %double2) #0 {
+define void @call_to_non_streaming_pass_args(ptr nocapture noundef readnone %ptr, i64 %long1, i64 %long2, i32 %int1, i32 %int2, float %float1, float %float2, double %double1, double %double2) #1 {
 ; CHECK-LABEL: call_to_non_streaming_pass_args:
 ; CHECK:       // %bb.0: // %entry
 ; CHECK-NEXT:    sub sp, sp, #112
@@ -408,15 +408,15 @@ define void @call_to_non_streaming_pass_args(ptr nocapture noundef readnone %ptr
 ; CHECK-NEXT:    stp s1, s0, [sp, #24] // 8-byte Folded Spill
 ; CHECK-NEXT:    stp d3, d2, [sp, #8] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstop sm
-; CHECK-NEXT:    ldp s1, s0, [sp, #24] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d3, d2, [sp, #8] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp s1, s0, [sp, #24] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl bar
 ; CHECK-NEXT:    smstart sm
 ; CHECK-NEXT:    ldp d9, d8, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x30, [sp, #96] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #32] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x30, [sp, #96] // 8-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #112
 ; CHECK-NEXT:    ret
 entry:

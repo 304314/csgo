@@ -466,22 +466,24 @@ define void @call_to_non_streaming_pass_args(ptr nocapture noundef readnone %ptr
 ; CHECK-NEXT:    .cfi_offset b15, -80
 ; CHECK-NEXT:    stp d2, d3, [sp, #16] // 16-byte Folded Spill
 ; CHECK-NEXT:    mov x8, x1
-; CHECK-NEXT:    mov x9, x0
 ; CHECK-NEXT:    stp s0, s1, [sp, #8] // 8-byte Folded Spill
+; CHECK-NEXT:    mov x9, x0
 ; CHECK-NEXT:    bl __arm_sme_state
-; CHECK-NEXT:    ldp s4, s0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ldr s4, [sp, #8] // 4-byte Folded Reload
 ; CHECK-NEXT:    and x19, x0, #0x1
+; CHECK-NEXT:    ldr s0, [sp, #12] // 4-byte Folded Reload
 ; CHECK-NEXT:    stp s4, s0, [sp, #8] // 8-byte Folded Spill
-; CHECK-NEXT:    ldp d4, d0, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr d4, [sp, #16] // 8-byte Folded Reload
+; CHECK-NEXT:    ldr d0, [sp, #24] // 8-byte Folded Reload
 ; CHECK-NEXT:    stp d4, d0, [sp, #16] // 16-byte Folded Spill
 ; CHECK-NEXT:    tbz w19, #0, .LBB10_2
 ; CHECK-NEXT:  // %bb.1: // %entry
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:  .LBB10_2: // %entry
-; CHECK-NEXT:    ldp s0, s1, [sp, #8] // 8-byte Folded Reload
-; CHECK-NEXT:    mov x0, x9
 ; CHECK-NEXT:    ldp d2, d3, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    mov x0, x9
 ; CHECK-NEXT:    mov x1, x8
+; CHECK-NEXT:    ldp s0, s1, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl bar
 ; CHECK-NEXT:    tbz w19, #0, .LBB10_4
 ; CHECK-NEXT:  // %bb.3: // %entry

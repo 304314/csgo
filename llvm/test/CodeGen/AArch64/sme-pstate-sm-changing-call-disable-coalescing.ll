@@ -28,15 +28,15 @@ define void @dont_coalesce_arg_i8(i8 %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl use_i8
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    ldr z0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = insertelement <vscale x 16 x i8> poison, i8 %arg, i32 0
@@ -61,15 +61,15 @@ define void @dont_coalesce_arg_i16(i16 %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl use_i16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr z0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = insertelement <vscale x 8 x i16> poison, i16 %arg, i32 0
@@ -94,15 +94,15 @@ define void @dont_coalesce_arg_i32(i32 %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl use_i32
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr z0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = insertelement <vscale x 4 x i32> poison, i32 %arg, i32 0
@@ -127,15 +127,15 @@ define void @dont_coalesce_arg_i64(i64 %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl use_i64
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr z0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = insertelement <vscale x 2 x i64> poison, i64 %arg, i32 0
@@ -155,8 +155,8 @@ define void @dont_coalesce_arg_f16(half %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $h0 killed $h0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $h0 killed $h0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $h0 killed $h0 killed $z0
@@ -165,17 +165,17 @@ define void @dont_coalesce_arg_f16(half %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr h0, [sp, #14] // 2-byte Folded Reload
 ; CHECK-NEXT:    bl use_f16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = insertelement <vscale x 8 x half> poison, half %arg, i32 0
@@ -195,8 +195,8 @@ define void @dont_coalesce_arg_f32(float %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $s0 killed $s0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $s0 killed $s0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $s0 killed $s0 killed $z0
@@ -205,17 +205,17 @@ define void @dont_coalesce_arg_f32(float %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr s0, [sp, #12] // 4-byte Folded Reload
 ; CHECK-NEXT:    bl use_f32
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = insertelement <vscale x 4 x float> poison, float %arg, i32 0
@@ -235,8 +235,8 @@ define void @dont_coalesce_arg_f64(double %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
@@ -245,17 +245,17 @@ define void @dont_coalesce_arg_f64(double %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_f64
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = insertelement <vscale x 2 x double> poison, double %arg, i32 0
@@ -280,8 +280,8 @@ define void @dont_coalesce_arg_v1i8(<1 x i8> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
@@ -290,17 +290,17 @@ define void @dont_coalesce_arg_v1i8(<1 x i8> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_v16i8
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %elt = extractelement <1 x i8> %arg, i32 0
@@ -321,8 +321,8 @@ define void @dont_coalesce_arg_v1i16(<1 x i16> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
@@ -331,17 +331,17 @@ define void @dont_coalesce_arg_v1i16(<1 x i16> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_v8i16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %elt = extractelement <1 x i16> %arg, i32 0
@@ -362,8 +362,8 @@ define void @dont_coalesce_arg_v1i32(<1 x i32> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
@@ -372,17 +372,17 @@ define void @dont_coalesce_arg_v1i32(<1 x i32> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_v4i32
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %elt = extractelement <1 x i32> %arg, i32 0
@@ -403,8 +403,8 @@ define void @dont_coalesce_arg_v1i64(<1 x i64> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
@@ -413,17 +413,17 @@ define void @dont_coalesce_arg_v1i64(<1 x i64> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_v2i64
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %elt = extractelement <1 x i64> %arg, i32 0
@@ -444,8 +444,8 @@ define void @dont_coalesce_arg_v1f16(<1 x half> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $h0 killed $h0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $h0 killed $h0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $h0 killed $h0 killed $z0
@@ -454,17 +454,17 @@ define void @dont_coalesce_arg_v1f16(<1 x half> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr h0, [sp, #14] // 2-byte Folded Reload
 ; CHECK-NEXT:    bl use_v8f16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %elt = extractelement <1 x half> %arg, i32 0
@@ -485,8 +485,8 @@ define void @dont_coalesce_arg_v1f32(<1 x float> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
@@ -495,17 +495,17 @@ define void @dont_coalesce_arg_v1f32(<1 x float> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_v4f32
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %elt = extractelement <1 x float> %arg, i32 0
@@ -526,8 +526,8 @@ define void @dont_coalesce_arg_v1f64(<1 x double> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
@@ -536,17 +536,17 @@ define void @dont_coalesce_arg_v1f64(<1 x double> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_v2f64
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %elt = extractelement <1 x double> %arg, i32 0
@@ -571,8 +571,8 @@ define void @dont_coalesce_arg_v16i8(<16 x i8> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -581,17 +581,17 @@ define void @dont_coalesce_arg_v16i8(<16 x i8> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v16i8
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 16 x i8> @llvm.vector.insert.nxv16i8.v16i8(<vscale x 16 x i8> poison, <16 x i8> %arg, i64 0)
@@ -611,8 +611,8 @@ define void @dont_coalesce_arg_v8i16(<8 x i16> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -621,17 +621,17 @@ define void @dont_coalesce_arg_v8i16(<8 x i16> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v8i16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 8 x i16> @llvm.vector.insert.nxv8i16.v8i16(<vscale x 8 x i16> poison, <8 x i16> %arg, i64 0)
@@ -651,8 +651,8 @@ define void @dont_coalesce_arg_v4i32(<4 x i32> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -661,17 +661,17 @@ define void @dont_coalesce_arg_v4i32(<4 x i32> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v4i32
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 4 x i32> @llvm.vector.insert.nxv4i32.v4i32(<vscale x 4 x i32> poison, <4 x i32> %arg, i64 0)
@@ -691,8 +691,8 @@ define void @dont_coalesce_arg_v2i64(<2 x i64> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -701,17 +701,17 @@ define void @dont_coalesce_arg_v2i64(<2 x i64> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v2i64
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 2 x i64> @llvm.vector.insert.nxv2i64.v2i64(<vscale x 2 x i64> poison, <2 x i64> %arg, i64 0)
@@ -731,8 +731,8 @@ define void @dont_coalesce_arg_v8f16(<8 x half> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -741,17 +741,17 @@ define void @dont_coalesce_arg_v8f16(<8 x half> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v8f16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 8 x half> @llvm.vector.insert.nxv8f16.v8f16(<vscale x 8 x half> poison, <8 x half> %arg, i64 0)
@@ -771,8 +771,8 @@ define void @dont_coalesce_arg_v8bf16(<8 x bfloat> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -781,17 +781,17 @@ define void @dont_coalesce_arg_v8bf16(<8 x bfloat> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v8bf16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 8 x bfloat> @llvm.vector.insert.nxv8bf16.v8bf16(<vscale x 8 x bfloat> poison, <8 x bfloat> %arg, i64 0)
@@ -811,8 +811,8 @@ define void @dont_coalesce_arg_v4f32(<4 x float> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -821,17 +821,17 @@ define void @dont_coalesce_arg_v4f32(<4 x float> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v4f32
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 4 x float> @llvm.vector.insert.nxv4f32.v4f32(<vscale x 4 x float> poison, <4 x float> %arg, i64 0)
@@ -851,8 +851,8 @@ define void @dont_coalesce_arg_v2f64(<2 x double> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
 ; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str z0, [x8] // 16-byte Folded Spill
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 killed $z0
@@ -861,17 +861,17 @@ define void @dont_coalesce_arg_v2f64(<2 x double> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
 ; CHECK-NEXT:    bl use_v2f64
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    add x8, sp, #16
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr z0, [x8] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 2 x double> @llvm.vector.insert.nxv2f64.v2f64(<vscale x 2 x double> poison, <2 x double> %arg, i64 0)
@@ -894,16 +894,16 @@ define void @dont_coalesce_arg_v8i1(<8 x i1> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    stp x30, x19, [sp, #80] // 16-byte Folded Spill
 ; CHECK-NEXT:    sub sp, sp, #16
 ; CHECK-NEXT:    addvl sp, sp, #-1
-; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
 ; CHECK-NEXT:    mov z1.d, z0.d
 ; CHECK-NEXT:    add x8, sp, #16
-; CHECK-NEXT:    mov x19, x0
-; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
-; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
+; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    and z1.b, z1.b, #0x1
 ; CHECK-NEXT:    cmpne p0.b, p0/z, z1.b, #0
+; CHECK-NEXT:    mov x19, x0
 ; CHECK-NEXT:    str p0, [x8, #7, mul vl] // 2-byte Folded Spill
+; CHECK-NEXT:    // kill: def $d0 killed $d0 killed $z0
+; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
 ; CHECK-NEXT:    bl use_v8i1
@@ -914,10 +914,10 @@ define void @dont_coalesce_arg_v8i1(<8 x i1> %arg, ptr %ptr) #0 {
 ; CHECK-NEXT:    addvl sp, sp, #1
 ; CHECK-NEXT:    add sp, sp, #16
 ; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
-; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
+; CHECK-NEXT:    ldr x29, [sp, #64] // 8-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #96 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %vec = call <vscale x 16 x i1> @llvm.vector.insert.nxv8i1.v8i1(<vscale x 16 x i1> poison, <8 x i1> %arg, i64 0)
@@ -942,13 +942,13 @@ define void @dont_coalesce_res_i8(ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl get_i8
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    fmov s0, w0
+; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
 ; CHECK-NEXT:    ldp x30, x19, [sp, #64] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #80 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %res = call i8 @get_i8()
@@ -969,13 +969,13 @@ define void @dont_coalesce_res_i16(ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl get_i16
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    fmov s0, w0
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
 ; CHECK-NEXT:    ldp x30, x19, [sp, #64] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #80 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %res = call i16 @get_i16()
@@ -996,13 +996,13 @@ define void @dont_coalesce_res_i32(ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl get_i32
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    fmov s0, w0
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
 ; CHECK-NEXT:    ldp x30, x19, [sp, #64] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #80 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %res = call i32 @get_i32()
@@ -1023,13 +1023,13 @@ define void @dont_coalesce_res_i64(ptr %ptr) #0 {
 ; CHECK-NEXT:    smstop sm
 ; CHECK-NEXT:    bl get_i64
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    fmov d0, x0
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldp d9, d8, [sp, #48] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
-; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
 ; CHECK-NEXT:    ldp x30, x19, [sp, #64] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d11, d10, [sp, #32] // 16-byte Folded Reload
+; CHECK-NEXT:    ldp d13, d12, [sp, #16] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp], #80 // 16-byte Folded Reload
 ; CHECK-NEXT:    ret
   %res = call i64 @get_i64()
@@ -1052,15 +1052,15 @@ define void @dont_coalesce_res_f16(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_f16
 ; CHECK-NEXT:    str h0, [sp, #14] // 2-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr h0, [sp, #14] // 2-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    // kill: def $h0 killed $h0 def $z0
+; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call half @get_f16()
@@ -1083,15 +1083,15 @@ define void @dont_coalesce_res_f32(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_f32
 ; CHECK-NEXT:    str s0, [sp, #12] // 4-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr s0, [sp, #12] // 4-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    // kill: def $s0 killed $s0 def $z0
+; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call float @get_f32()
@@ -1114,15 +1114,15 @@ define void @dont_coalesce_res_f64(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_f64
 ; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
+; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call double @get_f64()
@@ -1149,15 +1149,15 @@ define void @dont_coalesce_res_v1i8(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v1i8
 ; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
+; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <1 x i8> @get_v1i8()
@@ -1181,15 +1181,15 @@ define void @dont_coalesce_res_v1i16(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v1i16
 ; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
+; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <1 x i16> @get_v1i16()
@@ -1213,15 +1213,15 @@ define void @dont_coalesce_res_v1i32(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v1i32
 ; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
+; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <1 x i32> @get_v1i32()
@@ -1245,15 +1245,15 @@ define void @dont_coalesce_res_v1i64(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v1i64
 ; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
+; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <1 x i64> @get_v1i64()
@@ -1277,15 +1277,15 @@ define void @dont_coalesce_res_v1f16(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v1f16
 ; CHECK-NEXT:    str h0, [sp, #14] // 2-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr h0, [sp, #14] // 2-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    // kill: def $h0 killed $h0 def $z0
+; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <1 x half> @get_v1f16()
@@ -1309,15 +1309,15 @@ define void @dont_coalesce_res_v1f32(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v1f32
 ; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
+; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <1 x float> @get_v1f32()
@@ -1341,15 +1341,15 @@ define void @dont_coalesce_res_v1f64(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v1f64
 ; CHECK-NEXT:    str d0, [sp, #8] // 8-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr d0, [sp, #8] // 8-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    // kill: def $d0 killed $d0 def $z0
+; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <1 x double> @get_v1f64()
@@ -1377,15 +1377,15 @@ define void @dont_coalesce_res_v16i8(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v16i8
 ; CHECK-NEXT:    str q0, [sp] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.b
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
+; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1b { z0.b }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <16 x i8> @get_v16i8()
@@ -1408,15 +1408,15 @@ define void @dont_coalesce_res_v8i16(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v8i16
 ; CHECK-NEXT:    str q0, [sp] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
+; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <8 x i16> @get_v8i16()
@@ -1439,15 +1439,15 @@ define void @dont_coalesce_res_v4i32(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v4i32
 ; CHECK-NEXT:    str q0, [sp] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
+; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <4 x i32> @get_v4i32()
@@ -1470,15 +1470,15 @@ define void @dont_coalesce_res_v2i64(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v2i64
 ; CHECK-NEXT:    str q0, [sp] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
+; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <2 x i64> @get_v2i64()
@@ -1501,15 +1501,15 @@ define void @dont_coalesce_res_v8f16(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v8f16
 ; CHECK-NEXT:    str q0, [sp] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.h
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
+; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1h { z0.h }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <8 x half> @get_v8f16()
@@ -1532,15 +1532,15 @@ define void @dont_coalesce_res_v4f32(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v4f32
 ; CHECK-NEXT:    str q0, [sp] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.s
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
+; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1w { z0.s }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <4 x float> @get_v4f32()
@@ -1563,15 +1563,15 @@ define void @dont_coalesce_res_v2f64(ptr %ptr) #0 {
 ; CHECK-NEXT:    bl get_v2f64
 ; CHECK-NEXT:    str q0, [sp] // 16-byte Folded Spill
 ; CHECK-NEXT:    smstart sm
-; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    ldr q0, [sp] // 16-byte Folded Reload
+; CHECK-NEXT:    ptrue p0.d
 ; CHECK-NEXT:    // kill: def $q0 killed $q0 def $z0
+; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
+; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d9, d8, [sp, #64] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d11, d10, [sp, #48] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d13, d12, [sp, #32] // 16-byte Folded Reload
 ; CHECK-NEXT:    ldp d15, d14, [sp, #16] // 16-byte Folded Reload
-; CHECK-NEXT:    st1d { z0.d }, p0, [x19]
-; CHECK-NEXT:    ldp x30, x19, [sp, #80] // 16-byte Folded Reload
 ; CHECK-NEXT:    add sp, sp, #96
 ; CHECK-NEXT:    ret
   %res = call <2 x double> @get_v2f64()
@@ -1635,6 +1635,7 @@ declare <vscale x 4 x i32> @llvm.vector.insert.nxv4i32.v4i32(<vscale x 4 x i32>,
 declare <vscale x 2 x i64> @llvm.vector.insert.nxv2i64.v2i64(<vscale x 2 x i64>, <2 x i64>, i64)
 declare <vscale x 8 x half> @llvm.vector.insert.nxv8f16.v8f16(<vscale x 8 x half>, <8 x half>, i64)
 declare <vscale x 4 x float> @llvm.vector.insert.nxv4f32.v4f32(<vscale x 4 x float>, <4 x float>, i64)
+declare <vscale x 8 x bfloat> @llvm.vector.insert.nxv8bf16.v8bf16(<vscale x 8 x bfloat>, <8 x bfloat>, i64)
 declare <vscale x 2 x double> @llvm.vector.insert.nxv2f64.v2f64(<vscale x 2 x double>, <2 x double>, i64)
 
 attributes #0 = { nounwind "aarch64_pstate_sm_enabled" "target-features"="+sve,+sme"  }

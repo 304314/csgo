@@ -55,6 +55,8 @@ entry:
   ret i32 %res
 }
 
+declare i32 @llvm.vscale()
+
 define i32 @streaming_compatible_locally_streaming_callee() "aarch64_pstate_sm_compatible" "aarch64_pstate_sm_body" {
 ; CHECK-LABEL: define i32 @streaming_compatible_locally_streaming_callee
 ; CHECK-SAME: () #[[ATTR4:[0-9]+]] {
