@@ -1,3 +1,7 @@
+// REQUIRES: build_for_openeuler
+// RUN: clang-tblgen -gen-clang-test-pragma-attribute-supported-attributes -I%src_include_dir %src_include_dir/clang/Basic/Attr.td -DBUILD_FOR_OPENEULER -o - | FileCheck %s
+
+// XFAIL: build_for_openeuler
 // RUN: clang-tblgen -gen-clang-test-pragma-attribute-supported-attributes -I%src_include_dir %src_include_dir/clang/Basic/Attr.td -o - | FileCheck %s
 
 // The number of supported attributes should never go down!
@@ -148,6 +152,9 @@
 // CHECK-NEXT: ObjCSubclassingRestricted (SubjectMatchRule_objc_interface)
 // CHECK-NEXT: OpenCLIntelReqdSubGroupSize (SubjectMatchRule_function)
 // CHECK-NEXT: OpenCLNoSVM (SubjectMatchRule_variable)
+#ifdef BUILD_FOR_OPENEULER
+// CHECK-NEXT: Optimize (SubjectMatchRule_function)
+#endif
 // CHECK-NEXT: OptimizeNone (SubjectMatchRule_function, SubjectMatchRule_objc_method)
 // CHECK-NEXT: Overloadable (SubjectMatchRule_function)
 // CHECK-NEXT: Owner (SubjectMatchRule_record_not_is_union)

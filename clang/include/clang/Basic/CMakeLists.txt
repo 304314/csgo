@@ -50,6 +50,7 @@ clang_tablegen(AttrSubMatchRulesList.inc -gen-clang-attr-subject-match-rule-list
 
 clang_tablegen(AttrTokenKinds.inc -gen-clang-attr-token-kinds
   -I ${CMAKE_CURRENT_SOURCE_DIR}/../../
+  ${CLANG_BASIC_OPTIONS}
   SOURCE Attr.td
   TARGET ClangAttrTokenKinds
   )
