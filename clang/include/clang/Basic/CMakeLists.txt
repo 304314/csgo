@@ -5,6 +5,9 @@ endif()
 if(BUILD_FOR_OPENEULER)
   list(APPEND CLANG_BASIC_OPTIONS "-DBUILD_FOR_OPENEULER")
 endif()
+if(BUILD_FOR_OPENEULER)
+  list(APPEND CLANG_BASIC_OPTIONS "-DBUILD_FOR_OPENEULER")
+endif()
 
 macro(clang_diag_gen component)
   clang_tablegen(Diagnostic${component}Kinds.inc
@@ -50,6 +53,7 @@ clang_tablegen(AttrSubMatchRulesList.inc -gen-clang-attr-subject-match-rule-list
 
 clang_tablegen(AttrTokenKinds.inc -gen-clang-attr-token-kinds
   -I ${CMAKE_CURRENT_SOURCE_DIR}/../../
+  ${CLANG_BASIC_OPTIONS}
   SOURCE Attr.td
   TARGET ClangAttrTokenKinds
   )
