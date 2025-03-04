@@ -427,6 +427,7 @@ bool AArch64FrameLowering::canUseRedZone(const MachineFunction &MF) const {
 bool AArch64FrameLowering::hasFP(const MachineFunction &MF) const {
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   const TargetRegisterInfo *RegInfo = MF.getSubtarget().getRegisterInfo();
+
   // Win64 EH requires a frame pointer if funclets are present, as the locals
   // are accessed off the frame pointer in both the parent function and the
   // funclets.
@@ -2977,11 +2978,6 @@ bool AArch64FrameLowering::restoreCalleeSavedRegisters(
     return MIB->getIterator();
   };
 
-  // SVE objects are always restored in reverse order.
-  for (const RegPairInfo &RPI : reverse(RegPairs))
-    if (RPI.isScalable())
-      EmitMI(RPI);
-
   if (homogeneousPrologEpilog(MF, &MBB)) {
     auto MIB = BuildMI(MBB, MBBI, DL, TII.get(AArch64::HOM_Epilog))
                    .setMIFlag(MachineInstr::FrameDestroy);
@@ -2992,11 +2988,19 @@ bool AArch64FrameLowering::restoreCalleeSavedRegisters(
     return true;
   }
 
+  // For performance reasons restore SVE register in increasing order
+  auto IsPPR = [](const RegPairInfo &c) { return c.Type == RegPairInfo::PPR; };
+  auto PPRBegin = std::find_if(RegPairs.begin(), RegPairs.end(), IsPPR);
+  auto PPREnd = std::find_if_not(PPRBegin, RegPairs.end(), IsPPR);
+  std::reverse(PPRBegin, PPREnd);
+  auto IsZPR = [](const RegPairInfo &c) { return c.Type == RegPairInfo::ZPR; };
+  auto ZPRBegin = std::find_if(RegPairs.begin(), RegPairs.end(), IsZPR);
+  auto ZPREnd = std::find_if_not(ZPRBegin, RegPairs.end(), IsZPR);
+  std::reverse(ZPRBegin, ZPREnd);
+
   if (ReverseCSRRestoreSeq) {
     MachineBasicBlock::iterator First = MBB.end();
     for (const RegPairInfo &RPI : reverse(RegPairs)) {
-      if (RPI.isScalable())
-        continue;
       MachineBasicBlock::iterator It = EmitMI(RPI);
       if (First == MBB.end())
         First = It;
@@ -3005,8 +3009,6 @@ bool AArch64FrameLowering::restoreCalleeSavedRegisters(
       MBB.splice(MBBI, &MBB, First);
   } else {
     for (const RegPairInfo &RPI : RegPairs) {
-      if (RPI.isScalable())
-        continue;
       (void)EmitMI(RPI);
     }
   }
@@ -3252,6 +3254,12 @@ bool AArch64FrameLowering::assignCalleeSavedSpillSlots(
 bool AArch64FrameLowering::enableStackSlotScavenging(
     const MachineFunction &MF) const {
   const AArch64FunctionInfo *AFI = MF.getInfo<AArch64FunctionInfo>();
+  // If the function has streaming-mode changes, don't scavenge a
+  // spillslot in the callee-save area, as that might require an
+  // 'addvl' in the streaming-mode-changing call-sequence when the
+  // function doesn't use a FP.
+  if (AFI->hasStreamingModeChanges() && !hasFP(MF))
+    return false;
   return AFI->hasCalleeSaveStackFreeSpace();
 }
 

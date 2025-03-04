@@ -1000,10 +1000,12 @@ AArch64ExpandPseudo::expandCondSMToggle(MachineBasicBlock &MBB,
   // expected value for the callee (0 for a normal callee and 1 for a streaming
   // callee).
   auto PStateSM = MI.getOperand(2).getReg();
+  auto TRI = MBB.getParent()->getSubtarget().getRegisterInfo();
+  unsigned SMReg32 = TRI->getSubReg(PStateSM, AArch64::sub_32);
   bool IsStreamingCallee = MI.getOperand(3).getImm();
-  unsigned Opc = IsStreamingCallee ? AArch64::TBZX : AArch64::TBNZX;
+  unsigned Opc = IsStreamingCallee ? AArch64::TBZW : AArch64::TBNZW;
   MachineInstrBuilder Tbx =
-      BuildMI(MBB, MBBI, DL, TII->get(Opc)).addReg(PStateSM).addImm(0);
+      BuildMI(MBB, MBBI, DL, TII->get(Opc)).addReg(SMReg32).addImm(0);
 
   // Split MBB and create two new blocks:
   //  - MBB now contains all instructions before MSRcond_pstatesvcrImm1.
@@ -1481,17 +1483,12 @@ bool AArch64ExpandPseudo::expandMI(MachineBasicBlock &MBB,
        NextMBBI = MBB.end(); // The NextMBBI iterator is invalidated.
      return true;
    }
-   case AArch64::OBSCURE_COPY: {
-     if (MI.getOperand(0).getReg() != MI.getOperand(1).getReg()) {
-       BuildMI(MBB, MBBI, MI.getDebugLoc(), TII->get(AArch64::ORRXrs))
-           .add(MI.getOperand(0))
-           .addReg(AArch64::XZR)
-           .add(MI.getOperand(1))
-           .addImm(0);
-     }
+   case AArch64::COALESCER_BARRIER_FPR16:
+   case AArch64::COALESCER_BARRIER_FPR32:
+   case AArch64::COALESCER_BARRIER_FPR64:
+   case AArch64::COALESCER_BARRIER_FPR128:
      MI.eraseFromParent();
      return true;
-   }
   }
   return false;
 }
