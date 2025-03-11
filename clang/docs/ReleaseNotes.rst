@@ -160,6 +160,9 @@ Resolutions to C++ Defect Reports
   ``-Wdeprecated-literal-operator`` for the latter, off by default for now.
 
   .. code-block:: c++
+- Attributes now expect unevaluated strings in attributes parameters that are string literals.
+  This is applied to both C++ standard attributes, and other attributes supported by Clang.
+  This completes the implementation of `P2361R6 Unevaluated Strings <https://wg21.link/P2361R6>_`
 
     // What follows is warned by -Wuser-defined-literals
     // albeit "ill-formed, no diagnostic required".
@@ -934,6 +937,11 @@ Arm and AArch64 Support
 - Clang now emits ``-Wunsupported-abi`` if the hard-float ABI is specified
   and the selected processor lacks floating point registers.
   (`#55755 <https://github.com/llvm/llvm-project/issues/55755>`_)
+
+- New AArch64 asm constraints have been added for r8-r11(Uci) and r12-r15(Ucj).
+
+Android Support
+^^^^^^^^^^^^^^^
 
 - Clang builtin ``__arithmetic_fence`` and the command line option ``-fprotect-parens``
   are now enabled for AArch64.

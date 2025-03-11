@@ -185,12 +185,18 @@ class AArch64FunctionInfo final : public MachineFunctionInfo {
   /// The frame-index for the TPIDR2 object used for lazy saves.
   Register LazySaveTPIDR2Obj = 0;
 
+  /// Whether this function changes streaming mode within the function.
+  bool HasStreamingModeChanges = false;
 
   /// True if the function need unwind information.
   mutable std::optional<bool> NeedsDwarfUnwindInfo;
 
   /// True if the function need asynchronous unwind information.
   mutable std::optional<bool> NeedsAsyncDwarfUnwindInfo;
+
+  // Holds a register containing pstate.sm. This is set
+  // on function entry to record the initial pstate of a function.
+  Register PStateSMReg = MCRegister::NoRegister;
 
 public:
   AArch64FunctionInfo(const Function &F, const AArch64Subtarget *STI);
@@ -199,6 +205,9 @@ public:
   clone(BumpPtrAllocator &Allocator, MachineFunction &DestMF,
         const DenseMap<MachineBasicBlock *, MachineBasicBlock *> &Src2DstMBB)
       const override;
+
+  Register getPStateSMReg() const { return PStateSMReg; };
+  void setPStateSMReg(Register Reg) { PStateSMReg = Reg; };
 
   bool isSVECC() const { return IsSVECC; };
   void setIsSVECC(bool s) { IsSVECC = s; };
@@ -446,6 +455,11 @@ public:
 
   bool needsDwarfUnwindInfo(const MachineFunction &MF) const;
   bool needsAsyncDwarfUnwindInfo(const MachineFunction &MF) const;
+
+  bool hasStreamingModeChanges() const { return HasStreamingModeChanges; }
+  void setHasStreamingModeChanges(bool HasChanges) {
+    HasStreamingModeChanges = HasChanges;
+  }
 
 private:
   // Hold the lists of LOHs.

@@ -2893,28 +2893,26 @@ static QualType getNeonEltType(NeonTypeFlags Flags, ASTContext &Context,
   llvm_unreachable("Invalid NeonTypeFlag!");
 }
 
-bool Sema::CheckSVEBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
-  // Range check SVE intrinsics that take immediate values.
-  SmallVector<std::tuple<int,int,int>, 3> ImmChecks;
+enum ArmStreamingType { ArmNonStreaming, ArmStreaming, ArmStreamingCompatible };
 
-  switch (BuiltinID) {
-  default:
-    return false;
-#define GET_SVE_IMMEDIATE_CHECK
-#include "clang/Basic/arm_sve_sema_rangechecks.inc"
-#undef GET_SVE_IMMEDIATE_CHECK
-#define GET_SME_IMMEDIATE_CHECK
-#include "clang/Basic/arm_sme_sema_rangechecks.inc"
-#undef GET_SME_IMMEDIATE_CHECK
-  }
+enum ArmSMEState : unsigned {
+  ArmNoState = 0,
 
+  ArmInZA = 0b01,
+  ArmOutZA = 0b10,
+  ArmInOutZA = 0b11,
+  ArmZAMask = 0b11,
+};
+
+bool Sema::ParseSVEImmChecks(
+    CallExpr *TheCall, SmallVector<std::tuple<int, int, int>, 3> &ImmChecks) {
   // Perform all the immediate checks for this builtin call.
   bool HasError = false;
   for (auto &I : ImmChecks) {
     int ArgNum, CheckTy, ElementSizeInBits;
     std::tie(ArgNum, CheckTy, ElementSizeInBits) = I;
 
-    typedef bool(*OptionSetCheckFnTy)(int64_t Value);
+    typedef bool (*OptionSetCheckFnTy)(int64_t Value);
 
     // Function that checks whether the operand (ArgNum) is an immediate
     // that is one of the predefined values.
@@ -3029,8 +3027,135 @@ bool Sema::CheckSVEBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
   return HasError;
 }
 
+static ArmStreamingType getArmStreamingFnType(const FunctionDecl *FD) {
+  if (FD->hasAttr<ArmLocallyStreamingAttr>())
+    return ArmStreaming;
+  if (const auto *T = FD->getType()->getAs<FunctionProtoType>()) {
+    if (T->getAArch64SMEAttributes() & FunctionType::SME_PStateSMEnabledMask)
+      return ArmStreaming;
+    if (T->getAArch64SMEAttributes() & FunctionType::SME_PStateSMCompatibleMask)
+      return ArmStreamingCompatible;
+  }
+  return ArmNonStreaming;
+}
+
+static void checkArmStreamingBuiltin(Sema &S, CallExpr *TheCall,
+                                     const FunctionDecl *FD,
+                                     ArmStreamingType BuiltinType) {
+  ArmStreamingType FnType = getArmStreamingFnType(FD);
+  if (FnType == ArmStreaming && BuiltinType == ArmNonStreaming) {
+    S.Diag(TheCall->getBeginLoc(), diag::warn_attribute_arm_sm_incompat_builtin)
+        << TheCall->getSourceRange() << "streaming";
+  }
+
+  if (FnType == ArmStreamingCompatible &&
+      BuiltinType != ArmStreamingCompatible) {
+    S.Diag(TheCall->getBeginLoc(), diag::warn_attribute_arm_sm_incompat_builtin)
+        << TheCall->getSourceRange() << "streaming compatible";
+    return;
+  }
+
+  if (FnType == ArmNonStreaming && BuiltinType == ArmStreaming) {
+    S.Diag(TheCall->getBeginLoc(), diag::warn_attribute_arm_sm_incompat_builtin)
+        << TheCall->getSourceRange() << "non-streaming";
+  }
+}
+
+static bool hasArmZAState(const FunctionDecl *FD) {
+  const auto *T = FD->getType()->getAs<FunctionProtoType>();
+  return (T && FunctionType::getArmZAState(T->getAArch64SMEAttributes()) !=
+                   FunctionType::ARM_None) ||
+         (FD->hasAttr<ArmNewAttr>() && FD->getAttr<ArmNewAttr>()->isNewZA());
+}
+
+static ArmSMEState getSMEState(unsigned BuiltinID) {
+  switch (BuiltinID) {
+  default:
+    return ArmNoState;
+#define GET_SME_BUILTIN_GET_STATE
+#include "clang/Basic/arm_sme_builtins_za_state.inc"
+#undef GET_SME_BUILTIN_GET_STATE
+  }
+}
+
+bool Sema::CheckSMEBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
+  if (const FunctionDecl *FD = getCurFunctionDecl()) {
+    std::optional<ArmStreamingType> BuiltinType;
+
+    switch (BuiltinID) {
+#define GET_SME_STREAMING_ATTRS
+#include "clang/Basic/arm_sme_streaming_attrs.inc"
+#undef GET_SME_STREAMING_ATTRS
+    }
+
+    if (BuiltinType)
+      checkArmStreamingBuiltin(*this, TheCall, FD, *BuiltinType);
+
+    if ((getSMEState(BuiltinID) & ArmZAMask) && !hasArmZAState(FD))
+      Diag(TheCall->getBeginLoc(),
+           diag::warn_attribute_arm_za_builtin_no_za_state)
+          << TheCall->getSourceRange();
+  }
+
+  // Range check SME intrinsics that take immediate values.
+  SmallVector<std::tuple<int, int, int>, 3> ImmChecks;
+
+  switch (BuiltinID) {
+  default:
+    return false;
+#define GET_SME_IMMEDIATE_CHECK
+#include "clang/Basic/arm_sme_sema_rangechecks.inc"
+#undef GET_SME_IMMEDIATE_CHECK
+  }
+
+  return ParseSVEImmChecks(TheCall, ImmChecks);
+}
+
+bool Sema::CheckSVEBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall) {
+  if (const FunctionDecl *FD = getCurFunctionDecl()) {
+    std::optional<ArmStreamingType> BuiltinType;
+
+    switch (BuiltinID) {
+#define GET_SVE_STREAMING_ATTRS
+#include "clang/Basic/arm_sve_streaming_attrs.inc"
+#undef GET_SVE_STREAMING_ATTRS
+    }
+    if (BuiltinType)
+      checkArmStreamingBuiltin(*this, TheCall, FD, *BuiltinType);
+  }
+  // Range check SVE intrinsics that take immediate values.
+  SmallVector<std::tuple<int, int, int>, 3> ImmChecks;
+
+  switch (BuiltinID) {
+  default:
+    return false;
+#define GET_SVE_IMMEDIATE_CHECK
+#include "clang/Basic/arm_sve_sema_rangechecks.inc"
+#undef GET_SVE_IMMEDIATE_CHECK
+  }
+
+  return ParseSVEImmChecks(TheCall, ImmChecks);
+}
+
 bool Sema::CheckNeonBuiltinFunctionCall(const TargetInfo &TI,
                                         unsigned BuiltinID, CallExpr *TheCall) {
+  if (const FunctionDecl *FD = getCurFunctionDecl()) {
+
+    switch (BuiltinID) {
+    default:
+      break;
+#define GET_NEON_BUILTINS
+#define TARGET_BUILTIN(id, ...) case NEON::BI##id:
+#define BUILTIN(id, ...) case NEON::BI##id:
+#include "clang/Basic/arm_neon.inc"
+      checkArmStreamingBuiltin(*this, TheCall, FD, ArmNonStreaming);
+      break;
+#undef TARGET_BUILTIN
+#undef BUILTIN
+#undef GET_NEON_BUILTINS
+    }
+  }
+
   llvm::APSInt Result;
   uint64_t mask = 0;
   unsigned TV = 0;
@@ -3391,6 +3516,9 @@ bool Sema::CheckAArch64BuiltinFunctionCall(const TargetInfo &TI,
     return true;
 
   if (CheckSVEBuiltinFunctionCall(BuiltinID, TheCall))
+    return true;
+
+  if (CheckSMEBuiltinFunctionCall(BuiltinID, TheCall))
     return true;
 
   // For intrinsics which take an immediate value as part of the instruction,
@@ -7053,8 +7181,8 @@ void Sema::CheckArgAlignment(SourceLocation Loc, NamedDecl *FDecl,
 }
 
 /// Handles the checks for format strings, non-POD arguments to vararg
-/// functions, NULL arguments passed to non-NULL parameters, and diagnose_if
-/// attributes.
+/// functions, NULL arguments passed to non-NULL parameters, diagnose_if
+/// attributes and AArch64 SME attributes.
 void Sema::checkCall(NamedDecl *FDecl, const FunctionProtoType *Proto,
                      const Expr *ThisArg, ArrayRef<const Expr *> Args,
                      bool IsMemberFunction, SourceLocation Loc,
@@ -7134,6 +7262,41 @@ void Sema::checkCall(NamedDecl *FDecl, const FunctionProtoType *Proto,
         CheckArgAlignment(Arg->getExprLoc(), FDecl, std::to_string(ArgIdx + 1),
                           ArgTy, ParamTy);
       }
+    }
+
+    // If the callee has an AArch64 SME attribute to indicate that it is an
+    // __arm_streaming function, then the caller requires SME to be available.
+    FunctionProtoType::ExtProtoInfo ExtInfo = Proto->getExtProtoInfo();
+    if (ExtInfo.AArch64SMEAttributes & FunctionType::SME_PStateSMEnabledMask) {
+      if (auto *CallerFD = dyn_cast<FunctionDecl>(CurContext)) {
+        llvm::StringMap<bool> CallerFeatureMap;
+        Context.getFunctionFeatureMap(CallerFeatureMap, CallerFD);
+        if (!CallerFeatureMap.contains("sme"))
+          Diag(Loc, diag::err_sme_call_in_non_sme_target);
+      } else if (!Context.getTargetInfo().hasFeature("sme")) {
+        Diag(Loc, diag::err_sme_call_in_non_sme_target);
+      }
+    }
+
+    // If the callee uses AArch64 SME ZA state but the caller doesn't define
+    // any, then this is an error.
+    FunctionType::ArmStateValue ArmZAState =
+        FunctionType::getArmZAState(ExtInfo.AArch64SMEAttributes);
+    if (ArmZAState != FunctionType::ARM_None) {
+      bool CallerHasZAState = false;
+      if (const auto *CallerFD = dyn_cast<FunctionDecl>(CurContext)) {
+        auto *Attr = CallerFD->getAttr<ArmNewAttr>();
+        if (Attr && Attr->isNewZA())
+          CallerHasZAState = true;
+        else if (const auto *FPT =
+                     CallerFD->getType()->getAs<FunctionProtoType>())
+          CallerHasZAState = FunctionType::getArmZAState(
+                                 FPT->getExtProtoInfo().AArch64SMEAttributes) !=
+                             FunctionType::ARM_None;
+      }
+
+      if (!CallerHasZAState)
+        Diag(Loc, diag::err_sme_za_call_no_za_state);
     }
   }
 

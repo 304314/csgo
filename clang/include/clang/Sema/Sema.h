@@ -7076,6 +7076,8 @@ public:
                                  NestedNameSpecInfo &IdInfo,
                                  bool EnteringContext);
 
+  bool IsInvalidSMECallConversion(QualType FromType, QualType ToType);
+
   /// The parser has parsed a nested-name-specifier
   /// 'template[opt] template-name < template-args >::'.
   ///
@@ -13604,6 +13606,9 @@ private:
                                     CallExpr *TheCall);
   bool CheckMVEBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
   bool CheckSVEBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
+  bool ParseSVEImmChecks(CallExpr *TheCall,
+                         SmallVector<std::tuple<int, int, int>, 3> &ImmChecks);
+  bool CheckSMEBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
   bool CheckCDEBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
                                    CallExpr *TheCall);
   bool CheckARMCoprocessorImmediate(const TargetInfo &TI, const Expr *CoprocArg,

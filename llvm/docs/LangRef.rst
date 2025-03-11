@@ -4991,10 +4991,13 @@ AArch64:
   offsets). (However, LLVM currently does this for the ``m`` constraint as
   well.)
 - ``r``: A 32 or 64-bit integer register (W* or X*).
+- ``Uci``: Like r, but restricted to registers 8 to 11 inclusive.
+- ``Ucj``: Like r, but restricted to registers 12 to 15 inclusive.
 - ``w``: A 32, 64, or 128-bit floating-point, SIMD or SVE vector register.
 - ``x``: Like w, but restricted to registers 0 to 15 inclusive.
 - ``y``: Like w, but restricted to SVE vector registers Z0 to Z7 inclusive.
-- ``Upl``: One of the low eight SVE predicate registers (P0 to P7)
+- ``Uph``: One of the upper eight SVE predicate registers (P8 to P15)
+- ``Upl``: One of the lower eight SVE predicate registers (P0 to P7)
 - ``Upa``: Any of the SVE predicate registers (P0 to P15)
 
 AMDGPU:

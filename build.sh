@@ -10,7 +10,7 @@ enable_autotuner="1"
 buildtype=RelWithDebInfo
 backends="all"
 build_for_openeuler="0"
-enabled_projects="clang;lld;compiler-rt;openmp;clang-tools-extra"
+enabled_projects="clang;lld;openmp;clang-tools-extra"
 embedded_toolchain="0"
 split_dwarf=on
 use_ccache="0"
@@ -322,7 +322,7 @@ fi
 
 if [ $embedded_toolchain == "1" ]; then
   echo "Build for embedded cross tool chain"
-  enabled_projects="clang;lld;compiler-rt;"
+  enabled_projects="clang;lld;"
   CMAKE_OPTIONS="$CMAKE_OPTIONS \
                 -DLLVM_BUILD_FOR_EMBEDDED=ON"
 fi
@@ -364,14 +364,14 @@ mkdir -p "$build_prefix" && cd "$build_prefix"
 cmake $CMAKE_OPTIONS \
       -DCOMPILER_RT_BUILD_SANITIZERS=on \
       -DLLVM_ENABLE_PROJECTS=$enabled_projects \
-      -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+      -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind" \
       -DLLVM_USE_LINKER=gold \
       -DLLVM_LIT_ARGS="-sv -j$threads" \
       -DLLVM_USE_SPLIT_DWARF=$split_dwarf \
       -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO="-Wl,--gdb-index -Wl,--compress-debug-sections=zlib" \
       -DCMAKE_EXE_LINKER_FLAGS_DEBUG="-Wl,--gdb-index -Wl,--compress-debug-sections=zlib" \
       -DBUILD_SHARED_LIBS=OFF \
-      -DLLVM_ENABLE_LIBCXX=OFF \
+      -DLLVM_STATIC_LINK_CXX_STDLIB=ON \
       -DLLVM_ENABLE_ZLIB=ON \
       -DLLVM_BUILD_RUNTIME=ON \
       -DLLVM_INCLUDE_TOOLS=ON \
@@ -407,6 +407,39 @@ cmake $CMAKE_OPTIONS \
 make -j$threads
 if [ $do_install == "1" ]; then
   make -j$threads $verbose $install
+fi
+
+# build libcxx/libcxxabi with the just-built clang/clang++
+c_compiler="$install_prefix/bin/clang"
+cxx_compiler="$install_prefix/bin/clang++"
+if pushd runtimes > /dev/null 2>&1; then
+  if [ ! -f "$build_prefix"/projects/libcxx/CMakeCache.txt ]; then
+    mkdir -p "$build_prefix/projects/libcxx" && cd "$build_prefix/projects/libcxx"
+    cmake -Wno-dev \
+	  -DCMAKE_BUILD_TYPE=$buildtype \
+	  -DCMAKE_INSTALL_PREFIX="$install_prefix" \
+	  -DCMAKE_C_COMPILER="$c_compiler" \
+	  -DCMAKE_CXX_COMPILER="$cxx_compiler" \
+	  -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
+	  -DLLVM_LIT_ARGS="-sv -j$threads" \
+	  -DBUILD_SHARED_LIBS=OFF \
+	  -DCMAKE_SKIP_RPATH=ON \
+	  -DLLVM_USE_LINKER=gold \
+	  -DLLVM_USE_SPLIT_DWARF=$split_dwarf \
+	  ../../../runtimes
+  else
+    cd "$build_prefix"/projects/libcxx
+  fi
+  install_libcxx=${install/\/strip/-strripped}
+  make -j$threads $verbose \
+	  ${install_libcxx/install/install-cxx} ${install_libcxx/install/install-cxxabi} ${install_libcxx/install/install-cxxabi-headers}
+  if [ -n "$unit_test" ]; then
+	  make -j$threads $verbose ${unit_test/all/cxx} ${unit_test/all/cxxabi}
+  fi
+  popd > /dev/null 2>&1
+else
+  echo "$0: directory not found: libcxx"
+  exit 1
 fi
 
 if [ -n "$unit_test" ]; then

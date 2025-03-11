@@ -2035,6 +2035,10 @@ def err_different_return_type_for_overriding_virtual_function : Error<
   "than the function it overrides}1,2">;
 def note_overridden_virtual_function : Note<
   "overridden virtual function is here">;
+def err_conflicting_overriding_attributes : Error<
+  "virtual function %0 has different attributes "
+  "%diff{($) than the function it overrides (which has $)|"
+  "than the function it overrides}1,2">;
 def err_conflicting_overriding_cc_attributes : Error<
   "virtual function %0 has different calling convention attributes "
   "%diff{($) than the function it overrides (which has calling convention $)|"
@@ -3097,6 +3101,12 @@ def err_attribute_bad_sve_vector_size : Error<
 def err_attribute_arm_feature_sve_bits_unsupported : Error<
   "%0 is only supported when '-msve-vector-bits=<bits>' is specified with a "
   "value of 128, 256, 512, 1024 or 2048.">;
+def warn_attribute_arm_sm_incompat_builtin : Warning<
+  "builtin call has undefined behaviour when called from a %0 function">,
+  InGroup<DiagGroup<"undefined-arm-streaming">>;
+def warn_attribute_arm_za_builtin_no_za_state : Warning<
+  "builtin call is not valid when calling from a function without active ZA state">,
+  InGroup<DiagGroup<"undefined-arm-za">>;
 def err_sve_vector_in_non_sve_target : Error<
   "SVE vector type %0 cannot be used in a target without sve">;
 def err_attribute_riscv_rvv_bits_unsupported : Error<
@@ -3621,6 +3631,22 @@ def err_attribute_vecreturn_only_vector_member : Error<
   "the vecreturn attribute can only be used on a class or structure with one member, which must be a vector">;
 def err_attribute_vecreturn_only_pod_record : Error<
   "the vecreturn attribute can only be used on a POD (plain old data) class or structure (i.e. no virtual functions)">;
+def err_sme_attr_mismatch : Error<
+  "function declared %0 was previously declared %1, which has different SME function attributes">;
+def err_sme_call_in_non_sme_target : Error<
+  "call to a streaming function requires 'sme'">;
+def err_sme_za_call_no_za_state : Error<
+  "call to a shared ZA function requires the caller to have ZA state">;
+def err_sme_definition_using_sm_in_non_sme_target : Error<
+  "function executed in streaming-SVE mode requires 'sme'">;
+def err_sme_definition_using_za_in_non_sme_target : Error<
+  "function using ZA state requires 'sme'">;
+def err_conflicting_attributes_arm_state : Error<
+  "conflicting attributes for state '%0'">;
+def err_unknown_arm_state : Error<
+  "unknown state '%0'">;
+def err_missing_arm_state : Error<
+  "missing state for %0">;
 def err_cconv_change : Error<
   "function declared '%0' here was previously declared "
   "%select{'%2'|without calling convention}1">;

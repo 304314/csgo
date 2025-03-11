@@ -2297,6 +2297,22 @@ static bool isVariadicExprArgument(const Record *Arg) {
              .Default(false);
 }
 
+static bool isStringLiteralArgument(const Record *Arg) {
+  return !Arg->getSuperClasses().empty() &&
+         llvm::StringSwitch<bool>(
+             Arg->getSuperClasses().back().first->getName())
+             .Case("StringArgument", true)
+             .Default(false);
+}
+
+static bool isVariadicStringLiteralArgument(const Record *Arg) {
+  return !Arg->getSuperClasses().empty() &&
+         llvm::StringSwitch<bool>(
+             Arg->getSuperClasses().back().first->getName())
+             .Case("VariadicStringArgument", true)
+             .Default(false);
+}
+
 static void emitClangAttrVariadicIdentifierArgList(RecordKeeper &Records,
                                                    raw_ostream &OS) {
   OS << "#if defined(CLANG_ATTR_VARIADIC_IDENTIFIER_ARG_LIST)\n";
@@ -2315,6 +2331,34 @@ static void emitClangAttrVariadicIdentifierArgList(RecordKeeper &Records,
     });
   }
   OS << "#endif // CLANG_ATTR_VARIADIC_IDENTIFIER_ARG_LIST\n\n";
+}
+
+// Emits the list of arguments that should be parsed as unevaluated string
+// literals for each attribute.
+static void emitClangAttrUnevaluatedStringLiteralList(RecordKeeper &Records,
+                                                      raw_ostream &OS) {
+  OS << "#if defined(CLANG_ATTR_STRING_LITERAL_ARG_LIST)\n";
+  std::vector<Record *> Attrs = Records.getAllDerivedDefinitions("Attr");
+  for (const auto *Attr : Attrs) {
+    std::vector<Record *> Args = Attr->getValueAsListOfDefs("Args");
+    uint32_t Bits = 0;
+    assert(Args.size() <= 32 && "unsupported number of arguments in attribute");
+    for (uint32_t N = 0; N < Args.size(); ++N) {
+      Bits |= (isStringLiteralArgument(Args[N]) << N);
+      // If we have a variadic string argument, set all the remaining bits to 1
+      if (isVariadicStringLiteralArgument(Args[N])) {
+        Bits |= maskTrailingZeros<decltype(Bits)>(N);
+        break;
+      }
+    }
+    if (!Bits)
+      continue;
+    // All these spellings have at least one string literal has argument.
+    forEachUniqueSpelling(*Attr, [&](const FlattenedSpelling &S) {
+      OS << ".Case(\"" << S.name() << "\", " << Bits << ")\n";
+    });
+  }
+  OS << "#endif // CLANG_ATTR_STRING_LITERAL_ARG_LIST\n\n";
 }
 
 // Emits the first-argument-is-identifier property for attributes.
@@ -3415,23 +3459,27 @@ static void GenerateHasAttrSpellingStringSwitch(
   OS << "    .Default(0);\n";
 }
 
-// Emits the list of tokens for regular keyword attributes.
-void EmitClangAttrTokenKinds(RecordKeeper &Records, raw_ostream &OS) {
-  emitSourceFileHeader("A list of tokens generated from the attribute"
-                       " definitions",
-                       OS);
+// Emits list of regular keyword attributes with info about their arguments.
+void EmitClangRegularKeywordAttributeInfo(RecordKeeper &Records,
+                                          raw_ostream &OS) {
+  emitSourceFileHeader(
+      "A list of regular keyword attributes generated from the attribute"
+      " definitions",
+      OS);
   // Assume for now that the same token is not used in multiple regular
   // keyword attributes.
   for (auto *R : Records.getAllDerivedDefinitions("Attr"))
-    for (const auto &S : GetFlattenedSpellings(*R))
-      if (isRegularKeywordAttribute(S)) {
-        if (!R->getValueAsListOfDefs("Args").empty())
-          PrintError(R->getLoc(),
-                     "RegularKeyword attributes with arguments are not "
-                     "yet supported");
-        OS << "KEYWORD_ATTRIBUTE("
-           << S.getSpellingRecord().getValueAsString("Name") << ", )\n";
-      }
+    for (const auto &S : GetFlattenedSpellings(*R)) {
+      if (!isRegularKeywordAttribute(S))
+        continue;
+      std::vector<Record *> Args = R->getValueAsListOfDefs("Args");
+      bool HasArgs = llvm::any_of(
+          Args, [](const Record *Arg) { return !Arg->getValueAsBit("Fake"); });
+
+      OS << "KEYWORD_ATTRIBUTE("
+         << S.getSpellingRecord().getValueAsString("Name") << ", "
+         << (HasArgs ? "true" : "false") << ",)\n";
+    }
   OS << "#undef KEYWORD_ATTRIBUTE\n";
 }
 
@@ -4616,6 +4664,7 @@ void EmitClangAttrParserStringSwitches(RecordKeeper &Records,
   emitSourceFileHeader("Parser-related llvm::StringSwitch cases", OS);
   emitClangAttrArgContextList(Records, OS);
   emitClangAttrIdentifierArgList(Records, OS);
+  emitClangAttrUnevaluatedStringLiteralList(Records, OS);
   emitClangAttrVariadicIdentifierArgList(Records, OS);
   emitClangAttrThisIsaIdentifierArgList(Records, OS);
   emitClangAttrAcceptsExprPack(Records, OS);

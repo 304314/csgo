@@ -1762,6 +1762,22 @@ static void AddAttributesFromFunctionProtoType(ASTContext &Ctx,
   if (!isUnresolvedExceptionSpec(FPT->getExceptionSpecType()) &&
       FPT->isNothrow())
     FuncAttrs.addAttribute(llvm::Attribute::NoUnwind);
+
+  unsigned SMEBits = FPT->getAArch64SMEAttributes();
+  if (SMEBits & FunctionType::SME_PStateSMEnabledMask)
+    FuncAttrs.addAttribute("aarch64_pstate_sm_enabled");
+  if (SMEBits & FunctionType::SME_PStateSMCompatibleMask)
+    FuncAttrs.addAttribute("aarch64_pstate_sm_compatible");
+
+  // ZA
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_Preserves)
+    FuncAttrs.addAttribute("aarch64_preserves_za");
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_In)
+    FuncAttrs.addAttribute("aarch64_in_za");
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_Out)
+    FuncAttrs.addAttribute("aarch64_out_za");
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_InOut)
+    FuncAttrs.addAttribute("aarch64_inout_za");
 }
 
 static void AddAttributesFromAssumes(llvm::AttrBuilder &FuncAttrs,
@@ -2402,6 +2418,9 @@ void CodeGenModule::ConstructAttributeList(StringRef Name,
                                llvm::toStringRef(CodeGenOpts.UniformWGSize));
       }
     }
+
+    if (TargetDecl->hasAttr<ArmLocallyStreamingAttr>())
+      FuncAttrs.addAttribute("aarch64_pstate_sm_body");
   }
 
   // Attach "no-builtins" attributes to:

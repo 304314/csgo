@@ -937,6 +937,20 @@ void TypePrinter::printFunctionProtoAfter(const FunctionProtoType *T,
   OS << ')';
 
   FunctionType::ExtInfo Info = T->getExtInfo();
+  unsigned SMEBits = T->getAArch64SMEAttributes();
+
+  if (SMEBits & FunctionType::SME_PStateSMCompatibleMask)
+    OS << " __arm_streaming_compatible";
+  if (SMEBits & FunctionType::SME_PStateSMEnabledMask)
+    OS << " __arm_streaming";
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_Preserves)
+    OS << " __arm_preserves(\"za\")";
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_In)
+    OS << " __arm_in(\"za\")";
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_Out)
+    OS << " __arm_out(\"za\")";
+  if (FunctionType::getArmZAState(SMEBits) == FunctionType::ARM_InOut)
+    OS << " __arm_inout(\"za\")";
 
   printFunctionAfter(Info, OS);
 
@@ -1772,6 +1786,10 @@ void TypePrinter::printAttributedAfter(const AttributedType *T,
     OS << "__arm_streaming";
     return;
   }
+  if (T->getAttrKind() == attr::ArmStreamingCompatible) {
+    OS << "__arm_streaming_compatible";
+    return;
+  }
 
   OS << " __attribute__((";
   switch (T->getAttrKind()) {
@@ -1814,6 +1832,11 @@ void TypePrinter::printAttributedAfter(const AttributedType *T,
   case attr::AnnotateType:
   case attr::WebAssemblyFuncref:
   case attr::ArmStreaming:
+  case attr::ArmStreamingCompatible:
+  case attr::ArmIn:
+  case attr::ArmOut:
+  case attr::ArmInOut:
+  case attr::ArmPreserves:
     llvm_unreachable("This attribute should have been handled already");
 
   case attr::NSReturnsRetained:

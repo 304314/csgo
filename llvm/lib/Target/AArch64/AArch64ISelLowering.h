@@ -58,13 +58,8 @@ enum NodeType : unsigned {
 
   CALL_BTI, // Function call followed by a BTI instruction.
 
-  // Essentially like a normal COPY that works on GPRs, but cannot be
-  // rematerialised by passes like the simple register coalescer. It's
-  // required for SME when lowering calls because we cannot allow frame
-  // index calculations using addvl to slip in between the smstart/smstop
-  // and the bl instruction. The scalable vector length may change across
-  // the smstart/smstop boundary.
-  OBSCURE_COPY,
+  COALESCER_BARRIER,
+
   SMSTART,
   SMSTOP,
   RESTORE_ZA,
@@ -443,6 +438,10 @@ enum NodeType : unsigned {
   // Strict (exception-raising) floating point comparison
   STRICT_FCMP = ISD::FIRST_TARGET_STRICTFP_OPCODE,
   STRICT_FCMPE,
+
+  // SME ZA loads and stores
+  SME_ZA_LDR,
+  SME_ZA_STR,
 
   // NEON Load/Store with post-increment base updates
   LD2post = ISD::FIRST_TARGET_MEMORY_OPCODE,
@@ -963,6 +962,9 @@ private:
                                const SDLoc &DL, SelectionDAG &DAG,
                                SmallVectorImpl<SDValue> &InVals) const override;
 
+  void AdjustInstrPostInstrSelection(MachineInstr &MI,
+                                     SDNode *Node) const override;
+
   SDValue LowerCall(CallLoweringInfo & /*CLI*/,
                     SmallVectorImpl<SDValue> &InVals) const override;
 
@@ -971,7 +973,7 @@ private:
                           const SmallVectorImpl<CCValAssign> &RVLocs,
                           const SDLoc &DL, SelectionDAG &DAG,
                           SmallVectorImpl<SDValue> &InVals, bool isThisReturn,
-                          SDValue ThisVal) const;
+                          SDValue ThisVal, bool RequiresSMChange) const;
 
   SDValue LowerLOAD(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerSTORE(SDValue Op, SelectionDAG &DAG) const;
@@ -1238,10 +1240,10 @@ private:
   // This function does not handle predicate bitcasts.
   SDValue getSVESafeBitCast(EVT VT, SDValue Op, SelectionDAG &DAG) const;
 
-  // Returns the runtime value for PSTATE.SM. When the function is streaming-
-  // compatible, this generates a call to __arm_sme_state.
-  SDValue getPStateSM(SelectionDAG &DAG, SDValue Chain, SMEAttrs Attrs,
-                      SDLoc DL, EVT VT) const;
+  // Returns the runtime value for PSTATE.SM by generating a call to
+  // __arm_sme_state.
+  SDValue getRuntimePStateSM(SelectionDAG &DAG, SDValue Chain, SDLoc DL,
+                             EVT VT) const;
 
   bool isConstantUnsignedBitfieldExtractLegal(unsigned Opc, LLT Ty1,
                                               LLT Ty2) const override;

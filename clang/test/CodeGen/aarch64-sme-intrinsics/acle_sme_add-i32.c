@@ -1,11 +1,11 @@
 // REQUIRES: aarch64-registered-target
-// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme -target-feature +sve -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
-// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme -target-feature +sve -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
-// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme -target-feature +sve -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
-// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme -target-feature +sve -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
-// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme -target-feature +sve -S -O1 -Werror -o /dev/null %s
+// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
+// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
+// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme -S -O1 -Werror -emit-llvm -o - %s | FileCheck %s -check-prefixes=CHECK,CHECK-C
+// RUN: %clang_cc1 -DSME_OVERLOADED_FORMS -triple aarch64-none-linux-gnu -target-feature +sme -S -O1 -Werror -emit-llvm -o - -x c++ %s | FileCheck %s -check-prefixes=CHECK,CHECK-CXX
+// RUN: %clang_cc1 -triple aarch64-none-linux-gnu -target-feature +sme -S -O1 -Werror -o /dev/null %s
 
-#include <arm_sme_draft_spec_subject_to_change.h>
+#include <arm_sme.h>
 
 #ifdef SME_OVERLOADED_FORMS
 #define SME_ACLE_FUNC(A1,A2_UNUSED,A3) A1##A3
@@ -21,7 +21,7 @@
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv4i32(i32 0, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za32_u32(svbool_t pn, svbool_t pm, svuint32_t zn) {
+void test_svaddha_za32_u32(svbool_t pn, svbool_t pm, svuint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddha_za32, _u32, _m)(0, pn, pm, zn);
 }
 
@@ -33,7 +33,7 @@ void test_svaddha_za32_u32(svbool_t pn, svbool_t pm, svuint32_t zn) {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv4i32(i32 3, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za32_u32_1(svbool_t pn, svbool_t pm, svuint32_t zn) {
+void test_svaddha_za32_u32_1(svbool_t pn, svbool_t pm, svuint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddha_za32, _u32, _m)(3, pn, pm, zn);
 }
 
@@ -45,7 +45,7 @@ void test_svaddha_za32_u32_1(svbool_t pn, svbool_t pm, svuint32_t zn) {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv4i32(i32 0, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za32_s32(svbool_t pn, svbool_t pm, svint32_t zn) {
+void test_svaddha_za32_s32(svbool_t pn, svbool_t pm, svint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddha_za32, _s32, _m)(0, pn, pm, zn);
 }
 
@@ -57,7 +57,7 @@ void test_svaddha_za32_s32(svbool_t pn, svbool_t pm, svint32_t zn) {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addha.nxv4i32(i32 3, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddha_za32_s32_1(svbool_t pn, svbool_t pm, svint32_t zn) {
+void test_svaddha_za32_s32_1(svbool_t pn, svbool_t pm, svint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddha_za32, _s32, _m)(3, pn, pm, zn);
 }
 
@@ -69,7 +69,7 @@ void test_svaddha_za32_s32_1(svbool_t pn, svbool_t pm, svint32_t zn) {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv4i32(i32 0, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za32_u32(svbool_t pn, svbool_t pm, svuint32_t zn) {
+void test_svaddva_za32_u32(svbool_t pn, svbool_t pm, svuint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddva_za32, _u32, _m)(0, pn, pm, zn);
 }
 
@@ -81,7 +81,7 @@ void test_svaddva_za32_u32(svbool_t pn, svbool_t pm, svuint32_t zn) {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv4i32(i32 3, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za32_u32_1(svbool_t pn, svbool_t pm, svuint32_t zn) {
+void test_svaddva_za32_u32_1(svbool_t pn, svbool_t pm, svuint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddva_za32, _u32, _m)(3, pn, pm, zn);
 }
 
@@ -93,7 +93,7 @@ void test_svaddva_za32_u32_1(svbool_t pn, svbool_t pm, svuint32_t zn) {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv4i32(i32 0, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za32_s32(svbool_t pn, svbool_t pm, svint32_t zn) {
+void test_svaddva_za32_s32(svbool_t pn, svbool_t pm, svint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddva_za32, _s32, _m)(0, pn, pm, zn);
 }
 
@@ -105,6 +105,6 @@ void test_svaddva_za32_s32(svbool_t pn, svbool_t pm, svint32_t zn) {
 // CHECK-NEXT:    tail call void @llvm.aarch64.sme.addva.nxv4i32(i32 3, <vscale x 4 x i1> [[TMP0]], <vscale x 4 x i1> [[TMP1]], <vscale x 4 x i32> [[ZN:%.*]])
 // CHECK-NEXT:    ret void
 //
-void test_svaddva_za32_s32_1(svbool_t pn, svbool_t pm, svint32_t zn) {
+void test_svaddva_za32_s32_1(svbool_t pn, svbool_t pm, svint32_t zn) __arm_streaming __arm_inout("za") {
   SME_ACLE_FUNC(svaddva_za32, _s32, _m)(3, pn, pm, zn);
 }

@@ -222,7 +222,7 @@ llvm.func @arm_sme_store(%nxv1i1  : vector<[1]xi1>,
   "arm_sme.intr.st1b.vert"(%nxv16i1, %p8, %c0, %c0) :
               (vector<[16]xi1>, !llvm.ptr<i8>, i32, i32) -> ()
   // CHECK: call void @llvm.aarch64.sme.str
-  "arm_sme.intr.str"(%c0, %p8) : (i32, !llvm.ptr<i8>) -> ()
+  "arm_sme.intr.str"(%c0, %ptr, %c0) : (i32, !llvm.ptr, i32) -> ()
   llvm.return
 }
 
