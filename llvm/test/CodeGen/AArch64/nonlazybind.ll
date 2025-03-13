@@ -10,63 +10,63 @@ declare void @external() nonlazybind
 define void @test_laziness(ptr %a) nounwind {
 ;
 ; MACHO-LABEL: test_laziness:
-; MACHO:       ; %bb.0:
-; MACHO-NEXT:    stp x20, x19, [sp, #-32]! ; 16-byte Folded Spill
-; MACHO-NEXT:    stp x29, x30, [sp, #16] ; 16-byte Folded Spill
+; MACHO:       %bb.0:
+; MACHO-NEXT:  	stp	x20, x19, [sp, #-32]!           ; 16-byte Folded Spill
 ; MACHO-NEXT:  Lloh0:
-; MACHO-NEXT:    adrp x8, _external@GOTPAGE
-; MACHO-NEXT:    mov x19, x0
+; MACHO-NEXT:  	adrp	x8, _external@GOTPAGE
+; MACHO-NEXT:  	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+; MACHO-NEXT:  	mov	x19, x0
 ; MACHO-NEXT:  Lloh1:
-; MACHO-NEXT:    ldr x8, [x8, _external@GOTPAGEOFF]
-; MACHO-NEXT:    blr x8
+; MACHO-NEXT:  	ldr	x8, [x8, _external@GOTPAGEOFF]
+; MACHO-NEXT:  	blr	x8
 ; MACHO-NEXT:  Lloh2:
-; MACHO-NEXT:    adrp x8, _memset@GOTPAGE
-; MACHO-NEXT:    mov x0, x19
-; MACHO-NEXT:    mov w1, #1 ; =0x1
+; MACHO-NEXT:  	adrp	x8, _memset@GOTPAGE
+; MACHO-NEXT:  	mov	x0, x19
+; MACHO-NEXT:  	mov	w1, #1                          ; =0x1
+; MACHO-NEXT:  	mov	w2, #1000                       ; =0x3e8
 ; MACHO-NEXT:  Lloh3:
-; MACHO-NEXT:    ldr x8, [x8, _memset@GOTPAGEOFF]
-; MACHO-NEXT:    mov w2, #1000 ; =0x3e8
-; MACHO-NEXT:    blr x8
-; MACHO-NEXT:    ldp x29, x30, [sp, #16] ; 16-byte Folded Reload
-; MACHO-NEXT:    ldp x20, x19, [sp], #32 ; 16-byte Folded Reload
-; MACHO-NEXT:    ret
-; MACHO-NEXT:    .loh AdrpLdrGot Lloh2, Lloh3
-; MACHO-NEXT:    .loh AdrpLdrGot Lloh0, Lloh1
+; MACHO-NEXT:  	ldr	x8, [x8, _memset@GOTPAGEOFF]
+; MACHO-NEXT:  	blr	x8
+; MACHO-NEXT:  	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+; MACHO-NEXT:  	ldp	x20, x19, [sp], #32             ; 16-byte Folded Reload
+; MACHO-NEXT:  	ret
+; MACHO-NEXT:  	.loh AdrpLdrGot	Lloh2, Lloh3
+; MACHO-NEXT:  	.loh AdrpLdrGot	Lloh0, Lloh1
 ;
 ; MACHO-NORMAL-LABEL: test_laziness:
 ; MACHO-NORMAL:       ; %bb.0:
-; MACHO-NORMAL-NEXT:    stp x20, x19, [sp, #-32]! ; 16-byte Folded Spill
-; MACHO-NORMAL-NEXT:    stp x29, x30, [sp, #16] ; 16-byte Folded Spill
-; MACHO-NORMAL-NEXT:    mov x19, x0
-; MACHO-NORMAL-NEXT:    bl _external
-; MACHO-NORMAL-NEXT:  Lloh0:
-; MACHO-NORMAL-NEXT:    adrp x8, _memset@GOTPAGE
-; MACHO-NORMAL-NEXT:    mov x0, x19
-; MACHO-NORMAL-NEXT:    mov w1, #1 ; =0x1
-; MACHO-NORMAL-NEXT:  Lloh1:
-; MACHO-NORMAL-NEXT:    ldr x8, [x8, _memset@GOTPAGEOFF]
-; MACHO-NORMAL-NEXT:    mov w2, #1000 ; =0x3e8
-; MACHO-NORMAL-NEXT:    blr x8
-; MACHO-NORMAL-NEXT:    ldp x29, x30, [sp, #16] ; 16-byte Folded Reload
-; MACHO-NORMAL-NEXT:    ldp x20, x19, [sp], #32 ; 16-byte Folded Reload
-; MACHO-NORMAL-NEXT:    ret
-; MACHO-NORMAL-NEXT:    .loh AdrpLdrGot Lloh0, Lloh1
+; MACHO-NORMAL-NEXT: 	stp	x20, x19, [sp, #-32]!           ; 16-byte Folded Spill
+; MACHO-NORMAL-NEXT: 	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+; MACHO-NORMAL-NEXT: 	mov	x19, x0
+; MACHO-NORMAL-NEXT: 	bl	_external
+; MACHO-NORMAL-NEXT: Lloh0:
+; MACHO-NORMAL-NEXT: 	adrp	x8, _memset@GOTPAGE
+; MACHO-NORMAL-NEXT: 	mov	x0, x19
+; MACHO-NORMAL-NEXT: 	mov	w1, #1                          ; =0x1
+; MACHO-NORMAL-NEXT: 	mov	w2, #1000                       ; =0x3e8
+; MACHO-NORMAL-NEXT: Lloh1:
+; MACHO-NORMAL-NEXT: 	ldr	x8, [x8, _memset@GOTPAGEOFF]
+; MACHO-NORMAL-NEXT: 	blr	x8
+; MACHO-NORMAL-NEXT: 	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+; MACHO-NORMAL-NEXT: 	ldp	x20, x19, [sp], #32             ; 16-byte Folded Reload
+; MACHO-NORMAL-NEXT: 	ret
+; MACHO-NORMAL-NEXT: 	.loh AdrpLdrGot	Lloh0, Lloh1
 ;
 ; ELF-LABEL: test_laziness:
 ; ELF:       // %bb.0:
-; ELF-NEXT:    stp x30, x19, [sp, #-16]! // 16-byte Folded Spill
-; ELF-NEXT:    adrp x8, :got:external
-; ELF-NEXT:    mov x19, x0
-; ELF-NEXT:    ldr x8, [x8, :got_lo12:external]
-; ELF-NEXT:    blr x8
-; ELF-NEXT:    adrp x8, :got:memset
-; ELF-NEXT:    mov x0, x19
-; ELF-NEXT:    mov w1, #1 // =0x1
-; ELF-NEXT:    ldr x8, [x8, :got_lo12:memset]
-; ELF-NEXT:    mov w2, #1000 // =0x3e8
-; ELF-NEXT:    blr x8
-; ELF-NEXT:    ldp x30, x19, [sp], #16 // 16-byte Folded Reload
-; ELF-NEXT:    ret
+; ELF-NEXT:  stp	x30, x19, [sp, #-16]!           // 16-byte Folded Spill
+; ELF-NEXT:  adrp	x8, :got:external
+; ELF-NEXT:  mov	x19, x0
+; ELF-NEXT:  ldr	x8, [x8, :got_lo12:external]
+; ELF-NEXT:  blr	x8
+; ELF-NEXT:  adrp	x8, :got:memset
+; ELF-NEXT:  mov	x0, x19
+; ELF-NEXT:  mov	w1, #1                          // =0x1
+; ELF-NEXT:  mov	w2, #1000                       // =0x3e8
+; ELF-NEXT:  ldr	x8, [x8, :got_lo12:memset]
+; ELF-NEXT:  blr	x8
+; ELF-NEXT:  ldp	x30, x19, [sp], #16             // 16-byte Folded Reload
+; ELF-NEXT:  ret
   call void @external()
   call void @llvm.memset.p0.i64(ptr align 1 %a, i8 1, i64 1000, i1 false)
   ret void
@@ -74,17 +74,17 @@ define void @test_laziness(ptr %a) nounwind {
 
 define void @test_laziness_tail() nounwind {
 ; MACHO-LABEL: test_laziness_tail:
-; MACHO:       ; %bb.0:
+; MACHO:  ; %bb.0:
 ; MACHO-NEXT:  Lloh4:
-; MACHO-NEXT:    adrp x0, _external@GOTPAGE
+; MACHO-NEXT:  	adrp	x0, _external@GOTPAGE
 ; MACHO-NEXT:  Lloh5:
-; MACHO-NEXT:    ldr x0, [x0, _external@GOTPAGEOFF]
-; MACHO-NEXT:    br x0
-; MACHO-NEXT:    .loh AdrpLdrGot Lloh4, Lloh5
+; MACHO-NEXT:  	ldr	x0, [x0, _external@GOTPAGEOFF]
+; MACHO-NEXT:  	br	x0
+; MACHO-NEXT:  	.loh AdrpLdrGot	Lloh4, Lloh5
 ;
 ; MACHO-NORMAL-LABEL: test_laziness_tail:
 ; MACHO-NORMAL:       ; %bb.0:
-; MACHO-NORMAL-NEXT:    b _external
+; MACHO-NORMAL-NEXT:  	b	_external
 ;
 ; ELF-LABEL: test_laziness_tail:
 ; ELF:       // %bb.0:
@@ -95,15 +95,7 @@ define void @test_laziness_tail() nounwind {
   ret void
 }
 
-define void @test_laziness_tail() {
-; CHECK-LABEL: test_laziness_tail:
-
-; CHECK: adrp x[[TMP:[0-9]+]], _nonlocal@GOTPAGE
-; CHECK: ldr [[FUNC:x[0-9]+]], [x[[TMP]], _nonlocal@GOTPAGEOFF]
-; CHECK: br [[FUNC]]
-
-; CHECK-NORMAL-LABEL: test_laziness_tail:
-; CHECK-NORMAL: b _nonlocal
+declare void @llvm.memset.p0.i64(ptr nocapture writeonly, i8, i64, i1 immarg)
 
 !llvm.module.flags = !{!0}
 !0 = !{i32 7, !"RtLibUseGOT", i32 1}

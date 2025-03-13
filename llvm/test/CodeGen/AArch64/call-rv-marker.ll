@@ -65,10 +65,63 @@ entry:
 }
 
 define dso_local void @rv_marker_3() personality ptr @__gxx_personality_v0 {
-; CHECK-LABEL: _rv_marker_3:
-; CHECK:         bl _foo1
-; CHECK-NEXT:    mov x29, x29
-; CHECK-NEXT:    bl _objc_retainAutoreleasedReturnValue
+; SELDAG-LABEL: rv_marker_3:
+; SELDAG:       Lfunc_begin0:
+; SELDAG-NEXT:    .cfi_startproc
+; SELDAG-NEXT:    .cfi_personality 155, ___gxx_personality_v0
+; SELDAG-NEXT:    .cfi_lsda 16, Lexception0
+; SELDAG-NEXT:  ; %bb.0: ; %entry
+; SELDAG-NEXT:    stp x20, x19, [sp, #-32]! ; 16-byte Folded Spill
+; SELDAG-NEXT:    stp x29, x30, [sp, #16] ; 16-byte Folded Spill
+; SELDAG-NEXT:    .cfi_def_cfa_offset 32
+; SELDAG-NEXT:    .cfi_offset w30, -8
+; SELDAG-NEXT:    .cfi_offset w29, -16
+; SELDAG-NEXT:    .cfi_offset w19, -24
+; SELDAG-NEXT:    .cfi_offset w20, -32
+; SELDAG-NEXT:    bl _foo1
+; SELDAG-NEXT:    mov x29, x29
+; SELDAG-NEXT:    bl _objc_retainAutoreleasedReturnValue
+; SELDAG-NEXT:    mov x19, x0
+; SELDAG-NEXT:  Ltmp0:
+; SELDAG-NEXT:    bl _objc_object
+; SELDAG-NEXT:  Ltmp1:
+; SELDAG-NEXT:  ; %bb.1: ; %invoke.cont
+; SELDAG-NEXT:    ldp x29, x30, [sp, #16] ; 16-byte Folded Reload
+; SELDAG-NEXT:    mov x0, x19
+; SELDAG-NEXT:    ldp x20, x19, [sp], #32 ; 16-byte Folded Reload
+; SELDAG-NEXT:    b _objc_release
+; SELDAG-NEXT:  LBB3_2: ; %lpad
+; SELDAG-NEXT:  Ltmp2:
+; SELDAG-NEXT:    mov x20, x0
+; SELDAG-NEXT:    mov x0, x19
+; SELDAG-NEXT:    bl _objc_release
+; SELDAG-NEXT:    mov x0, x20
+; SELDAG-NEXT:    bl __Unwind_Resume
+; SELDAG-NEXT:  Lfunc_end0:
+; SELDAG-NEXT:    .cfi_endproc
+; SELDAG-NEXT:    .section __TEXT,__gcc_except_tab
+; SELDAG-NEXT:    .p2align 2, 0x0
+; SELDAG-NEXT:  GCC_except_table3:
+; SELDAG-NEXT:  Lexception0:
+; SELDAG-NEXT:    .byte 255 ; @LPStart Encoding = omit
+; SELDAG-NEXT:    .byte 255 ; @TType Encoding = omit
+; SELDAG-NEXT:    .byte 1 ; Call site Encoding = uleb128
+; SELDAG-NEXT:    .uleb128 Lcst_end0-Lcst_begin0
+; SELDAG-NEXT:  Lcst_begin0:
+; SELDAG-NEXT:    .uleb128 Lfunc_begin0-Lfunc_begin0 ; >> Call Site 1 <<
+; SELDAG-NEXT:    .uleb128 Ltmp0-Lfunc_begin0 ; Call between Lfunc_begin0 and Ltmp0
+; SELDAG-NEXT:    .byte 0 ; has no landing pad
+; SELDAG-NEXT:    .byte 0 ; On action: cleanup
+; SELDAG-NEXT:    .uleb128 Ltmp0-Lfunc_begin0 ; >> Call Site 2 <<
+; SELDAG-NEXT:    .uleb128 Ltmp1-Ltmp0 ; Call between Ltmp0 and Ltmp1
+; SELDAG-NEXT:    .uleb128 Ltmp2-Lfunc_begin0 ; jumps to Ltmp2
+; SELDAG-NEXT:    .byte 0 ; On action: cleanup
+; SELDAG-NEXT:    .uleb128 Ltmp1-Lfunc_begin0 ; >> Call Site 3 <<
+; SELDAG-NEXT:    .uleb128 Lfunc_end0-Ltmp1 ; Call between Ltmp1 and Lfunc_end0
+; SELDAG-NEXT:    .byte 0 ; has no landing pad
+; SELDAG-NEXT:    .byte 0 ; On action: cleanup
+; SELDAG-NEXT:  Lcst_end0:
+; SELDAG-NEXT:    .p2align 2, 0x0
 ;
 ; GISEL-LABEL: rv_marker_3:
 ; GISEL:       Lfunc_begin0:
@@ -154,12 +207,78 @@ lpad:                                             ; preds = %entry
 }
 
 define dso_local void @rv_marker_4() personality ptr @__gxx_personality_v0 {
-; CHECK-LABEL: _rv_marker_4:
-; CHECK:       Ltmp3:
-; CHECK-NEXT:    bl _foo1
-; CHECK-NEXT:    mov x29, x29
-; CHECK-NEXT:    bl _objc_retainAutoreleasedReturnValue
-; CHECK-NEXT:  Ltmp4:
+; SELDAG-LABEL: rv_marker_4:
+; SELDAG:       Lfunc_begin1:
+; SELDAG-NEXT:    .cfi_startproc
+; SELDAG-NEXT:    .cfi_personality 155, ___gxx_personality_v0
+; SELDAG-NEXT:    .cfi_lsda 16, Lexception1
+; SELDAG-NEXT:  ; %bb.0: ; %entry
+; SELDAG-NEXT:    sub sp, sp, #48
+; SELDAG-NEXT:    stp x20, x19, [sp, #16] ; 16-byte Folded Spill
+; SELDAG-NEXT:    stp x29, x30, [sp, #32] ; 16-byte Folded Spill
+; SELDAG-NEXT:    .cfi_def_cfa_offset 48
+; SELDAG-NEXT:    .cfi_offset w30, -8
+; SELDAG-NEXT:    .cfi_offset w29, -16
+; SELDAG-NEXT:    .cfi_offset w19, -24
+; SELDAG-NEXT:    .cfi_offset w20, -32
+; SELDAG-NEXT:  Ltmp3:
+; SELDAG-NEXT:    bl _foo1
+; SELDAG-NEXT:    mov x29, x29
+; SELDAG-NEXT:    bl _objc_retainAutoreleasedReturnValue
+; SELDAG-NEXT:  Ltmp4:
+; SELDAG-NEXT:  ; %bb.1: ; %invoke.cont
+; SELDAG-NEXT:  Ltmp6:
+; SELDAG-NEXT:    mov x19, x0
+; SELDAG-NEXT:    bl _objc_object
+; SELDAG-NEXT:  Ltmp7:
+; SELDAG-NEXT:  ; %bb.2: ; %invoke.cont2
+; SELDAG-NEXT:    mov x0, x19
+; SELDAG-NEXT:    bl _objc_release
+; SELDAG-NEXT:    add x0, sp, #15
+; SELDAG-NEXT:    bl __ZN1SD1Ev
+; SELDAG-NEXT:    ldp x29, x30, [sp, #32] ; 16-byte Folded Reload
+; SELDAG-NEXT:    ldp x20, x19, [sp, #16] ; 16-byte Folded Reload
+; SELDAG-NEXT:    add sp, sp, #48
+; SELDAG-NEXT:    ret
+; SELDAG-NEXT:  LBB4_3: ; %lpad1
+; SELDAG-NEXT:  Ltmp8:
+; SELDAG-NEXT:    mov x20, x0
+; SELDAG-NEXT:    mov x0, x19
+; SELDAG-NEXT:    bl _objc_release
+; SELDAG-NEXT:    b LBB4_5
+; SELDAG-NEXT:  LBB4_4: ; %lpad
+; SELDAG-NEXT:  Ltmp5:
+; SELDAG-NEXT:    mov x20, x0
+; SELDAG-NEXT:  LBB4_5: ; %ehcleanup
+; SELDAG-NEXT:    add x0, sp, #15
+; SELDAG-NEXT:    bl __ZN1SD1Ev
+; SELDAG-NEXT:    mov x0, x20
+; SELDAG-NEXT:    bl __Unwind_Resume
+; SELDAG-NEXT:  Lfunc_end1:
+; SELDAG-NEXT:    .cfi_endproc
+; SELDAG-NEXT:    .section __TEXT,__gcc_except_tab
+; SELDAG-NEXT:    .p2align 2, 0x0
+; SELDAG-NEXT:  GCC_except_table4:
+; SELDAG-NEXT:  Lexception1:
+; SELDAG-NEXT:    .byte 255 ; @LPStart Encoding = omit
+; SELDAG-NEXT:    .byte 255 ; @TType Encoding = omit
+; SELDAG-NEXT:    .byte 1 ; Call site Encoding = uleb128
+; SELDAG-NEXT:    .uleb128 Lcst_end1-Lcst_begin1
+; SELDAG-NEXT:  Lcst_begin1:
+; SELDAG-NEXT:    .uleb128 Ltmp3-Lfunc_begin1 ; >> Call Site 1 <<
+; SELDAG-NEXT:    .uleb128 Ltmp4-Ltmp3 ; Call between Ltmp3 and Ltmp4
+; SELDAG-NEXT:    .uleb128 Ltmp5-Lfunc_begin1 ; jumps to Ltmp5
+; SELDAG-NEXT:    .byte 0 ; On action: cleanup
+; SELDAG-NEXT:    .uleb128 Ltmp6-Lfunc_begin1 ; >> Call Site 2 <<
+; SELDAG-NEXT:    .uleb128 Ltmp7-Ltmp6 ; Call between Ltmp6 and Ltmp7
+; SELDAG-NEXT:    .uleb128 Ltmp8-Lfunc_begin1 ; jumps to Ltmp8
+; SELDAG-NEXT:    .byte 0 ; On action: cleanup
+; SELDAG-NEXT:    .uleb128 Ltmp7-Lfunc_begin1 ; >> Call Site 3 <<
+; SELDAG-NEXT:    .uleb128 Lfunc_end1-Ltmp7 ; Call between Ltmp7 and Lfunc_end1
+; SELDAG-NEXT:    .byte 0 ; has no landing pad
+; SELDAG-NEXT:    .byte 0 ; On action: cleanup
+; SELDAG-NEXT:  Lcst_end1:
+; SELDAG-NEXT:    .p2align 2, 0x0
 ;
 ; GISEL-LABEL: rv_marker_4:
 ; GISEL:       Lfunc_begin1:
