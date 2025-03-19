@@ -570,6 +570,9 @@ CodeGen::CGCXXABI *CodeGen::CreateItaniumCXXABI(CodeGenModule &CGM) {
   case TargetCXXABI::GenericMIPS:
     return new ItaniumCXXABI(CGM, /*UseARMMethodPtrABI=*/true);
 
+  case TargetCXXABI::GenericSW64:
+    return new ItaniumCXXABI(CGM, /*UseARMMethodPtrABI=*/true);
+
   case TargetCXXABI::WebAssembly:
     return new WebAssemblyCXXABI(CGM);
 

@@ -428,6 +428,31 @@ static uint64_t resolveSparc32(uint64_t Type, uint64_t Offset, uint64_t S,
   return LocData;
 }
 
+static bool supportsSw64(uint64_t Type) {
+  switch (Type) {
+  case ELF::R_SW_64_REFLONG:
+  case ELF::R_SW_64_REFQUAD:
+  case ELF::R_SW_64_SREL32:
+    return true;
+  default:
+    return false;
+  }
+}
+
+static uint64_t resolveSw64(uint64_t Type, uint64_t Offset, uint64_t S,
+                            uint64_t /*LocData*/, int64_t Addend) {
+  switch (Type) {
+  case ELF::R_SW_64_REFLONG:
+  case ELF::R_SW_64_REFQUAD:
+    return S + Addend;
+  case ELF::R_SW_64_SREL32:
+    return (S + Addend) & 0xFFFFFFFF;
+  default:
+    llvm_unreachable("Invalid relocation type");
+  }
+  return 0;
+}
+
 static bool supportsHexagon(uint64_t Type) {
   return Type == ELF::R_HEX_32;
 }
@@ -807,6 +832,8 @@ getRelocationResolver(const ObjectFile &Obj) {
         return {supportsAmdgpu, resolveAmdgpu};
       case Triple::riscv64:
         return {supportsRISCV, resolveRISCV};
+      case Triple::sw_64:
+        return {supportsSw64, resolveSw64};
       default:
         if (isAMDGPU(Obj))
           return {supportsAmdgpu, resolveAmdgpu};

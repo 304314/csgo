@@ -536,6 +536,9 @@ protected:
   // %hi(), and similar unary operators.
   bool HasMipsExpressions = false;
 
+  // If true, then the assembler supports the .set directive.
+  bool HasSw64SetDirective = false;
+
   // If true, use Motorola-style integers in Assembly (ex. $0ac).
   bool UseMotorolaIntegers = false;
 
@@ -881,6 +884,7 @@ public:
   bool canRelaxRelocations() const { return RelaxELFRelocations; }
   void setRelaxELFRelocations(bool V) { RelaxELFRelocations = V; }
   bool hasMipsExpressions() const { return HasMipsExpressions; }
+  bool hasSw64SetDirective() const { return HasSw64SetDirective; }
   bool needsFunctionDescriptors() const { return NeedsFunctionDescriptors; }
   bool shouldUseMotorolaIntegers() const { return UseMotorolaIntegers; }
 };

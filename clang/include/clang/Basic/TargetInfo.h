@@ -332,6 +332,9 @@ public:
     //   } va_list[1];
     SystemZBuiltinVaList,
 
+    // __builtin_va_list as defined by the Sw64 ABI
+    Sw64ABIBuiltinVaList,
+
     // typedef struct __va_list_tag {
     //    void *__current_saved_reg_area_pointer;
     //    void *__saved_reg_area_end_pointer;

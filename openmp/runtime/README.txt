@@ -55,6 +55,7 @@ Architectures Supported
 * MIPS and MIPS64 architecture
 * RISCV64 architecture
 * LoongArch64 architecture
+* SW64 architecture
 
 Supported RTL Build Configurations
 ==================================

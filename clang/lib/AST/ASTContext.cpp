@@ -884,6 +884,7 @@ CXXABI *ASTContext::createCXXABI(const TargetInfo &T) {
   case TargetCXXABI::WatchOS:
   case TargetCXXABI::GenericAArch64:
   case TargetCXXABI::GenericMIPS:
+  case TargetCXXABI::GenericSW64:
   case TargetCXXABI::GenericItanium:
   case TargetCXXABI::WebAssembly:
   case TargetCXXABI::XL:
@@ -9009,6 +9010,57 @@ CreateAAPCSABIBuiltinVaListDecl(const ASTContext *Context) {
   return Context->buildImplicitTypedef(T, "__builtin_va_list");
 }
 
+static TypedefDecl *CreateSw64ABIBuiltinVaListDecl(const ASTContext *Context) {
+  // struct __va_list {
+  RecordDecl *VaListTagDecl = Context->buildImplicitRecord("__va_list");
+
+  if (Context->getLangOpts().CPlusPlus) {
+
+    // namespace std {
+    //   struct __va_list {
+    NamespaceDecl *NS;
+    NS = NamespaceDecl::Create(const_cast<ASTContext &>(*Context),
+                               Context->getTranslationUnitDecl(),
+                               /*Inline*/ false, SourceLocation(),
+                               SourceLocation(), &Context->Idents.get("std"),
+                               /*PrevDecl*/ nullptr, /*Nested=*/false);
+    NS->setImplicit();
+    VaListTagDecl->setDeclContext(NS);
+  }
+
+  VaListTagDecl->startDefinition();
+
+  const size_t NumFields = 2;
+  QualType FieldTypes[NumFields];
+  const char *FieldNames[NumFields];
+
+  //   unsigned gp_offset;
+  FieldTypes[0] = Context->getPointerType(Context->VoidTy);
+  FieldNames[0] = "__stack";
+
+  //   unsigned fp_offset;
+  FieldTypes[1] = Context->IntTy;
+  FieldNames[1] = "__offs";
+
+  // Create fields
+  for (unsigned i = 0; i < NumFields; ++i) {
+    FieldDecl *Field = FieldDecl::Create(
+        const_cast<ASTContext &>(*Context), VaListTagDecl, SourceLocation(),
+        SourceLocation(), &Context->Idents.get(FieldNames[i]), FieldTypes[i],
+        /*TInfo=*/nullptr,
+        /*BitWidth=*/nullptr,
+        /*Mutable=*/false, ICIS_NoInit);
+    Field->setAccess(AS_public);
+    VaListTagDecl->addDecl(Field);
+  }
+  VaListTagDecl->completeDefinition();
+  Context->VaListTagDecl = VaListTagDecl;
+  QualType VaListTagType = Context->getRecordType(VaListTagDecl);
+
+  // };
+  return Context->buildImplicitTypedef(VaListTagType, "__builtin_va_list");
+}
+
 static TypedefDecl *
 CreateSystemZBuiltinVaListDecl(const ASTContext *Context) {
   // struct __va_list_tag {
@@ -9136,6 +9188,8 @@ static TypedefDecl *CreateVaListDecl(const ASTContext *Context,
     return CreateSystemZBuiltinVaListDecl(Context);
   case TargetInfo::HexagonBuiltinVaList:
     return CreateHexagonBuiltinVaListDecl(Context);
+  case TargetInfo::Sw64ABIBuiltinVaList:
+    return CreateSw64ABIBuiltinVaListDecl(Context);
   }
 
   llvm_unreachable("Unhandled __builtin_va_list type kind");
@@ -12041,6 +12095,7 @@ MangleContext *ASTContext::createMangleContext(const TargetInfo *T) {
   case TargetCXXABI::GenericItanium:
   case TargetCXXABI::GenericARM:
   case TargetCXXABI::GenericMIPS:
+  case TargetCXXABI::GenericSW64:
   case TargetCXXABI::iOS:
   case TargetCXXABI::WebAssembly:
   case TargetCXXABI::WatchOS:
@@ -12062,6 +12117,7 @@ MangleContext *ASTContext::createDeviceMangleContext(const TargetInfo &T) {
   case TargetCXXABI::GenericItanium:
   case TargetCXXABI::GenericARM:
   case TargetCXXABI::GenericMIPS:
+  case TargetCXXABI::GenericSW64:
   case TargetCXXABI::iOS:
   case TargetCXXABI::WebAssembly:
   case TargetCXXABI::WatchOS:

@@ -7,6 +7,7 @@ add_llvm_component_library(LLVMRuntimeDyld
   RuntimeDyldELF.cpp
   RuntimeDyldMachO.cpp
   Targets/RuntimeDyldELFMips.cpp
+  Targets/RuntimeDyldELFSw64.cpp
 
   DEPENDS
   intrinsics_gen

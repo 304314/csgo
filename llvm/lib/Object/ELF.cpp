@@ -181,6 +181,13 @@ StringRef llvm::object::getELFRelocationTypeName(uint32_t Machine,
       break;
     }
     break;
+  case ELF::EM_SW64:
+    switch (Type) {
+#include "llvm/BinaryFormat/ELFRelocs/Sw64.def"
+    default:
+      break;
+    }
+    break;
   default:
     break;
   }
@@ -233,6 +240,8 @@ uint32_t llvm::object::getELFRelativeRelocationType(uint32_t Machine) {
     break;
   case ELF::EM_LOONGARCH:
     return ELF::R_LARCH_RELATIVE;
+  case ELF::EM_SW64:
+    break;
   default:
     break;
   }
@@ -276,6 +285,14 @@ StringRef llvm::object::getELFSectionTypeName(uint32_t Machine, unsigned Type) {
       STRINGIFY_ENUM_CASE(ELF, SHT_AARCH64_MEMTAG_GLOBALS_DYNAMIC);
       STRINGIFY_ENUM_CASE(ELF, SHT_AARCH64_MEMTAG_GLOBALS_STATIC);
     }
+  case ELF::EM_SW64:
+    switch (Type) {
+      STRINGIFY_ENUM_CASE(ELF, SHT_SW64_REGINFO);
+      STRINGIFY_ENUM_CASE(ELF, SHT_SW64_OPTIONS);
+      STRINGIFY_ENUM_CASE(ELF, SHT_SW64_ABIFLAGS);
+      STRINGIFY_ENUM_CASE(ELF, SHT_SW64_DWARF);
+    }
+    break;
   default:
     break;
   }
@@ -497,6 +514,13 @@ std::string ELFFile<ELFT>::getDynamicTagAsString(unsigned Arch,
 #undef PPC_DYNAMIC_TAG
     }
     break;
+
+  case ELF::EM_SW64:
+    switch (Type) {
+#define SW64_DYNAMIC_TAG(name, value) DYNAMIC_STRINGIFY_ENUM(name, value)
+#include "llvm/BinaryFormat/DynamicTags.def"
+#undef SW64_DYNAMIC_TAG
+    }
 
   case ELF::EM_PPC64:
     switch (Type) {

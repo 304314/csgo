@@ -880,6 +880,15 @@ EOF
 	if test "$?" = 0 ; then LIBC="libc1" ; else LIBC="" ; fi
 	echo ${UNAME_MACHINE}-unknown-linux-gnu${LIBC}
 	exit ;;
+    sw_64:Linux:*:* | sw_64:Linux:*:*)
+        case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
+          SW6)   UNAME_MACHINE=sw_64 ;;
+        esac
+          UNAME_MACHINE=sw_64
+        objdump --private-headers /bin/sh | grep -q ld.so.1
+        if test "$?" = 0 ; then LIBC="libc1" ; else LIBC="" ; fi
+        echo ${UNAME_MACHINE}-sunway-linux-gnu${LIBC}
+        exit ;;
     arm*:Linux:*:*)
 	eval $set_cc_for_build
 	if echo __ARM_EABI__ | $CC_FOR_BUILD -E - 2>/dev/null \

@@ -194,6 +194,8 @@ def m_riscv_Features_Group : OptionGroup<"<riscv features group>">,
                              Group<m_Group>, DocName<"RISC-V">;
 def m_loongarch_Features_Group : OptionGroup<"<loongarch features group>">,
                                  Group<m_Group>, DocName<"LoongArch">;
+def m_sw_64_Features_Group : OptionGroup<"<sw_64 features group>">,
+                             Group<m_Group>, DocName<"SW64">;
 
 def m_libc_Group : OptionGroup<"<m libc group>">, Group<m_mips_Features_Group>,
                    Flags<[HelpHidden]>;
@@ -4247,6 +4249,41 @@ def mno_lasx : Flag<["-"], "mno-lasx">, Group<m_loongarch_Features_Group>,
 def msimd_EQ : Joined<["-"], "msimd=">, Group<m_loongarch_Features_Group>,
   Flags<[TargetSpecific]>,
   HelpText<"Select the SIMD extension(s) to be enabled in LoongArch either 'none', 'lsx', 'lasx'.">;
+def mieee : Flag<["-"], "mieee">, Group<m_sw_64_Features_Group>,
+  HelpText<"Use mieee to set setfpec (SW64 only)">;
+foreach i = {0-31} in
+  def ffixed_sw_#i : Flag<["-"], "ffixed-sw-"#i>, Group<m_sw_64_Features_Group>,
+    HelpText<"Reserve the "#i#" register (SW64 only)">;
+def FS_LOAD : Flag<["-"], "fastload">, Group<M_Group>, Flags<[CC1Option]>,
+    HelpText<"enable fast load/store instrs in sw_64 target.(Development)">;
+def fsw_int_divmod : Flag<["-"], "fsw-int-divmod">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 int-div/rem instructions">, Flags<[CC1Option]>;
+def fsw_shift_word : Flag<["-"], "fsw-shift-word">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 int-shift instructions">, Flags<[CC1Option]>;
+def fsw_rev : Flag<["-"], "fsw-rev">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 byte-rev instructions">, Flags<[CC1Option]>;
+def fsw_recip : Flag<["-"], "fsw-recip">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 fp-rec instructions">, Flags<[CC1Option]>;
+def fsw_fprnd : Flag<["-"], "fsw-fprnd">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 fp-round instructions">, Flags<[CC1Option]>;
+def fsw_cmov : Flag<["-"], "fsw-cmov">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 fp-cmov instructions">, Flags<[CC1Option]>;
+def fsw_auto_inc_dec : Flag<["-"], "fsw-auto-inc-dec">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 post-inc instructions">, Flags<[CC1Option]>;
+def fsw_use_cas : Flag<["-"], "fsw-use-cas">, Group<f_Group>,
+  HelpText<"Enable sw64 core4 atomic-cas instructions">, Flags<[CC1Option]>;
+def msw64_relax : Flag<["-"], "sw64-mrelax">, Group<m_sw_64_Features_Group>,
+    HelpText<"Enable linker relaxation">;
+def msw64_no_relax : Flag<["-"], "sw64-mno-relax">, Group<m_sw_64_Features_Group>,
+    HelpText<"Disable linker relaxation">;
+def msw6a : Flag<["-"], "sw6a">,
+  Alias<march_EQ>, AliasArgs<["sw6a"]>, Group<m_sw_64_Features_Group>,
+  HelpText<"sw6a">, Flags<[HelpHidden]>;
+def msw6b : Flag<["-"], "sw6b">,
+  Alias<march_EQ>, AliasArgs<["sw6b"]>, Group<m_sw_64_Features_Group>,
+  HelpText<"sw6b">, Flags<[HelpHidden]>;
+def mswEv : Flag<["-"], "mswEv">, Group<m_sw_64_Features_Group>;
+
 def mnop_mcount : Flag<["-"], "mnop-mcount">, HelpText<"Generate mcount/__fentry__ calls as nops. To activate they need to be patched in.">,
   Flags<[CC1Option]>, Group<m_Group>,
   MarshallingInfoFlag<CodeGenOpts<"MNopMCount">>;
@@ -4297,6 +4334,12 @@ def mmsa : Flag<["-"], "mmsa">, Group<m_mips_Features_Group>,
   HelpText<"Enable MSA ASE (MIPS only)">;
 def mno_msa : Flag<["-"], "mno-msa">, Group<m_mips_Features_Group>,
   HelpText<"Disable MSA ASE (MIPS only)">;
+
+def msimd : Flag<["-"], "msimd">, Group<m_sw_64_Features_Group>,
+  HelpText<"Enable SIMD (SW64 only)">;
+def mno_simd : Flag<["-"], "mno-simd">, Group<m_sw_64_Features_Group>,
+  HelpText<"Disable SIMD (SW64 only)">;
+
 def mmt : Flag<["-"], "mmt">, Group<m_mips_Features_Group>,
   HelpText<"Enable MT ASE (MIPS only)">;
 def mno_mt : Flag<["-"], "mno-mt">, Group<m_mips_Features_Group>,

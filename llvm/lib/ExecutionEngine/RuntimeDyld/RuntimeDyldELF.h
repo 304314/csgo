@@ -15,6 +15,8 @@
 
 #include "RuntimeDyldImpl.h"
 #include "llvm/ADT/DenseMap.h"
+#include <vector>
+using namespace std;
 
 using namespace llvm;
 
@@ -60,6 +62,9 @@ class RuntimeDyldELF : public RuntimeDyldImpl {
   void resolveBPFRelocation(const SectionEntry &Section, uint64_t Offset,
                             uint64_t Value, uint32_t Type, int64_t Addend);
 
+  void resolveSW64Relocation(const SectionEntry &Section, uint64_t Offset,
+                             uint64_t Value, uint32_t Type, int32_t Addend);
+
   unsigned getMaxStubSize() const override {
     if (Arch == Triple::aarch64 || Arch == Triple::aarch64_be)
       return 20; // movz; movk; movk; movk; br
@@ -74,6 +79,8 @@ class RuntimeDyldELF : public RuntimeDyldImpl {
     else if (Arch == Triple::x86_64)
       return 6; // 2-byte jmp instruction + 32-bit relative address
     else if (Arch == Triple::systemz)
+      return 16;
+    else if (Arch == Triple::sw_64)
       return 16;
     else
       return 0;

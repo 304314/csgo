@@ -347,6 +347,56 @@ StringRef MCSymbolRefExpr::getVariantKindName(VariantKind Kind) {
   case VK_PPC_LOCAL: return "local";
   case VK_PPC_NOTOC: return "notoc";
   case VK_PPC_PCREL_OPT: return "<<invalid>>";
+  case VK_SW64_ELF_LITERAL:
+    return "ELF_LITERAL";
+  case VK_SW64_LITUSE_ADDR:
+    return "LITUSE_ADDR";
+  case VK_SW64_LITUSE_BASE:
+    return "LITUSE_BASE";
+  case VK_SW64_LITUSE_BYTOFF:
+    return "LITUSE_BYTOFF";
+  case VK_SW64_LITUSE_JSR:
+    return "LITUSE_JSR";
+  case VK_SW64_LITUSE_TLSGD:
+    return "LITUSE_TLSGD";
+  case VK_SW64_LITUSE_TLSLDM:
+    return "LITUSE_TLSLDM";
+  case VK_SW64_LITUSE_JSRDIRECT:
+    return "LITUSE_JSRDIRECT";
+  case VK_SW64_GPDISP:
+    return "GPDISP";
+  case VK_SW64_GPDISP_HI16:
+    return "GPDISP_HI16";
+  case VK_SW64_GPDISP_LO16:
+    return "GPDISP_LO16";
+  case VK_SW64_GPREL_HI16:
+    return "GPREL_HI16";
+  case VK_SW64_GPREL_LO16:
+    return "GPREL_LO16";
+  case VK_SW64_GPREL16:
+    return "GPREL16";
+  case VK_SW64_BRSGP:
+    return "BRSGP";
+  case VK_SW64_TLSGD:
+    return "TLSGD";
+  case VK_SW64_TLSLDM:
+    return "TLSLDM";
+  case VK_SW64_GOTDTPREL16:
+    return "GOTDTPREL16";
+  case VK_SW64_DTPREL_HI16:
+    return "DTPREL_HI16";
+  case VK_SW64_DTPREL_LO16:
+    return "DTPREL_LO16";
+  case VK_SW64_DTPREL16:
+    return "DTPREL16";
+  case VK_SW64_GOTTPREL16:
+    return "GOTTPREL16";
+  case VK_SW64_TPREL_HI16:
+    return "TPREL_HI16";
+  case VK_SW64_TPREL_LO16:
+    return "TPREL_LO16";
+  case VK_SW64_TPREL16:
+    return "TPREL16";
   case VK_COFF_IMGREL32: return "IMGREL";
   case VK_Hexagon_LO16: return "LO16";
   case VK_Hexagon_HI16: return "HI16";

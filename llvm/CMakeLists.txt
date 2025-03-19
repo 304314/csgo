@@ -441,6 +441,7 @@ set(LLVM_ALL_TARGETS
   PowerPC
   RISCV
   Sparc
+  Sw64
   SystemZ
   VE
   WebAssembly
@@ -458,7 +459,7 @@ set(LLVM_ALL_EXPERIMENTAL_TARGETS
 )
 
 # List of targets with JIT support:
-set(LLVM_TARGETS_WITH_JIT X86 PowerPC AArch64 ARM Mips SystemZ)
+set(LLVM_TARGETS_WITH_JIT X86 PowerPC AArch64 ARM Mips SystemZ Sw64)
 
 set(LLVM_TARGETS_TO_BUILD "all"
     CACHE STRING "Semicolon-separated list of targets to build, or \"all\".")

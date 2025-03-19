@@ -17,6 +17,7 @@
 #undef NetBSD
 #undef mips
 #undef sparc
+#undef sw_64
 
 namespace llvm {
 
@@ -106,7 +107,8 @@ public:
     renderscript32, // 32-bit RenderScript
     renderscript64, // 64-bit RenderScript
     ve,             // NEC SX-Aurora Vector Engine
-    LastArchType = ve
+    sw_64,          // sw64:basic Arch for SW
+    LastArchType = sw_64
   };
   enum SubArchType {
     NoSubArch,
@@ -152,6 +154,11 @@ public:
     KalimbaSubArch_v5,
 
     MipsSubArch_r6,
+
+    Sw64SubArch_4d,
+    Sw64SubArch_6a,
+    Sw64SubArch_6b,
+    Sw64SubArch_8a,
 
     PPCSubArch_spe,
 
@@ -890,6 +897,21 @@ public:
     return isMIPS32() || isMIPS64();
   }
 
+  /// Tests whether the target is SW64 64-bit (little endian).
+  bool isSw64() const { return getArch() == Triple::sw_64; }
+
+  bool isSw6a() const { return getSubArch() == Triple::Sw64SubArch_6a; }
+
+  bool isSw6b() const { return getSubArch() == Triple::Sw64SubArch_6b; }
+
+  bool isSw4d() const { return getSubArch() == Triple::Sw64SubArch_4d; }
+
+  bool isSw8a() const { return getSubArch() == Triple::Sw64SubArch_8a; }
+
+  bool isSW() const {
+    return isSw64() || isSw6a() || isSw6b() || isSw4d() || isSw8a();
+  }
+
   /// Tests whether the target is PowerPC (32- or 64-bit LE or BE).
   bool isPPC() const {
     return getArch() == Triple::ppc || getArch() == Triple::ppc64 ||
@@ -1139,6 +1161,5 @@ public:
 };
 
 } // End llvm namespace
-
 
 #endif

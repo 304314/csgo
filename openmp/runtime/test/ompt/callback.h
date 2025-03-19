@@ -212,6 +212,16 @@ ompt_label_##id:
   printf("%" PRIu64 ": current_address=%p or %p\n", \
          ompt_get_thread_data()->value, ((char *)addr) - 8, ((char *)addr) - 12)
 #endif
+#elif KMP_ARCH_SW64
+// On SW64 the NOP instruction is 4 bytes long, can be followed by some other
+// instructions (more bytes).
+#define print_possible_return_addresses(addr)                                  \
+  printf("%" PRIu64 ": current_address=%p or %p or %p or %p or %p or %p or "   \
+                    "%p or %p or %p or %p\n",                                  \
+         ompt_get_thread_data()->value, ((char *)addr) - 16,                   \
+         ((char *)addr) - 20, ((char *)addr) - 24, ((char *)addr) - 28,        \
+         ((char *)addr) - 32, ((char *)addr) - 36, ((char *)addr) - 40,        \
+         ((char *)addr) - 44, ((char *)addr) - 48, ((char *)addr) - 52)
 #elif KMP_ARCH_LOONGARCH64
 // On LoongArch64 the NOP instruction is 4 bytes long, can be followed by
 // inserted jump instruction (another 4 bytes long). And an additional jump
