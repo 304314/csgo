@@ -13626,6 +13626,9 @@ private:
   bool CheckMipsBuiltinCpu(const TargetInfo &TI, unsigned BuiltinID,
                            CallExpr *TheCall);
   bool CheckMipsBuiltinArgument(unsigned BuiltinID, CallExpr *TheCall);
+  bool CheckSw64BuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
+  bool CheckSw64VectorMemoryIntr(unsigned BuiltinID, CallExpr *TheCall);
+  bool CheckSw64VectorShift(unsigned BuiltinID, CallExpr *TheCall);
   bool CheckSystemZBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
   bool CheckX86BuiltinRoundingOrSAE(unsigned BuiltinID, CallExpr *TheCall);
   bool CheckX86BuiltinGatherScatterScale(unsigned BuiltinID, CallExpr *TheCall);

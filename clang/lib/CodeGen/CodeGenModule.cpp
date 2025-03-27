@@ -90,6 +90,7 @@ static CGCXXABI *createCXXABI(CodeGenModule &CGM) {
   case TargetCXXABI::iOS:
   case TargetCXXABI::WatchOS:
   case TargetCXXABI::GenericMIPS:
+  case TargetCXXABI::GenericSW64:
   case TargetCXXABI::GenericItanium:
   case TargetCXXABI::WebAssembly:
   case TargetCXXABI::XL:
@@ -268,6 +269,8 @@ createTargetCodeGenInfo(CodeGenModule &CGM) {
       return createX86_64TargetCodeGenInfo(CGM, AVXLevel);
     }
   }
+  case llvm::Triple::sw_64:
+    return createSw64TargetCodeGenInfo(CGM);
   case llvm::Triple::hexagon:
     return createHexagonTargetCodeGenInfo(CGM);
   case llvm::Triple::lanai:

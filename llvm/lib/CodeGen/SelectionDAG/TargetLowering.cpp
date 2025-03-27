@@ -408,6 +408,87 @@ void TargetLowering::softenSetCCOperands(SelectionDAG &DAG, EVT VT,
   auto Call = makeLibCall(DAG, LC1, RetVT, Ops, CallOptions, dl, Chain);
   NewLHS = Call.first;
   NewRHS = DAG.getConstant(0, dl, RetVT);
+  if (Triple(this->getTargetMachine().getTargetTriple()).getArch() ==
+      Triple::sw_64) {
+
+    ShouldInvertCC = false;
+    switch (CCCode) {
+
+    case llvm::ISD::SETOGT:
+    case llvm::ISD::SETUGT:
+    case llvm::ISD::SETGT:
+      // from:
+      // ldi $1,0($31)
+      // cmplt $1,$0,$0
+      // to:
+      //
+      Call = makeLibCall(DAG, LC1, RetVT, Ops, CallOptions, dl, Chain);
+      NewLHS = Call.first;
+      NewRHS = DAG.getConstant(0, dl, RetVT);
+      break;
+    case llvm::ISD::SETOGE:
+    case llvm::ISD::SETUGE:
+    case llvm::ISD::SETGE:
+      // from:
+      // ldi $1,-1($31)
+      // cmplt $1,$0,$0
+      // to:
+      // ldi $1 0($31)
+      // complt $1,$0,$0
+
+      Call = makeLibCall(DAG, LC1, RetVT, Ops, CallOptions, dl, Chain);
+      NewLHS = Call.first;
+      NewRHS = DAG.getConstant(1, dl, RetVT);
+      break;
+    case llvm::ISD::SETOLT:
+    case llvm::ISD::SETULT:
+    case llvm::ISD::SETLT:
+
+      // from:
+      // cmplt $0,0,$0
+      // to:
+      // cmplt $31,$0,$0
+
+      Call = makeLibCall(DAG, LC1, RetVT, Ops, CallOptions, dl, Chain);
+      NewRHS = Call.first;
+      NewLHS = DAG.getConstant(0, dl, RetVT);
+      break;
+    case llvm::ISD::SETOLE:
+    case llvm::ISD::SETULE:
+    case llvm::ISD::SETLE:
+      //    from:
+      //    cmplt $0,-1,$0
+      //    to:
+      //    cmplt $31,$0,$0
+      Call = makeLibCall(DAG, LC1, RetVT, Ops, CallOptions, dl, Chain);
+      NewRHS = Call.first;
+      NewLHS = DAG.getConstant(1, dl, RetVT);
+      break;
+    case llvm::ISD::SETUEQ:
+    case llvm::ISD::SETOEQ:
+    case llvm::ISD::SETEQ:
+      // from:
+      // cmplt $0,0,$0
+      // to:
+      // cmplt $0,-1,$0
+      //
+      Call = makeLibCall(DAG, LC1, RetVT, Ops, CallOptions, dl, Chain);
+      NewLHS = Call.first;
+      NewRHS = DAG.getConstant(1, dl, RetVT);
+      break;
+    case llvm::ISD::SETONE:
+      ShouldInvertCC = true;
+      Call = makeLibCall(DAG, LC1, RetVT, Ops, CallOptions, dl, Chain);
+      NewLHS = Call.first;
+      NewRHS = DAG.getConstant(1, dl, RetVT);
+      break;
+    case llvm::ISD::SETO:
+      ShouldInvertCC = true;
+      LLVM_FALLTHROUGH;
+    default:
+      break;
+    }
+  }
 
   CCCode = getCmpLibcallCC(LC1);
   if (ShouldInvertCC) {

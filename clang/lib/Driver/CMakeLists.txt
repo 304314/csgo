@@ -44,6 +44,7 @@ add_clang_library(clangDriver
   ToolChains/Arch/PPC.cpp
   ToolChains/Arch/RISCV.cpp
   ToolChains/Arch/Sparc.cpp
+  ToolChains/Arch/Sw64.cpp
   ToolChains/Arch/SystemZ.cpp
   ToolChains/Arch/VE.cpp
   ToolChains/Arch/X86.cpp
@@ -94,6 +95,7 @@ add_clang_library(clangDriver
   ToolChains/XCore.cpp
   ToolChains/PPCLinux.cpp
   ToolChains/PPCFreeBSD.cpp
+  ToolChains/Sw64Toolchain.cpp
   ToolChains/InterfaceStubs.cpp
   ToolChains/ZOS.cpp
   Types.cpp

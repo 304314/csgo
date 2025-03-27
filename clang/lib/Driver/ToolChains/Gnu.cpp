@@ -14,6 +14,7 @@
 #include "Arch/PPC.h"
 #include "Arch/RISCV.h"
 #include "Arch/Sparc.h"
+#include "Arch/Sw64.h"
 #include "Arch/SystemZ.h"
 #include "CommonArgs.h"
 #include "Linux.h"
@@ -287,6 +288,8 @@ static const char *getLDMOption(const llvm::Triple &T, const ArgList &Args) {
     return "elf64ve";
   case llvm::Triple::csky:
     return "cskyelf_linux";
+  case llvm::Triple::sw_64:
+    return "elf64sw_64";
   default:
     return nullptr;
   }
@@ -972,6 +975,11 @@ void tools::gnutools::Assembler::ConstructJob(Compilation &C,
       // support -mmsa / -mno-msa options.
       if (A->getOption().matches(options::OPT_mmsa))
         CmdArgs.push_back(Args.MakeArgString("-mmsa"));
+    }
+
+    if (Arg *A = Args.getLastArg(options::OPT_msimd, options::OPT_mno_simd)) {
+      if (A->getOption().matches(options::OPT_msimd))
+        CmdArgs.push_back(Args.MakeArgString("-msimd"));
     }
 
     Args.AddLastArg(CmdArgs, options::OPT_mhard_float,
@@ -2495,6 +2503,12 @@ void Generic_GCC::GCCInstallationDetector::AddDefaultGCCPrefixes(
       "s390x-linux-gnu", "s390x-unknown-linux-gnu", "s390x-ibm-linux-gnu",
       "s390x-suse-linux", "s390x-redhat-linux"};
 
+	static const char *const Sw64LibDirs[] = {"/lib64", "/lib",
+                                            "/lib/gcc/sw_64-sunway-linux-gnu/",
+                                            "/sw_64-sunway-linux-gnu/lib"};
+  static const char *const Sw64Triples[] = {
+      "sw_64-sunway-linux-gnu", "sw_64-unknown-linux-gnu", "sw_64-linux-gnu",
+      "sw_64-openEuler-linux"};
 
   using std::begin;
   using std::end;
@@ -2747,6 +2761,10 @@ void Generic_GCC::GCCInstallationDetector::AddDefaultGCCPrefixes(
   case llvm::Triple::systemz:
     LibDirs.append(begin(SystemZLibDirs), end(SystemZLibDirs));
     TripleAliases.append(begin(SystemZTriples), end(SystemZTriples));
+    break;
+  case llvm::Triple::sw_64:
+    LibDirs.append(begin(Sw64LibDirs), end(Sw64LibDirs));
+    TripleAliases.append(begin(Sw64Triples), end(Sw64Triples));
     break;
   default:
     // By default, just rely on the standard lib directories and the original
@@ -3364,4 +3382,9 @@ void Generic_ELF::addClangTargetOptions(const ArgList &DriverArgs,
   if (!DriverArgs.hasFlag(options::OPT_fuse_init_array,
                           options::OPT_fno_use_init_array, true))
     CC1Args.push_back("-fno-use-init-array");
+  if (getTriple().getArch() == llvm::Triple::sw_64 &&
+      DriverArgs.hasArg(options::OPT_mieee)) {
+    CC1Args.push_back("-mllvm");
+    CC1Args.push_back("-mieee");
+  }
 }

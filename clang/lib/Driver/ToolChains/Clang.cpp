@@ -17,6 +17,7 @@
 #include "Arch/PPC.h"
 #include "Arch/RISCV.h"
 #include "Arch/Sparc.h"
+#include "Arch/Sw64.h"
 #include "Arch/SystemZ.h"
 #include "Arch/VE.h"
 #include "Arch/X86.h"
@@ -53,6 +54,7 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Process.h"
 #include "llvm/Support/RISCVISAInfo.h"
+#include "llvm/Support/Sw64TargetParser.h"
 #include "llvm/Support/YAMLParser.h"
 #include "llvm/TargetParser/ARMTargetParserCommon.h"
 #include "llvm/TargetParser/Host.h"
@@ -478,6 +480,7 @@ static bool useFramePointerForTargetByDefault(const ArgList &Args,
     case llvm::Triple::mips64el:
     case llvm::Triple::mips:
     case llvm::Triple::mipsel:
+    case llvm::Triple::sw_64:
     case llvm::Triple::systemz:
     case llvm::Triple::x86:
     case llvm::Triple::x86_64:
@@ -1735,6 +1738,10 @@ void Clang::RenderTargetOptions(const llvm::Triple &EffectiveTriple,
     AddSparcTargetArgs(Args, CmdArgs);
     break;
 
+  case llvm::Triple::sw_64:
+    AddSw64TargetArgs(Args, CmdArgs);
+    break;
+
   case llvm::Triple::systemz:
     AddSystemZTargetArgs(Args, CmdArgs);
     break;
@@ -2230,6 +2237,34 @@ void Clang::AddSparcTargetArgs(const ArgList &Args,
 
     CmdArgs.push_back("-tune-cpu");
     CmdArgs.push_back(Args.MakeArgString(TuneCPU));
+  }
+}
+
+void Clang::AddSw64TargetArgs(const ArgList &Args,
+                              ArgStringList &CmdArgs) const {
+  std::string TuneCPU;
+
+  if (const Arg *A = Args.getLastArg(clang::driver::options::OPT_mtune_EQ)) {
+    StringRef Name = A->getValue();
+
+    Name = llvm::Sw64::resolveTuneCPUAlias(Name, true);
+    TuneCPU = std::string(Name);
+  }
+  if (!TuneCPU.empty()) {
+    CmdArgs.push_back("-tune-cpu");
+    CmdArgs.push_back(Args.MakeArgString(TuneCPU));
+  }
+
+  if (Arg *A = Args.getLastArg(options::OPT_O_Group)) {
+    StringRef OOpt;
+    if (A->getOption().matches(options::OPT_O))
+      OOpt = A->getValue();
+
+    if (A->getOption().matches(options::OPT_O0) || OOpt == "1" || OOpt == "s")
+      return;
+
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-loop-prefetch-writes=true");
   }
 }
 
@@ -5096,6 +5131,14 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
         options::OPT_Wa_COMMA,
         options::OPT_Xassembler,
         options::OPT_mllvm,
+        options::OPT_fsw_int_divmod,
+        options::OPT_fsw_shift_word,
+        options::OPT_fsw_rev,
+        options::OPT_fsw_recip,
+        options::OPT_fsw_fprnd,
+        options::OPT_fsw_cmov,
+        options::OPT_fsw_auto_inc_dec,
+        options::OPT_fsw_use_cas,
     };
     for (const auto &A : Args)
       if (llvm::is_contained(kBitcodeOptionIgnorelist, A->getOption().getID()))
@@ -5287,6 +5330,10 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   unsigned PICLevel;
   bool IsPIE;
   std::tie(RelocationModel, PICLevel, IsPIE) = ParsePICArgs(TC, Args);
+  if (TC.getArch() == llvm::Triple::sw_64 &&
+      RelocationModel != llvm::Reloc::PIC_)
+    RelocationModel = llvm::Reloc::PIC_;
+
   Arg *LastPICDataRelArg =
       Args.getLastArg(options::OPT_mno_pic_data_is_text_relative,
                       options::OPT_mpic_data_is_text_relative);
@@ -5648,6 +5695,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
       A->render(Args, CmdArgs);
     else if (TC.getTriple().isPPC() &&
              (A->getOption().getID() != options::OPT_mlong_double_80))
+      A->render(Args, CmdArgs);
+    else if (TC.getTriple().isSw64())
       A->render(Args, CmdArgs);
     else
       D.Diag(diag::err_drv_unsupported_opt_for_target)
@@ -6622,6 +6671,46 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   }
 
   Args.AddLastArg(CmdArgs, options::OPT_ftrap_function_EQ);
+
+  if (Args.getLastArg(options::OPT_fsw_int_divmod)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-int-divmod");
+  }
+
+  if (Args.getLastArg(options::OPT_fsw_shift_word)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-shift-word");
+  }
+
+  if (Args.getLastArg(options::OPT_fsw_rev)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-rev");
+  }
+
+  if (Args.getLastArg(options::OPT_fsw_recip)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-recip");
+  }
+
+  if (Args.getLastArg(options::OPT_fsw_fprnd)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-fprnd");
+  }
+
+  if (Args.getLastArg(options::OPT_fsw_cmov)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-cmov");
+  }
+
+  if (Args.getLastArg(options::OPT_fsw_auto_inc_dec)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-auto-inc-dec");
+  }
+
+  if (Args.getLastArg(options::OPT_fsw_use_cas)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sw-use-cas");
+  }
 
   // -fno-strict-overflow implies -fwrapv if it isn't disabled, but
   // -fstrict-overflow won't turn off an explicitly enabled -fwrapv.

@@ -49,6 +49,8 @@ function(libomp_get_architecture return_arch)
       #error ARCHITECTURE=riscv64
     #elif defined(__loongarch__) && __loongarch_grlen == 64
       #error ARCHITECTURE=loongarch64
+    #elif defined(__sw_64__)
+      #error ARCHITECTURE=sw_64
     #else
       #error ARCHITECTURE=UnknownArchitecture
     #endif

@@ -681,9 +681,14 @@ void MCAsmStreamer::emitAssignment(MCSymbol *Symbol, const MCExpr *Value) {
     if (E->inlineAssignedExpr())
       EmitSet = false;
   if (EmitSet) {
-    OS << ".set ";
-    Symbol->print(OS, MAI);
-    OS << ", ";
+    if (MAI->hasSw64SetDirective()) {
+      Symbol->print(OS, MAI);
+      OS << " = ";
+    } else {
+      OS << ".set ";
+      Symbol->print(OS, MAI);
+      OS << ", ";
+    }
     Value->print(OS, MAI);
 
     EmitEOL();

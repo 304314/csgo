@@ -180,6 +180,16 @@ enum class MachineCombinerPattern {
   DPWSSD,
 
   FNMADD,
+
+  // SW64
+  VMULADDS_OP1,
+  VMULADDS_OP2,
+  VMULADDD_OP1,
+  VMULADDD_OP2,
+  VMULSUBS_OP1,
+  VMULSUBS_OP2,
+  VMULSUBD_OP1,
+  VMULSUBD_OP2,
 };
 
 } // end namespace llvm

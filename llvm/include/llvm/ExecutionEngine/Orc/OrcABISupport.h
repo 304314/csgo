@@ -416,6 +416,46 @@ public:
                                       unsigned NumStubs);
 };
 
+// @brief Sw64 support.
+//
+// Sw64 supports lazy JITing.
+class OrcSw64 {
+public:
+  static constexpr unsigned PointerSize = 8;
+  static constexpr unsigned TrampolineSize = 40;
+  static constexpr unsigned StubSize = 32;
+  static constexpr unsigned StubToPointerMaxDisplacement = 1 << 31;
+  static constexpr unsigned ResolverCodeSize = 0x218;
+
+  /// Write the resolver code into the given memory. The user is
+  /// responsible for allocating the memory and setting permissions.
+  ///
+  /// ReentryFnAddr should be the address of a function whose signature matches
+  /// void* (*)(void *TrampolineAddr, void *ReentryCtxAddr). The ReentryCtxAddr
+  /// argument of writeResolverCode will be passed as the second argument to
+  /// the function at ReentryFnAddr.
+  static void writeResolverCode(char *ResolverWorkingMem,
+                                ExecutorAddr ResolverTargetAddress,
+                                ExecutorAddr ReentryFnAddr,
+                                ExecutorAddr ReentryCtxAddr);
+
+  /// Write the requested number of trampolines into the given memory,
+  /// which must be big enough to hold 1 pointer, plus NumTrampolines
+  /// trampolines.
+  static void writeTrampolines(char *TrampolineBlockWorkingMem,
+                               ExecutorAddr TrampolineBlockTargetAddress,
+                               ExecutorAddr ResolverFnAddr,
+                               unsigned NumTrampolines);
+  /// Write NumStubs indirect stubs to working memory at StubsBlockWorkingMem.
+  /// Stubs will be written as if linked at StubsBlockTargetAddress, with the
+  /// Nth stub using the Nth pointer in memory starting at
+  /// PointersBlockTargetAddress.
+  static void writeIndirectStubsBlock(char *StubsBlockWorkingMem,
+                                      ExecutorAddr StubsBlockTargetAddress,
+                                      ExecutorAddr PointersBlockTargetAddress,
+                                      unsigned NumStubs);
+};
+
 } // end namespace orc
 } // end namespace llvm
 

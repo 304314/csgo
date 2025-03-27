@@ -48,6 +48,7 @@
 #include "llvm/IR/IntrinsicsR600.h"
 #include "llvm/IR/IntrinsicsRISCV.h"
 #include "llvm/IR/IntrinsicsS390.h"
+#include "llvm/IR/IntrinsicsSw64.h"
 #include "llvm/IR/IntrinsicsVE.h"
 #include "llvm/IR/IntrinsicsWebAssembly.h"
 #include "llvm/IR/IntrinsicsX86.h"
@@ -5601,6 +5602,8 @@ static Value *EmitTargetArchBuiltinExpr(CodeGenFunction *CGF,
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
     return CGF->EmitRISCVBuiltinExpr(BuiltinID, E, ReturnValue);
+  case llvm::Triple::sw_64:
+    return CGF->EmitSw64BuiltinExpr(BuiltinID, E, ReturnValue);
   default:
     return nullptr;
   }
@@ -20445,4 +20448,109 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
 
   llvm::Function *F = CGM.getIntrinsic(ID, IntrinsicTypes);
   return Builder.CreateCall(F, Ops, "");
+}
+
+Value *CodeGenFunction::EmitSw64BuiltinExpr(unsigned BuiltinID,
+                                            const CallExpr *E,
+                                            ReturnValueSlot ReturnValue) {
+  SmallVector<Value *, 4> Ops;
+  llvm::Type *ResultType = ConvertType(E->getType());
+  Intrinsic::ID ID = Intrinsic::not_intrinsic;
+
+  switch (BuiltinID) {
+  default:
+    llvm_unreachable("unexpected builtin ID");
+  case Sw64::BI__builtin_sw_vload:
+    ID = Intrinsic::sw64_vload;
+    break;
+  case Sw64::BI__builtin_sw_vloade:
+    ID = Intrinsic::sw64_vloade;
+    break;
+  case Sw64::BI__builtin_sw_vloadu:
+    ID = Intrinsic::sw64_vloadu;
+    break;
+  case Sw64::BI__builtin_sw_vload_u:
+    ID = Intrinsic::sw64_vload_u;
+    break;
+  case Sw64::BI__builtin_sw_vloadnc:
+    ID = Intrinsic::sw64_vloadnc;
+    break;
+  case Sw64::BI__builtin_sw_vstore:
+    ID = Intrinsic::sw64_vstore;
+    break;
+  case Sw64::BI__builtin_sw_vstoreu:
+    ID = Intrinsic::sw64_vstoreu;
+    break;
+  case Sw64::BI__builtin_sw_vstore_u:
+    ID = Intrinsic::sw64_vstore_u;
+    break;
+  case Sw64::BI__builtin_sw_vstoreul:
+    ID = Intrinsic::sw64_vstoreul;
+    break;
+  case Sw64::BI__builtin_sw_vstoreuh:
+    ID = Intrinsic::sw64_vstoreuh;
+    break;
+  case Sw64::BI__builtin_sw_vstorenc:
+    ID = Intrinsic::sw64_vstorenc;
+    break;
+  case Sw64::BI__builtin_sw_vsll:
+    ID = Intrinsic::sw64_vsll;
+    break;
+  case Sw64::BI__builtin_sw_vsrl:
+    ID = Intrinsic::sw64_vsrl;
+    break;
+  case Sw64::BI__builtin_sw_vsra:
+    ID = Intrinsic::sw64_vsra;
+    break;
+  case Sw64::BI__builtin_sw_vrol:
+    ID = Intrinsic::sw64_vrol;
+    break;
+  }
+
+  if (BuiltinID == Sw64::BI__builtin_sw_vload ||
+      BuiltinID == Sw64::BI__builtin_sw_vloade ||
+      BuiltinID == Sw64::BI__builtin_sw_vloadu ||
+      BuiltinID == Sw64::BI__builtin_sw_vload_u ||
+      BuiltinID == Sw64::BI__builtin_sw_vloadnc) {
+    bool isLoadExt = BuiltinID == Sw64::BI__builtin_sw_vloade;
+
+    Value *LoadAddr = EmitScalarExpr(E->getArg(0));
+    QualType Ty = E->getType();
+    llvm::Type *ArgTy = LoadAddr->getType();
+    llvm::Type *RealResTy = ConvertType(Ty);
+    llvm::Type *ResPTy = RealResTy->getPointerTo();
+    // if target is Load duplicated in vector, do not emit BitCast
+    ResPTy = isLoadExt ? LoadAddr->getType() : ResPTy;
+    if (!isLoadExt) {
+      LoadAddr = Builder.CreateBitCast(LoadAddr, ResPTy);
+    }
+    llvm::Type *Tys[2] = {RealResTy, ResPTy};
+    Function *F = CGM.getIntrinsic(ID, Tys);
+    return Builder.CreateCall(F, LoadAddr, "vload");
+  } else if (BuiltinID == Sw64::BI__builtin_sw_vstore ||
+             BuiltinID == Sw64::BI__builtin_sw_vstoreu ||
+             BuiltinID == Sw64::BI__builtin_sw_vstore_u ||
+             BuiltinID == Sw64::BI__builtin_sw_vstoreuh ||
+             BuiltinID == Sw64::BI__builtin_sw_vstoreul ||
+             BuiltinID == Sw64::BI__builtin_sw_vstorenc) {
+    Value *StoreVal = EmitScalarExpr(E->getArg(0));
+    Value *StoreAddr = EmitScalarExpr(E->getArg(1));
+    QualType Ty = E->getArg(0)->getType();
+    llvm::Type *StoreTy = StoreVal->getType();
+    StoreAddr = Builder.CreateBitCast(StoreAddr, StoreTy->getPointerTo());
+    Function *F =
+        CGM.getIntrinsic(ID, {StoreVal->getType(), StoreAddr->getType()});
+    return Builder.CreateCall(F, {StoreVal, StoreAddr}, "");
+  } else if (BuiltinID == Sw64::BI__builtin_sw_vsll ||
+             BuiltinID == Sw64::BI__builtin_sw_vsra ||
+             BuiltinID == Sw64::BI__builtin_sw_vsrl ||
+             BuiltinID == Sw64::BI__builtin_sw_vrol) {
+    Value *ShiftVal = EmitScalarExpr(E->getArg(0));
+    Value *ShiftImm = EmitScalarExpr(E->getArg(1));
+    QualType Ty = E->getArg(0)->getType();
+
+    Function *F =
+        CGM.getIntrinsic(ID, {ShiftVal->getType(), ShiftImm->getType()});
+    return Builder.CreateCall(F, {ShiftVal, ShiftImm}, "");
+  }
 }

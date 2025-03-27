@@ -108,6 +108,10 @@ set(sifive_files
   sifive_vector.h
   )
 
+set(sw64_files
+  sw64intrin.h
+  )
+
 set(systemz_files
   s390intrin.h
   vecintrin.h
@@ -260,6 +264,7 @@ set(files
   ${ppc_htm_files}
   ${riscv_files}
   ${sifive_files}
+  ${sw64_files}
   ${systemz_files}
   ${ve_files}
   ${x86_files}
@@ -463,6 +468,7 @@ add_header_target("mips-resource-headers" "${mips_msa_files}")
 add_header_target("ppc-resource-headers" "${ppc_files};${ppc_wrapper_files}")
 add_header_target("ppc-htm-resource-headers" "${ppc_htm_files}")
 add_header_target("riscv-resource-headers" "${riscv_files};${riscv_generated_files}")
+add_header_target("sw64-resource-headers" "${sw64_files}")
 add_header_target("systemz-resource-headers" "${systemz_files}")
 add_header_target("ve-resource-headers" "${ve_files}")
 add_header_target("webassembly-resource-headers" "${webassembly_files}")
@@ -607,6 +613,12 @@ install(
   DESTINATION ${header_install_dir}
   EXCLUDE_FROM_ALL
   COMPONENT riscv-resource-headers)
+
+install(
+	FILES ${sw64_files}
+	DESTINATION ${header_install_dir}
+	EXCLUDE_FROM_ALL
+	COMPONENT sw64-resource-headers)
 
 install(
   FILES ${systemz_files}

@@ -16,6 +16,7 @@
 #include "Arch/PPC.h"
 #include "Arch/RISCV.h"
 #include "Arch/Sparc.h"
+#include "Arch/Sw64.h"
 #include "Arch/SystemZ.h"
 #include "Arch/VE.h"
 #include "Arch/X86.h"
@@ -514,6 +515,9 @@ std::string tools::getCPUName(const Driver &D, const ArgList &Args,
   case llvm::Triple::loongarch32:
   case llvm::Triple::loongarch64:
     return loongarch::getLoongArchTargetCPU(Args, T);
+
+  case llvm::Triple::sw_64:
+    return Sw64::getSw64TargetCPU(Args);
   }
 }
 
@@ -609,6 +613,9 @@ void tools::getTargetFeatureList(const Driver &D,
   case llvm::Triple::loongarch32:
   case llvm::Triple::loongarch64:
     loongarch::getLoongArchTargetFeatures(D, Triple, Args, Features);
+    break;
+  case llvm::Triple::sw_64:
+    Sw64::getSw64TargetFeatures(D, Args, Features);
     break;
   }
 #ifdef ENABLE_CLASSIC_FLANG

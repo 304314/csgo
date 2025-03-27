@@ -13,6 +13,7 @@
 #include "RuntimeDyldELF.h"
 #include "RuntimeDyldCheckerImpl.h"
 #include "Targets/RuntimeDyldELFMips.h"
+#include "Targets/RuntimeDyldELFSw64.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/BinaryFormat/ELF.h"
@@ -241,6 +242,8 @@ llvm::RuntimeDyldELF::create(Triple::ArchType Arch,
   case Triple::mips64:
   case Triple::mips64el:
     return std::make_unique<RuntimeDyldELFMips>(MemMgr, Resolver);
+  case Triple::sw_64:
+    return make_unique<RuntimeDyldELFSw64>(MemMgr, Resolver);
   }
 }
 
@@ -1878,6 +1881,42 @@ RuntimeDyldELF::processRelocationRef(
     } else {
       processSimpleRelocation(SectionID, Offset, RelType, Value);
     }
+  } else if (Arch == Triple::sw_64) {
+    uint32_t r_type = RelType & 0xff;
+    RelocationEntry RE(SectionID, Offset, RelType, Value.Addend);
+    LLVM_DEBUG(dbgs() << "Resolve Sw64 reloc" << TargetName << "\n");
+    if (r_type == ELF::R_SW_64_GPDISP) {
+      TargetName = "gphi";
+      StringMap<uint64_t>::iterator i = GOTSymbolOffsets.find(TargetName);
+      if (i != GOTSymbolOffsets.end())
+        RE.SymOffset = i->second;
+      else {
+        RE.SymOffset = allocateGOTEntries(1);
+        GOTSymbolOffsets[TargetName] = RE.SymOffset;
+      }
+      if (Value.SymbolName)
+        addRelocationForSymbol(RE, Value.SymbolName);
+      else
+        addRelocationForSection(RE, Value.SectionID);
+    } else if (RelType == ELF::R_SW_64_BRADDR) {
+      // This is an Sw64 branch relocation, need to use a stub function.
+      LLVM_DEBUG(dbgs() << "\t\tThis is a Sw64 branch relocation.");
+      llvm_unreachable(" Sw64 branch relocation not yet supported.");
+    } else if (r_type == ELF::R_SW_64_LITERAL) {
+      StringMap<uint64_t>::iterator a = GOTSymbolOffsets.find(TargetName);
+      if (a != GOTSymbolOffsets.end())
+        RE.SymOffset = a->second;
+      else {
+        RE.SymOffset = allocateGOTEntries(1);
+        GOTSymbolOffsets[TargetName] = RE.SymOffset;
+      }
+      if (Value.SymbolName)
+        addRelocationForSymbol(RE, Value.SymbolName);
+      else
+        addRelocationForSection(RE, Value.SectionID);
+    } else {
+      processSimpleRelocation(SectionID, Offset, RelType, Value);
+    }
   } else {
     if (Arch == Triple::x86) {
       Value.Addend += support::ulittle32_t::ref(computePlaceholderAddress(SectionID, Offset));
@@ -2221,6 +2260,7 @@ size_t RuntimeDyldELF::getGOTEntrySize() {
   case Triple::aarch64_be:
   case Triple::ppc64:
   case Triple::ppc64le:
+  case Triple::sw_64:
   case Triple::systemz:
     Result = sizeof(uint64_t);
     break;
@@ -2373,6 +2413,25 @@ Error RuntimeDyldELF::finalizeLoad(const ObjectFile &Obj,
     memset(Addr, 0, TotalSize);
     if (IsMipsN32ABI || IsMipsN64ABI) {
       // To correctly resolve Mips GOT relocations, we need a mapping from
+      // object's sections to GOTs.
+      for (section_iterator SI = Obj.section_begin(), SE = Obj.section_end();
+           SI != SE; ++SI) {
+        if (SI->relocation_begin() != SI->relocation_end()) {
+          Expected<section_iterator> RelSecOrErr = SI->getRelocatedSection();
+          if (!RelSecOrErr)
+            return make_error<RuntimeDyldError>(
+                toString(RelSecOrErr.takeError()));
+
+          section_iterator RelocatedSection = *RelSecOrErr;
+          ObjSectionToIDMap::iterator i = SectionMap.find(*RelocatedSection);
+          assert(i != SectionMap.end());
+          SectionToGOTMap[i->second] = GOTSectionID;
+        }
+      }
+      GOTSymbolOffsets.clear();
+    }
+    if (Arch == Triple::sw_64) {
+      // To correctly resolve Sw64 GOT relocations, we need a mapping from
       // object's sections to GOTs.
       for (section_iterator SI = Obj.section_begin(), SE = Obj.section_end();
            SI != SE; ++SI) {

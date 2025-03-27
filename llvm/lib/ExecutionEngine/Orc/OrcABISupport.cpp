@@ -915,6 +915,268 @@ void OrcMips64::writeIndirectStubsBlock(char *StubsBlockWorkingMem,
   }
 }
 
+void OrcSw64::writeResolverCode(char *ResolverWorkingMem,
+                                ExecutorAddr ResolverTargetAddress,
+                                ExecutorAddr ReentryFnAddr,
+                                ExecutorAddr ReentryCtxAddr) {
+  const uint32_t ResolverCode[] = {
+      // resolver_entry:
+      0xfbdefe38, // ldi    sp,-456(sp)
+      0xac1e0000, // stl    v0,0(sp)
+      0xae1e0008, // stl    a0,8(sp)
+      0xae3e0010, // stl    a1,16(sp)
+      0xae5e0018, // stl    a2,24(sp)
+      0xae7e0020, // stl    a3,32(sp)
+      0xae9e0028, // stl    a4,40(sp)
+      0xaebe0030, // stl    a5,48(sp)
+      0xad3e0038, // stl    s0,56(sp)
+      0xad5e0040, // stl    s1,64(sp)
+      0xad7e0048, // stl    s2,72(sp)
+      0xad9e0050, // stl    s3,80(sp)
+      0xadbe0058, // stl    s4,88(sp)
+      0xadde0060, // stl    s5,96(sp)
+      0xac3e0068, // stl    t0,104(sp)
+      0xac5e0070, // stl    t1,112(sp)
+      0xac7e0078, // stl    t2,120(sp)
+      0xac9e0080, // stl    t3,128(sp)
+      0xacbe0088, // stl    t4,136(sp)
+      0xacde0090, // stl    t5,144(sp)
+      0xacfe0098, // stl    t6,152(sp)
+      0xad1e00a0, // stl    t7,160(sp)
+      0xaede00a8, // stl    t8,168(sp)
+      0xaefe00b0, // stl    t9,176(sp)
+      0xaf1e00b8, // stl    t10,184(sp)
+      0xaf3e00c0, // stl    t11,192(sp)
+      0xaf7e00c8, // stl    t12,200(sp)
+      0xadfe00d0, // stl    fp,208(sp)
+      0xaf5e00d8, // stl    ra,216(sp)
+
+      0xbc5e00e0, // fstd    $f2,224(sp)
+      0xbc7e00e8, // fstd    $f3,232(sp)
+      0xbc9e00f0, // fstd    $f4,240(sp)
+      0xbcbe00f8, // fstd    $f5,248(sp)
+      0xbcde0100, // fstd    $f6,256(sp)
+      0xbcfe0108, // fstd    $f7,264(sp)
+      0xbd1e0110, // fstd    $f8,272(sp)
+      0xbd3e0118, // fstd    $f9,280(sp)
+      0xbd5e0120, // fstd    $f10,288(sp)
+      0xbd7e0128, // fstd    $f11,296(sp)
+      0xbd9e0130, // fstd    $f12,304(sp)
+      0xbdbe0138, // fstd    $f13,312(sp)
+      0xbdde0140, // fstd    $f14,320(sp)
+      0xbdfe0148, // fstd    $f15,328(sp)
+      0xbe1e0150, // fstd    $f16,336(sp)
+      0xbe3e0158, // fstd    $f17,344(sp)
+      0xbe5e0160, // fstd    $f18,352(sp)
+      0xbe7e0168, // fstd    $f19,360(sp)
+      0xbe9e0170, // fstd    $f20,368(sp)
+      0xbebe0178, // fstd    $f21,376(sp)
+      0xbede0180, // fstd    $f22,384(sp)
+      0xbefe0188, // fstd    $f23,392(sp)
+      0xbf1e0190, // fstd    $f24,400(sp)
+      0xbf3e0198, // fstd    $f25,408(sp)
+      0xbf5e01a0, // fstd    $f26,416(sp)
+      0xbf7e01a8, // fstd    $f27,424(sp)
+      0xbf9e01b0, // fstd    $f28,432(sp)
+      0xbfbe01b8, // fstd    $f29,440(sp)
+      0xbfde01c0, // fstd    $f30,448(sp)
+
+      // JIT re-entry ctx addr.
+      0x00000000, // ldih   $16,ctxhighest($31)
+      0x00000000, // ldi    $16,ctxhigher($16)
+      0x00000000, // sll    $16,16,$16
+      0x00000000, // ldi    $16,ctxhi($16)
+      0x00000000, // sll    $16,16,$16
+      0x00000000, // ldi    $16,ctxlo($16)
+      0x435a0751, // or     ra,ra,a1
+      0xfa31ffe0, // ldi    a1,-32(a1)
+      // JIT re-entry fn addr:
+      0x00000000, // ldih   $27,reentry($31)
+      0x00000000, // ldi    $27,reentry($27)
+      0x00000000, // sll    $27,16,$27
+      0x00000000, // ldi    $27,reentryhi($27)
+      0x00000000, // sll    $27,16,$27
+      0x00000000, // ldi    $27,reentrylo($27)
+      0x075b0000, // call   ra,(t12),6c <main+0x6c>
+      0x43ff075f, // nop
+
+      0x9fde01c0, // fldd    $f30,448(sp)
+      0x9fbe01b8, // fldd    $f29,440(sp)
+      0x9f9e01b0, // fldd    $f28,432(sp)
+      0x9f7e01a8, // fldd    $f27,424(sp)
+      0x9f5e01a0, // fldd    $f26,416(sp)
+      0x9f3e0198, // fldd    $f25,408(sp)
+      0x9f1e0190, // fldd    $f24,400(sp)
+      0x9efe0188, // fldd    $f23,392(sp)
+      0x9ede0180, // fldd    $f22,384(sp)
+      0x9ebe0178, // fldd    $f21,376(sp)
+      0x9e9e0170, // fldd    $f20,368(sp)
+      0x9e7e0168, // fldd    $f19,360(sp)
+      0x9e5e0160, // fldd    $f18,352(sp)
+      0x9e3e0158, // fldd    $f17,344(sp)
+      0x9e1e0150, // fldd    $f16,336(sp)
+      0x9dfe0148, // fldd    $f15,328(sp)
+      0x9dde0140, // fldd    $f14,320(sp)
+      0x9dbe0138, // fldd    $f13,312(sp)
+      0x9d9e0130, // fldd    $f12,304(sp)
+      0x9d7e0128, // fldd    $f11,296(sp)
+      0x9d5e0120, // fldd    $f10,288(sp)
+      0x9d3e0118, // fldd    $f9,280(sp)
+      0x9d1e0110, // fldd    $f8,272(sp)
+      0x9cfe0108, // fldd    $f7,264(sp)
+      0x9cde0100, // fldd    $f6,256(sp)
+      0x9cbe00f8, // fldd    $f5,248(sp)
+      0x9c9e00f0, // fldd    $f4,240(sp)
+      0x9c7e00e8, // fldd    $f3,232(sp)
+      0x9c5e00e0, // fldd    $f2,224(sp)
+
+      0x8f5e00d8, // ldl    ra,216(sp)
+      0x8dfe00d0, // ldl    fp,208(sp)
+      0x8f7e00c8, // ldl    t12,200(sp)
+      0x8f3e00c0, // ldl    t11,192(sp)
+      0x8f1e00b8, // ldl    t10,184(sp)
+      0x8efe00b0, // ldl    t9,176(sp)
+      0x8ede00a8, // ldl    t8,168(sp)
+      0x8d1e00a0, // ldl    t7,160(sp)
+      0x8cfe0098, // ldl    t6,152(sp)
+      0x8cde0090, // ldl    t5,144(sp)
+      0x8cbe0088, // ldl    t4,136(sp)
+      0x8c9e0080, // ldl    t3,128(sp)
+      0x8c7e0078, // ldl    t2,120(sp)
+      0x8c5e0070, // ldl    t1,112(sp)
+      0x8c3e0068, // ldl    t0,104(sp)
+      0x8dde0060, // ldl    s5,96(sp)
+      0x8dbe0058, // ldl    s4,88(sp)
+      0x8d9e0050, // ldl    s3,80(sp)
+      0x8d7e0048, // ldl    s2,72(sp)
+      0x8d5e0040, // ldl    s1,64(sp)
+      0x8d3e0038, // ldl    s0,56(sp)
+      0x8ebe0030, // ldl    a5,48(sp)
+      0x8e9e0028, // ldl    a4,40(sp)
+      0x8e7e0020, // ldl    a3,32(sp)
+      0x8e5e0018, // ldl    a2,24(sp)
+      0x8e3e0010, // ldl    a1,16(sp)
+      0x8e1e0008, // ldl    a0,8(sp)
+      0xfbde01c8, // ldi    sp,456(sp)
+
+      0x4339075a, // or     t11,t11,ra
+      0x4000075b, // or     v0,v0,t12
+      0x0ffb0000, // jmp    zero,(t12),c4 <main+0xc4>
+  };
+  const unsigned ReentryFnAddrOffset = 0x108; // JIT re-entry fn addr lui
+  const unsigned ReentryCtxAddrOffset = 0xe8; // JIT re-entry ctx addr lui
+
+  memcpy(ResolverWorkingMem, ResolverCode, sizeof(ResolverCode));
+
+  uint32_t ReentryCtxLDIh =
+      0xfe1f0000 | (((ReentryCtxAddr.getValue() >> 48) +
+                     ((ReentryCtxAddr.getValue() >> 47) & 1)) &
+                    0xFFFF);
+  uint32_t ReentryCtxLDI =
+      0xfa100000 | (((ReentryCtxAddr.getValue() >> 32) +
+                     ((ReentryCtxAddr.getValue() >> 31) & 1)) &
+                    0xFFFF);
+  uint32_t ReentryCtxSLL = 0x4a020910;
+  uint32_t ReentryCtxLDI2 =
+      0xfa100000 | (((ReentryCtxAddr.getValue() >> 16) +
+                     ((ReentryCtxAddr.getValue() >> 15) & 1)) &
+                    0xFFFF);
+  uint32_t ReentryCtxSLL2 = 0x4a020910;
+  uint32_t ReentryCtxLDI3 = 0xfa100000 | (ReentryCtxAddr.getValue() & 0xFFFF);
+  memcpy(ResolverWorkingMem + ReentryCtxAddrOffset, &ReentryCtxLDIh,
+         sizeof(ReentryCtxLDIh));
+  memcpy(ResolverWorkingMem + ReentryCtxAddrOffset + 4, &ReentryCtxLDI,
+         sizeof(ReentryCtxLDI));
+  memcpy(ResolverWorkingMem + ReentryCtxAddrOffset + 8, &ReentryCtxSLL,
+         sizeof(ReentryCtxSLL));
+  memcpy(ResolverWorkingMem + ReentryCtxAddrOffset + 12, &ReentryCtxLDI2,
+         sizeof(ReentryCtxLDI2));
+  memcpy(ResolverWorkingMem + ReentryCtxAddrOffset + 16, &ReentryCtxSLL2,
+         sizeof(ReentryCtxSLL2));
+  memcpy(ResolverWorkingMem + ReentryCtxAddrOffset + 20, &ReentryCtxLDI3,
+         sizeof(ReentryCtxLDI3));
+
+  uint32_t ReentryFnLDIh =
+      0xff7f0000 | (((ReentryFnAddr.getValue() >> 48) +
+                     ((ReentryFnAddr.getValue() >> 47) & 1)) &
+                    0xFFFF);
+  uint32_t ReentryFnLDI =
+      0xfb7b0000 | (((ReentryFnAddr.getValue() >> 32) +
+                     ((ReentryFnAddr.getValue() >> 31) & 1)) &
+                    0xFFFF);
+  uint32_t ReentryFnSLL = 0x4b62091b;
+  uint32_t ReentryFnLDI2 =
+      0xfb7b0000 | (((ReentryFnAddr.getValue() >> 16) +
+                     ((ReentryFnAddr.getValue() >> 15) & 1)) &
+                    0xFFFF);
+  uint32_t ReentryFnSLL2 = 0x4b62091b;
+  uint32_t ReentryFnLDI3 = 0xfb7b0000 | (ReentryFnAddr.getValue() & 0xFFFF);
+  memcpy(ResolverWorkingMem + ReentryFnAddrOffset, &ReentryFnLDIh,
+         sizeof(ReentryFnLDIh));
+  memcpy(ResolverWorkingMem + ReentryFnAddrOffset + 4, &ReentryFnLDI,
+         sizeof(ReentryFnLDI));
+  memcpy(ResolverWorkingMem + ReentryFnAddrOffset + 8, &ReentryFnSLL,
+         sizeof(ReentryFnSLL));
+  memcpy(ResolverWorkingMem + ReentryFnAddrOffset + 12, &ReentryFnLDI2,
+         sizeof(ReentryFnLDI2));
+  memcpy(ResolverWorkingMem + ReentryFnAddrOffset + 16, &ReentryFnSLL2,
+         sizeof(ReentryFnSLL2));
+  memcpy(ResolverWorkingMem + ReentryFnAddrOffset + 20, &ReentryFnLDI3,
+         sizeof(ReentryFnLDI3));
+}
+
+void OrcSw64::writeTrampolines(char *TrampolineBlockWorkingMem,
+                               ExecutorAddr TrampolineBlockTargetAddress,
+                               ExecutorAddr ResolverAddr,
+                               unsigned NumTrampolines) {
+
+  uint32_t *Trampolines =
+      reinterpret_cast<uint32_t *>(TrampolineBlockWorkingMem);
+  uint64_t HighestAddr =
+      (ResolverAddr.getValue() >> 48) + ((ResolverAddr.getValue() >> 47) & 1);
+  uint64_t HigherAddr =
+      (ResolverAddr.getValue() >> 32) + ((ResolverAddr.getValue() >> 31) & 1);
+  uint64_t HiAddr =
+      (ResolverAddr.getValue() >> 16) + ((ResolverAddr.getValue() >> 15) & 1);
+
+  for (unsigned I = 0; I < NumTrampolines; ++I) {
+    Trampolines[10 * I + 0] = 0x435a0759; // or  ra,ra,t11
+    Trampolines[10 * I + 1] = 0xff7f0000 | (HighestAddr & 0xFFFF);
+    Trampolines[10 * I + 2] = 0xfb7b0000 | (HigherAddr & 0xFFFF);
+    Trampolines[10 * I + 3] = 0x4b62091b; // sll
+    Trampolines[10 * I + 4] = 0xfb7b0000 | (HiAddr & 0xFFFF);
+    Trampolines[10 * I + 5] = 0x4b62091b; // sll2
+    Trampolines[10 * I + 6] = 0xfb7b0000 | (ResolverAddr.getValue() & 0xFFFF);
+    Trampolines[10 * I + 7] = 0x075b0000; // call
+    Trampolines[10 * I + 8] = 0x43ff075f; // nop
+    Trampolines[10 * I + 9] = 0x43ff075f; // nop
+  }
+}
+
+void OrcSw64::writeIndirectStubsBlock(char *StubsBlockWorkingMem,
+                                      ExecutorAddr StubsBlockTargetAddress,
+                                      ExecutorAddr PointersBlockTargetAddress,
+                                      unsigned NumStubs) {
+
+  // Populate the stubs page stubs and mark it executable.
+  uint32_t *Stub = reinterpret_cast<uint32_t *>(StubsBlockWorkingMem);
+  uint64_t PtrAddr = PointersBlockTargetAddress.getValue();
+
+  for (unsigned I = 0; I < NumStubs; ++I, PtrAddr += 8) {
+    uint64_t HighestAddr = (PtrAddr >> 48) + ((PtrAddr >> 47) & 1);
+    uint64_t HigherAddr = (PtrAddr >> 32) + ((PtrAddr >> 31) & 1);
+    uint64_t HiAddr = (PtrAddr >> 16) + ((PtrAddr >> 15) & 1);
+    Stub[8 * I + 0] = 0xff7f0000 | (HighestAddr & 0xFFFF); // ldih
+    Stub[8 * I + 1] = 0xfb7b0000 | (HigherAddr & 0xFFFF);  // ldi
+    Stub[8 * I + 2] = 0x4b62091b;                          // sll
+    Stub[8 * I + 3] = 0xfb7b0000 | (HiAddr & 0xFFFF);      // ldi
+    Stub[8 * I + 4] = 0x4b62091b;                          // sll2
+    Stub[8 * I + 5] = 0x8f7b0000 | (PtrAddr & 0xFFFF);     // ldl
+    Stub[8 * I + 6] = 0x0ffb0000;                          // jmp $31,($27),0
+    Stub[8 * I + 7] = 0x43ff075f;                          // nop
+  }
+}
+
 void OrcRiscv64::writeResolverCode(char *ResolverWorkingMem,
                                    ExecutorAddr ResolverTargetAddress,
                                    ExecutorAddr ReentryFnAddr,

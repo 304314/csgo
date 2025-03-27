@@ -1318,6 +1318,8 @@ bool ELFObjectWriter::shouldRelocateWithSymbol(const MCAssembler &Asm,
   // in a relocation with a null section which is the desired result.
   case MCSymbolRefExpr::VK_PPC_TOCBASE:
     return false;
+  case MCSymbolRefExpr::VK_SW64_GPDISP:
+    return false;
 
   // These VariantKind cause the relocation to refer to something other than
   // the symbol itself, like a linker generated table. Since the address of
@@ -1501,6 +1503,21 @@ void ELFObjectWriter::recordRelocation(MCAssembler &Asm,
         SecA ? cast<MCSymbolELF>(SecA->getBeginSymbol()) : nullptr;
     if (SectionSymbol)
       SectionSymbol->setUsedInReloc();
+    if (TargetObjectWriter->getEMachine() == ELF::EM_SW64) {
+      const MCFixupKindInfo &FKI =
+          Asm.getBackend().getFixupKindInfo((MCFixupKind)Fixup.getKind());
+      if (strcmp(FKI.Name, "fixup_SW64_GPDISP_HI16") == 0) {
+
+        Addend = 4;
+        const auto *RenamedSymA =
+            cast<MCSymbolELF>(Asm.getContext().getOrCreateSymbol(".text"));
+
+        RenamedSymA->setUsedInReloc();
+        ELFRelocationEntry Rec(FixupOffset, RenamedSymA, Type, Addend, SymA, C);
+        Relocations[&FixupSection].push_back(Rec);
+        return;
+      }
+    }
     ELFRelocationEntry Rec(FixupOffset, SectionSymbol, Type, Addend, SymA, C);
     Relocations[&FixupSection].push_back(Rec);
     return;
@@ -1510,6 +1527,22 @@ void ELFObjectWriter::recordRelocation(MCAssembler &Asm,
   if (SymA) {
     if (const MCSymbolELF *R = Renames.lookup(SymA))
       RenamedSymA = R;
+
+    if (TargetObjectWriter->getEMachine() == ELF::EM_SW64) {
+      const MCFixupKindInfo &FKI =
+          Asm.getBackend().getFixupKindInfo((MCFixupKind)Fixup.getKind());
+      if (strcmp(FKI.Name, "fixup_SW64_GPDISP_HI16") == 0) {
+        Addend = 4;
+        SymA = nullptr;
+        for (auto it = Asm.symbol_begin(), ie = Asm.symbol_end(); it != ie;
+             ++it) {
+          if (it->isInSection() && &(it->getSection()) == Fragment->getParent()) {
+            RenamedSymA = cast<MCSymbolELF>(&*it);
+            break;
+          }
+        }
+      }
+    }
 
     if (ViaWeakRef)
       RenamedSymA->setIsWeakrefUsedInReloc();
