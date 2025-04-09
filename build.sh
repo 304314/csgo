@@ -157,6 +157,11 @@ while getopts :b:d:cCehiI:j:orstvfX: optchr; do
   esac
 done
 
+if [ $OPTIND -le $# ]; then
+  echo "$0: invalid option '${@:$OPTIND:1}'"
+  exit 1
+fi
+
 # Make sure that all files under the build directory can be deleted; when some
 # LLVM tests are interrupted, they can leave behind inaccessible directories.
 build_cleanup() {
