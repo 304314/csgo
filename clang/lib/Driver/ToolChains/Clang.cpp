@@ -2765,7 +2765,7 @@ static void CollectArgsForIntegratedAssembler(Compilation &C,
       } else if (Value == "--version") {
         D.PrintVersion(C, llvm::outs());
     #ifdef BUILD_FOR_OPENEULER
-      } else if (Value.startswith("--generate-missing-build-notes=") &&
+      } else if (Value.starts_with("--generate-missing-build-notes=") &&
       Args.hasFlag(options::OPT_fgcc_compatible,
       options::OPT_fno_gcc_compatible, false)) {
       // Do nothing.
