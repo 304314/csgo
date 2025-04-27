@@ -2322,13 +2322,15 @@ def fmemory_profile_use_EQ : Joined<["-"], "fmemory-profile-use=">,
 
 #ifdef BUILD_FOR_OPENEULER
 def fgcc_compatible : Flag<["-"], "fgcc-compatible">,
-  Flags<[CC1Option]>,
+  Visibility<[ClangOption, CC1Option, FlangOption, FC1Option]>,
   MarshallingInfoFlag<DiagnosticOpts<"GccCompatible">>,
   HelpText<"Enable gcc compatibility for openEuler.">;
-def : Flag["-"], "fGNU-compatibility">,
-  Flags<[CC1Option]>, Alias<fgcc_compatible>,
+def fGNU_compatibility : Flag<["-"], "fGNU-compatibility">,
+  Visibility<[ClangOption, CC1Option, FlangOption, FC1Option]>,
+  Alias<fgcc_compatible>,
   HelpText<"Alias for -fgcc_compatible">;
-def fno_gcc_compatible : Flag<["-"], "fno-gcc-compatible">, Flags<[CC1Option]>;
+def fno_gcc_compatible : Flag<["-"], "fno-gcc-compatible">,
+  Visibility<[ClangOption, CC1Option, FlangOption, FC1Option]>;
 #endif
 
 // Begin sanitizer flags. These should all be core options exposed in all driver
