@@ -155,6 +155,7 @@ enum ArchExtKind : uint64_t {
   AEK_ITE =         1ULL << 55, // FEAT_ITE
   AEK_GCS =         1ULL << 56, // FEAT_GCS
   AEK_SMEFA64 =     1ULL << 57, // FEAT_SME_FA64
+  AEK_FPAC =        1ULL << 58, // FEAT_FPAC
 };
 // clang-format on
 
@@ -262,6 +263,7 @@ inline constexpr ExtensionInfo Extensions[] = {
     {"wfxt", AArch64::AEK_NONE, {}, {}, FEAT_WFXT, "+wfxt", 550},
     {"gcs", AArch64::AEK_GCS, "+gcs", "-gcs", FEAT_MAX, "", 0},
     {"sme-fa64",  AArch64::AEK_SMEFA64,  "+sme-fa64", "-sme-fa64",  FEAT_MAX, "", 0},
+    {"fpac",  AArch64::AEK_FPAC,  "+fpac", "-fpac",  FEAT_MAX, "", 0},
     // Special cases
     {"none", AArch64::AEK_NONE, {}, {}, FEAT_MAX, "", ExtensionInfo::MaxFMVPriority},
 };
@@ -563,6 +565,15 @@ inline constexpr CpuInfo CpuInfos[] = {
       AArch64::AEK_FP16FML | AArch64::AEK_SVE | AArch64::AEK_SVE2 |
       AArch64::AEK_SVE2BITPERM | AArch64::AEK_BF16 | AArch64::AEK_SME |
       AArch64::AEK_SMEF64F64 | AArch64::AEK_SMEFA64)},
+    {"hip12", ARMV9_2A,
+     (AArch64::AEK_SVE | AArch64::AEK_SVE2 | AArch64::AEK_SVE2BITPERM |
+      AArch64::AEK_SVE2AES | AArch64::AEK_SVE2SM4 | AArch64::AEK_SVE2SHA3 |
+      AArch64::AEK_FP16 | AArch64::AEK_PERFMON | AArch64::AEK_PROFILE |
+      AArch64::AEK_HBC | AArch64::AEK_RCPC3 | AArch64::AEK_BF16 |
+      AArch64::AEK_CRC | AArch64::AEK_DOTPROD | AArch64::AEK_FP |
+      AArch64::AEK_I8MM | AArch64::AEK_LSE | AArch64::AEK_SIMD |
+      AArch64::AEK_PAUTH | AArch64::AEK_RAS | AArch64::AEK_RCPC |
+      AArch64::AEK_RDM | AArch64::AEK_LS64 | AArch64::AEK_BRBE)},
 };
 
 // An alias for a CPU.
