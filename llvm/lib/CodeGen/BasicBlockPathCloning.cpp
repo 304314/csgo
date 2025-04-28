@@ -56,7 +56,8 @@ MachineBasicBlock *CloneMachineBasicBlock(MachineBasicBlock &OrigBB,
   auto TII = MF.getSubtarget().getInstrInfo();
   // Create the clone block and set its BBID based on the original block.
   MachineBasicBlock *CloneBB = MF.CreateMachineBasicBlock(
-      OrigBB.getBasicBlock(), UniqueBBID{OrigBB.getBBID()->BaseID, CloneID});
+      OrigBB.getBasicBlock(), UniqueBBID{OrigBB.getBBID()->BaseID,
+                                         OrigBB.getBBID()->Hash, CloneID});
   MF.push_back(CloneBB);
 
   // Copy the instructions.
