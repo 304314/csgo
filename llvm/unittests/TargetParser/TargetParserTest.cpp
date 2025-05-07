@@ -1471,7 +1471,7 @@ INSTANTIATE_TEST_SUITE_P(
                          "8.2-A")));
 
 // Note: number of CPUs includes aliases.
-static constexpr unsigned NumAArch64CPUArchs = 65;
+static constexpr unsigned NumAArch64CPUArchs = 66;
 
 TEST(TargetParserTest, testAArch64CPUArchList) {
   SmallVector<StringRef, NumAArch64CPUArchs> List;
