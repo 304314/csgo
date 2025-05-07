@@ -573,7 +573,8 @@ inline constexpr CpuInfo CpuInfos[] = {
       AArch64::AEK_CRC | AArch64::AEK_DOTPROD | AArch64::AEK_FP |
       AArch64::AEK_I8MM | AArch64::AEK_LSE | AArch64::AEK_SIMD |
       AArch64::AEK_PAUTH | AArch64::AEK_RAS | AArch64::AEK_RCPC |
-      AArch64::AEK_RDM | AArch64::AEK_LS64 | AArch64::AEK_BRBE)},
+      AArch64::AEK_RDM | AArch64::AEK_LS64 | AArch64::AEK_BRBE |
+      AArch64::AEK_FPAC)},
 };
 
 // An alias for a CPU.
