@@ -90,7 +90,8 @@ public:
     TSV110,
     HIP09,
     HIP10C,
-    HIP11
+    HIP11,
+    HIP12
   };
 
 protected:

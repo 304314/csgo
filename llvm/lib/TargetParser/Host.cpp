@@ -260,6 +260,7 @@ StringRef sys::detail::getHostCPUNameForARM(StringRef ProcCpuinfoContent) {
       .Case("0xd02", "hip09")
       .Case("0xd45", "hip10c")
       .Case("0xd22", "hip11")
+      .Case("0xd06", "hip12")
       .Default("generic");
 
   if (Implementer == "0x51") // Qualcomm Technologies, Inc.
