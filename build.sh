@@ -410,8 +410,8 @@ if [ $do_install == "1" ]; then
 fi
 
 # build libcxx/libcxxabi with the just-built clang/clang++
-c_compiler="$install_prefix/bin/clang"
-cxx_compiler="$install_prefix/bin/clang++"
+c_compiler="$build_prefix/bin/clang"
+cxx_compiler="$build_prefix/bin/clang++"
 if pushd runtimes > /dev/null 2>&1; then
   if [ ! -f "$build_prefix"/projects/libcxx/CMakeCache.txt ]; then
     mkdir -p "$build_prefix/projects/libcxx" && cd "$build_prefix/projects/libcxx"
