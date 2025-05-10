@@ -210,7 +210,7 @@
 // TODO: Fixme - This is clever, but really fugly
 #if (1 != KMP_ARCH_X86 + KMP_ARCH_X86_64 + KMP_ARCH_ARM + KMP_ARCH_PPC64 +     \
               KMP_ARCH_AARCH64 + KMP_ARCH_MIPS + KMP_ARCH_MIPS64 +             \
-              KMP_ARCH_RISCV64 + KMP_ARCH_LOONGARCH6464 + KMP_ARCH_SW64)
+              KMP_ARCH_RISCV64 + KMP_ARCH_LOONGARCH64 + KMP_ARCH_SW64)
 #error Unknown or unsupported architecture
 #endif
 
