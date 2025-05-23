@@ -46,6 +46,7 @@ add_llvm_component_library(LLVMCodeGen
   BranchRelaxation.cpp
   BreakFalseDeps.cpp
   BasicBlockSections.cpp
+  BasicBlockPathCloning.cpp
   BasicBlockSectionsProfileReader.cpp
   CalcSpillWeights.cpp
   CallBrPrepare.cpp
@@ -200,6 +201,7 @@ add_llvm_component_library(LLVMCodeGen
   RegisterCoalescer.cpp
   RegisterPressure.cpp
   RegisterScavenging.cpp
+  GCEmptyBasicBlocks.cpp
   RemoveRedundantDebugValues.cpp
   RenameIndependentSubregs.cpp
   MachineStableHash.cpp
