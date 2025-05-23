@@ -114,7 +114,8 @@ while getopts :aAb:d:cCeEhiI:j:orstvfX: optchr; do
       containerize=1
       ;;
     d)
-      build_prefix="$OPTARG"
+      build_dir_name="$OPTARG"
+      build_prefix="$dir/$build_dir_name"
       containerized_opts+=(-$optchr "$OPTARG")
       ;;
     f)
