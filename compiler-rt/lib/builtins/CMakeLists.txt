@@ -612,6 +612,7 @@ if (COMPILER_RT_HAS_AARCH64_SME)
     aarch64/matrix/transpose_int4.c
     aarch64/matrix/transpose_int8.c
   )
+  add_subdirectory(aarch64/matrix)
 else()
   message(STATUS "AArch64 SME matrix routines disabled")
 endif()
