@@ -150,6 +150,13 @@ if(LLVM_RUNTIMES_GPU_BUILD)
   return()
 endif()
 
+option(BUILD_FOR_OPENEULER "Build support for openeuler" OFF)
+if(BUILD_FOR_OPENEULER)
+  set(BUILD_FOR_OPENEULER 1)
+else()
+  set(BUILD_FOR_OPENEULER 0)
+endif()
+
 if(LLVM_ENABLE_EXPENSIVE_CHECKS)
   # When LLVM_ENABLE_EXPENSIVE_CHECKS is ON, LLVM will intercept errors
   # using assert(). An explicit check is performed here.
