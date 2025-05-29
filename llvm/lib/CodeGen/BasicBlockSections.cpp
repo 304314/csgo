@@ -70,6 +70,7 @@
 
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/Hashing.h"
 #include "llvm/CodeGen/BasicBlockSectionUtils.h"
 #include "llvm/CodeGen/BasicBlockSectionsProfileReader.h"
 #include "llvm/CodeGen/MachineFunction.h"
@@ -77,6 +78,7 @@
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
 #include "llvm/InitializePasses.h"
+#include "llvm/IR/Constants.h"
 #include "llvm/Target/TargetMachine.h"
 #include <optional>
 
@@ -289,12 +291,43 @@ bool llvm::hasInstrProfHashMismatch(MachineFunction &MF) {
   return false;
 }
 
+void computeBBHash(MachineFunction &MF) {
+  for (auto &MBB : MF) {
+    llvm::hash_code Hash = llvm::hash_value(0);
+    for (const MachineInstr &MI : MBB) {
+      if (MI.isPseudo() || MI.isDebugOrPseudoInstr())
+        continue;
+      if (MI.isUnconditionalBranch())
+        continue;
+      Hash = llvm::hash_combine(Hash, MI.getOpcode());
+
+      for (const MachineOperand &MO : MI.operands()) {
+        if (MO.isReg()) {
+          Hash = llvm::hash_combine(Hash, MO.getReg());
+        } else if (MO.isImm()) {
+          Hash = llvm::hash_combine(Hash, MO.getImm());
+        } else if (MO.isCImm()) {
+          Hash = llvm::hash_combine(Hash, MO.getCImm()->getZExtValue());
+        } else if (MO.isFPImm()) {
+          Hash = llvm::hash_combine(Hash, MO.getFPImm()->getValueAPF().bitcastToAPInt().getZExtValue());
+        } else if (MO.isGlobal()) {
+          Hash = llvm::hash_combine(Hash, MO.getGlobal()->getName());
+        } else if (MO.isSymbol()) {
+          Hash = llvm::hash_combine(Hash, MO.getSymbolName());
+        }
+      }
+    }
+    MBB.setHash(Hash);
+  }
+}
+
 // Identify, arrange, and modify basic blocks which need separate sections
 // according to the specification provided by the -fbasic-block-sections flag.
 bool BasicBlockSections::handleBBSections(MachineFunction &MF) {
   auto BBSectionsType = MF.getTarget().getBBSectionsType();
   if (BBSectionsType == BasicBlockSection::None)
     return false;
+  computeBBHash(MF);
 
   // Check for source drift. If the source has changed since the profiles
   // were obtained, optimizing basic blocks might be sub-optimal.
@@ -384,6 +417,7 @@ bool BasicBlockSections::handleBBAddrMap(MachineFunction &MF) {
     return false;
   if (!MF.getTarget().Options.BBAddrMap)
     return false;
+  computeBBHash(MF);
   MF.RenumberBlocks();
   return true;
 }
