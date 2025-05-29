@@ -1363,6 +1363,16 @@ public:
         *Ctx, 0)));
   }
 
+  void createCondBranch(MCInst &Inst, const MCSymbol *TBB, unsigned CC,
+                        MCContext *Ctx) const override {
+    Inst.setOpcode(AArch64::Bcc);
+    Inst.clear();
+    Inst.addOperand(MCOperand::createImm(CC));
+    Inst.addOperand(MCOperand::createExpr(getTargetExprFor(
+        Inst, MCSymbolRefExpr::create(TBB, MCSymbolRefExpr::VK_None, *Ctx),
+        *Ctx, 0)));
+  }
+
   bool shouldRecordCodeRelocation(uint64_t RelType) const override {
     switch (RelType) {
     case ELF::R_AARCH64_ABS64:
@@ -1411,6 +1421,10 @@ public:
 
   StringRef getTrapFillValue() const override {
     return StringRef("\0\0\0\0", 4);
+  }
+
+  StringRef getUndefFillValue() const override {
+    return StringRef("\xff\xff\x00\x00", 4); // UDF
   }
 
   void createReturn(MCInst &Inst) const override {
@@ -1680,6 +1694,9 @@ public:
   createRelocation(const MCFixup &Fixup,
                    const MCAsmBackend &MAB) const override {
     const MCFixupKindInfo &FKI = MAB.getFixupKindInfo(Fixup.getKind());
+
+    if (Fixup.getKind() == MCFixupKind(AArch64::fixup_aarch64_pcrel_branch19))
+      return std::nullopt;
 
     assert(FKI.TargetOffset == 0 && "0-bit relocation offset expected");
     const uint64_t RelOffset = Fixup.getOffset();

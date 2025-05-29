@@ -300,6 +300,9 @@ void Instrumentation::instrumentIndirectTarget(BinaryBasicBlock &BB,
   createIndCallDescription(FromFunction, From);
 
   BinaryContext &BC = FromFunction.getBinaryContext();
+  if (BC.IsLinuxKernel)
+    return;
+
   bool IsTailCall = BC.MIB->isTailCall(*Iter);
   InstructionListType CounterInstrs = BC.MIB->createInstrumentedIndirectCall(
       std::move(*Iter),
@@ -380,6 +383,17 @@ void Instrumentation::instrumentFunction(BinaryFunction &Function,
   std::unordered_set<const BinaryBasicBlock *> BBToSkip;
   if (BC.isAArch64() && hasAArch64ExclusiveMemop(Function, BBToSkip))
     return;
+
+  if (BC.IsLinuxKernel && BC.isAArch64()) {
+    // Do not instrument these functions, since they might be called before page
+    // table is initialized
+    for (const std::string &Name : std::vector<std::string>{
+             "strrchr", "strchr", "strcmp", "strncmp", "strlen", "strnlen",
+             "memcmp", "memchr", "memcpy", "memmove", "memset"}) {
+      if (Function.hasNameRegex(Name))
+        return;
+    }
+  }
 
   SplitWorklistTy SplitWorklist;
   SplitInstrsTy SplitInstrs;
@@ -732,6 +746,10 @@ void Instrumentation::createAuxiliaryFunctions(BinaryContext &BC) {
                        BC.MIB->createInstrNumFuncsGetter(BC.Ctx.get()));
 
   if (BC.isELF()) {
+    if (BC.IsLinuxKernel)
+      assert(!BC.StartFunctionAddress && !BC.FiniFunctionAddress &&
+             "Linux kernel should not have entry/fini function");
+
     if (BC.StartFunctionAddress) {
       BinaryFunction *Start =
           BC.getBinaryFunctionAtAddress(*BC.StartFunctionAddress);
@@ -788,8 +806,9 @@ void Instrumentation::setupRuntimeLibrary(BinaryContext &BC) {
                 Summary->IndCallTargetDescriptions.size() *
                     sizeof(IndCallTargetDescription))
             << " bytes in file\n";
-  BC.outs() << "BOLT-INSTRUMENTER: Profile will be saved to file "
-            << opts::InstrumentationFilename << "\n";
+  if (!BC.IsLinuxKernel)
+    BC.outs() << "BOLT-INSTRUMENTER: Profile will be saved to file "
+              << opts::InstrumentationFilename << "\n";
 
   InstrumentationRuntimeLibrary *RtLibrary =
       static_cast<InstrumentationRuntimeLibrary *>(BC.getRuntimeLibrary());
