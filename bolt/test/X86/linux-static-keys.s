@@ -79,6 +79,21 @@ __start___jump_table:
   .type __stop___jump_table, %object
 __stop___jump_table:
 
+## Staic keys (we just use the label ignoring the format of the keys).
+  .data
+  .align 8
+fake_static_key:
+  .quad 0
+
+## Linux kernel version
+  .rodata
+  .align 16
+  .globl linux_banner
+  .type  linux_banner, @object
+linux_banner:
+  .string  "Linux version 6.6.61\n"
+  .size  linux_banner, . - linux_banner
+
 ## Fake Linux Kernel sections.
   .section __ksymtab,"a",@progbits
   .section __ksymtab_gpl,"a",@progbits
