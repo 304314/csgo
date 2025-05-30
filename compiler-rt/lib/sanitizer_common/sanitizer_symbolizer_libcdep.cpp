@@ -272,6 +272,8 @@ class LLVMSymbolizerProcess final : public SymbolizerProcess {
     const char* const kSymbolizerArch = "--default-arch=s390x";
 #elif defined(__s390__)
     const char* const kSymbolizerArch = "--default-arch=s390";
+#elif defined(__sw_64__)
+    const char* const kSymbolizerArch = "--default-arch=sw_64";
 #else
     const char* const kSymbolizerArch = "--default-arch=unknown";
 #endif

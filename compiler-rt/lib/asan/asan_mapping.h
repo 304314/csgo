@@ -79,6 +79,13 @@
 // || `[0x0d55550000, 0x0effff9fff]` || LowShadow  ||
 // || `[0x0000000000, 0x0d5554ffff]` || LowMem     ||
 //
+// Default Linux/SW64 mapping:
+// || `[0x4000000000000, 0xfffffffffffff]` || HighMem    ||
+// || `[0x2800000000000, 0x3ffffffffffff]` || HighShadow ||
+// || `[0x2400000000000, 0x27fffffffffff]` || ShadowGap  ||
+// || `[0x2000000000000, 0x23fffffffffff]` || LowShadow  ||
+// || `[0x0000000000000, 0x1ffffffffffff]` || LowMem     ||
+//
 // Default Linux/AArch64 (39-bit VMA) mapping:
 // || `[0x2000000000, 0x7fffffffff]` || highmem    ||
 // || `[0x1400000000, 0x1fffffffff]` || highshadow ||
@@ -205,6 +212,8 @@
 #    define ASAN_SHADOW_OFFSET_CONST 0x0000080000000000
 #  elif SANITIZER_LOONGARCH64
 #    define ASAN_SHADOW_OFFSET_CONST 0x0000400000000000
+#  elif SANITIZER_SW64
+#    define ASAN_SHADOW_OFFSET_CONST 0x0002000000000000
 #  elif SANITIZER_WINDOWS64
 #    define ASAN_SHADOW_OFFSET_DYNAMIC
 #  else

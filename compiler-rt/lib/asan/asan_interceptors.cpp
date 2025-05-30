@@ -45,6 +45,8 @@
 #    define ASAN_PTHREAD_CREATE_VERSION "GLIBC_2.1"
 #  elif defined(__mips__) && SANITIZER_LINUX
 #    define ASAN_PTHREAD_CREATE_VERSION "GLIBC_2.2"
+#  elif defined(__sw_64__)
+#    define ASAN_PTHREAD_CREATE_VERSION "GLIBC_2.1"
 #  endif
 
 namespace __asan {

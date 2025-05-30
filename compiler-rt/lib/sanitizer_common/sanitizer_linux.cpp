@@ -50,6 +50,14 @@
 #undef stat
 #endif
 
+#if defined(__sw_64__)
+#define stat kernel_stat
+#define stat64 kernel_stat64
+#include <asm/stat.h>
+#undef stat
+#undef stat64
+#endif
+
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -322,7 +330,7 @@ static void statx_to_stat(struct statx *in, struct stat *out) {
 }
 #endif
 
-#if SANITIZER_MIPS64
+#if SANITIZER_MIPS64 || SANITIZER_SW64
 // Undefine compatibility macros from <sys/stat.h>
 // so that they would not clash with the kernel_stat
 // st_[a|m|c]time fields
@@ -352,6 +360,12 @@ static void kernel_stat_to_stat(struct kernel_stat *in, struct stat *out) {
   out->st_size = in->st_size;
   out->st_blksize = in->st_blksize;
   out->st_blocks = in->st_blocks;
+#if defined(__sw_64__)
+  // There's no nsecs in sw_64's struct stat
+  out->st_atim.tv_sec = in->st_atime;
+  out->st_mtim.tv_sec = in->st_mtime;
+  out->st_ctim.tv_sec = in->st_ctime;
+#else
 #if defined(__USE_MISC)     || \
     defined(__USE_XOPEN2K8) || \
     defined(SANITIZER_ANDROID)
@@ -369,6 +383,7 @@ static void kernel_stat_to_stat(struct kernel_stat *in, struct stat *out) {
   out->st_ctime = in->st_ctime;
   out->st_atimensec = in->st_ctime_nsec;
 #endif
+#endif
 }
 #endif
 
@@ -381,6 +396,11 @@ uptr internal_stat(const char *path, void *buf) {
   int res = internal_syscall(SYSCALL(statx), AT_FDCWD, (uptr)path,
                              AT_NO_AUTOMOUNT, STATX_BASIC_STATS, (uptr)&bufx);
   statx_to_stat(&bufx, (struct stat *)buf);
+  return res;
+#    elif defined(__sw_64__)
+  struct kernel_stat kbuf;
+  int res = internal_syscall(SYSCALL(stat), path, &kbuf);
+  kernel_stat_to_stat(&kbuf, (struct stat *)buf);
   return res;
 #    elif (SANITIZER_WORDSIZE == 64 || SANITIZER_X32 ||    \
            (defined(__mips__) && _MIPS_SIM == _ABIN32)) && \
@@ -414,6 +434,11 @@ uptr internal_lstat(const char *path, void *buf) {
                              STATX_BASIC_STATS, (uptr)&bufx);
   statx_to_stat(&bufx, (struct stat *)buf);
   return res;
+#    elif SANITIZER_SW64
+  struct kernel_stat kbuf;
+  int res = internal_syscall(SYSCALL(lstat), path, &kbuf);
+  kernel_stat_to_stat(&kbuf, (struct stat *)buf);
+  return res;
 #    elif (defined(_LP64) || SANITIZER_X32 ||              \
            (defined(__mips__) && _MIPS_SIM == _ABIN32)) && \
         !SANITIZER_SPARC
@@ -436,7 +461,7 @@ uptr internal_lstat(const char *path, void *buf) {
 
 uptr internal_fstat(fd_t fd, void *buf) {
 #if SANITIZER_FREEBSD || SANITIZER_LINUX_USES_64BIT_SYSCALLS
-#if SANITIZER_MIPS64
+#if SANITIZER_MIPS64 || SANITIZER_SW64
   // For mips64, fstat syscall fills buffer in the format of kernel_stat
   struct kernel_stat kbuf;
   int res = internal_syscall(SYSCALL(fstat), fd, &kbuf);
@@ -780,6 +805,15 @@ uptr internal_waitpid(int pid, int *status, int options) {
                           0 /* rusage */);
 }
 
+#if SANITIZER_SW64 // FIXME
+uptr internal_getpid() {
+  return internal_syscall(SYSCALL(getxpid));
+}
+
+uptr internal_getppid() {
+  return internal_syscall(SYSCALL(getppid));
+}
+#else
 uptr internal_getpid() {
   return internal_syscall(SYSCALL(getpid));
 }
@@ -787,6 +821,7 @@ uptr internal_getpid() {
 uptr internal_getppid() {
   return internal_syscall(SYSCALL(getppid));
 }
+#endif
 
 int internal_dlinfo(void *handle, int request, void *p) {
 #if SANITIZER_FREEBSD
@@ -899,7 +934,7 @@ int internal_sigaction_norestorer(int signum, const void *act, void *oldact) {
     // rt_sigaction, so we need to do the same (we'll need to reimplement the
     // restorers; for x86_64 the restorer address can be obtained from
     // oldact->sa_restorer upon a call to sigaction(xxx, NULL, oldact).
-#if !SANITIZER_ANDROID || !SANITIZER_MIPS32
+#if (!SANITIZER_ANDROID || !SANITIZER_MIPS32) && !SANITIZER_SW64
     k_act.sa_restorer = u_act->sa_restorer;
 #endif
   }
@@ -915,7 +950,7 @@ int internal_sigaction_norestorer(int signum, const void *act, void *oldact) {
     internal_memcpy(&u_oldact->sa_mask, &k_oldact.sa_mask,
                     sizeof(__sanitizer_kernel_sigset_t));
     u_oldact->sa_flags = k_oldact.sa_flags;
-#if !SANITIZER_ANDROID || !SANITIZER_MIPS32
+#if (!SANITIZER_ANDROID || !SANITIZER_MIPS32) && !SANITIZER_SW64
     u_oldact->sa_restorer = k_oldact.sa_restorer;
 #endif
   }
@@ -1123,6 +1158,10 @@ uptr GetMaxVirtualAddress() {
   return (1ULL << 38) - 1;
 # elif SANITIZER_MIPS64
   return (1ULL << 40) - 1;  // 0x000000ffffffffffUL;
+# elif defined(__sw_64__)
+  // sw6b has a 52-bit user address space(4PiB) with 4-level pagetable
+  // according to TASK_SIZE in kernel.
+  return (1ULL << 52) - 1;  // 0x000fffffffffffffUL;
 # elif defined(__s390x__)
   return (1ULL << 53) - 1;  // 0x001fffffffffffffUL;
 #elif defined(__sparc__)
@@ -1453,6 +1492,71 @@ uptr internal_clone(int (*fn)(void *), void *child_stack, int flags, void *arg,
       : "0"(__flags), "r"(__stack), "r"(__ptid), "r"(__tls), "r"(__ctid),
         "r"(__fn), "r"(__arg), "r"(nr_clone), "i"(__NR_exit)
       : "memory");
+  return res;
+}
+#elif defined(__sw_64__)
+uptr internal_clone(int (*fn)(void *), void *child_stack, int flags, void *arg,
+                    int *parent_tidptr, void *newtls, int *child_tidptr) {
+  long long res;
+  if (!fn || !child_stack)
+    return -EINVAL;
+  child_stack = (char *)child_stack - 4 * sizeof(unsigned long long);
+  ((unsigned long long *)child_stack)[0] = (uptr)fn;
+  ((unsigned long long *)child_stack)[1] = (uptr)arg;
+  ((unsigned long long *)child_stack)[2] = (uptr)flags;
+
+  register void *r20 __asm__("$20") = newtls;
+  register int *r22 __asm__("$22") = child_tidptr;
+
+  __asm__ __volatile__(
+                       /* $v0 = syscall($v0 = __NR_clone,
+                        * $a0 = flags,
+                        * $a1 = child_stack,
+                        * $a2 = parent_tidptr,
+                        * $a3 = child_tidptr,
+                        * $a4 = new_tls)
+                        */
+                       "mov %[flag],$16\n"
+                       "mov %[usp],$17\n"
+                       "mov %[ptid],$18\n"
+                       "ldl $19,0($sp)\n"
+                       "mov %5,$20\n"
+                       /* Store the fifth argument on stack
+                        * if we are using 32-bit abi.
+                        */
+                       "ldi $0,%[NR_clone];\n"
+                       "sys_call 0x83;\n"
+
+                       /* if ($v0 != 0)
+                        * return;
+                        */
+                       "bne $0,1f;\n"
+                       "mov $31,$15;\n"
+                       /* Call "fn(arg)". */
+                       "ldl $27,0($sp);\n"
+                       "ldl $16,8($sp);\n"
+                       "ldi $sp,32($sp);\n"
+
+                       "call $26,($27),0;\n"
+                       "ldgp  $29, 0($26);\n"
+
+                       /* Call _exit($v0). */
+                       "mov $0,$16;\n"
+                       "ldi $0,%[NR_exit];\n"
+                       "sys_call 0x83;\n"
+
+                       /* Return to parent. */
+                     "1:\n"
+                       : "=r" (res)
+                       : [flag]"r"(flags),
+                         [usp]"r"(child_stack),
+                         [ptid]"r"(parent_tidptr),
+                         "r"(r20),
+                         "r"(r22),
+                         [NR_clone]"i"(__NR_clone),
+                         [NR_exit]"i"(__NR_exit)
+                       : "memory", "$30" );
+
   return res;
 }
 #elif defined(__aarch64__)
@@ -2008,6 +2112,65 @@ SignalContext::WriteFlag SignalContext::GetWriteFlag() const {
   if (flags & SC_ADDRERR_WR)
     return SignalContext::Write;
   return SignalContext::Unknown;
+#elif defined(__sw_64__)
+  uint32_t *exception_source;
+  uint32_t faulty_instruction;
+  uint32_t op_code;
+
+  exception_source = (uint32_t *)ucontext->uc_mcontext.sc_pc;
+  faulty_instruction = (uint32_t)(*exception_source);
+
+  op_code = (faulty_instruction >> 26) & 0x3f;
+
+  switch (op_code) {
+    case 0x28:  // STB
+    case 0x29:  // STH
+    case 0x2A:  // STW
+    case 0x2B:  // STL
+    case 0x2C:  // STL_U
+    case 0x2E:  // FSTS
+    case 0x2F:  // FSTD
+    case 0x0E:  // VSTS
+    case 0x0F:  // STD
+      return SignalContext::Write;
+
+    case 0x20:  // LDBU
+    case 0x21:  // LDHU
+    case 0x22:  // LDW
+    case 0x23:  // LDL
+    case 0x24:  // LDL_U
+    case 0x26:  // FLDS
+    case 0x27:  // FLDD
+    case 0x09:  // LDWE
+    case 0x0A:  // LDSE
+    case 0x0B:  // LDDE
+    case 0x0C:  // VLDS
+    case 0x0D:  // VLDD
+      return SignalContext::Read;
+
+    case 0x1C:  // SIMD
+      op_code = (faulty_instruction >> 12) & 0x3;
+      switch (op_code) {
+        case 0x1:  // VSTW_U
+        case 0x3:  // VSTS_U
+        case 0x5:  // VSTD_U
+        case 0x8:  // VSTW_UL
+        case 0x9:  // VSTW_UH
+        case 0xA:  // VSTS_UL
+        case 0xB:  // VSTS_UH
+        case 0xC:  // VSTD_UL
+        case 0xD:  // VSTD_UH
+        case 0xF:  // VSTD_NC
+          return SignalContext::Write;
+
+        case 0x0:  // VLDW_U
+        case 0x2:  // VLDS_U
+        case 0x4:  // VLDD_U
+        case 0xE:  // VLDD_NC
+          return SignalContext::Read;
+      }
+  }
+  return SignalContext::Unknown;
 #elif defined(__sparc__)
   // Decode the instruction to determine the access type.
   // From OpenSolaris $SRC/uts/sun4/os/trap.c (get_accesstype).
@@ -2251,6 +2414,11 @@ static void GetPcSpBp(void *context, uptr *pc, uptr *sp, uptr *bp) {
   *pc = ucontext->uc_mcontext.pc;
   *bp = ucontext->uc_mcontext.gregs[30];
   *sp = ucontext->uc_mcontext.gregs[29];
+#elif defined(__sw_64__)
+  ucontext_t *ucontext = (ucontext_t*)context;
+  *pc = ucontext->uc_mcontext.sc_pc;
+  *bp = ucontext->uc_mcontext.sc_regs[15];
+  *sp = ucontext->uc_mcontext.sc_regs[30];
 #elif defined(__s390__)
   ucontext_t *ucontext = (ucontext_t*)context;
 # if defined(__s390x__)

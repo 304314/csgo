@@ -115,6 +115,7 @@ supported_linux = (
         "armv7l",
         "s390x",
         "loongarch64",
+        "sw_64",
     ]
 )
 supported_darwin = config.host_os == "Darwin" and config.target_arch in ["x86_64"]

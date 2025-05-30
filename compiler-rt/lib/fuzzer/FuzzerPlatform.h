@@ -87,6 +87,10 @@
   (LIBFUZZER_APPLE || LIBFUZZER_LINUX || LIBFUZZER_NETBSD ||                   \
    LIBFUZZER_FREEBSD || LIBFUZZER_EMSCRIPTEN)
 
+#ifdef __sw_64__
+#define LIBFUZZER_SW64 1
+#endif
+
 #ifdef __x86_64
 #if __has_attribute(target)
 #define ATTRIBUTE_TARGET_POPCNT __attribute__((target("popcnt")))

@@ -39,6 +39,7 @@
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
+#include "llvm/MC/MCInstBuilder.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSymbolELF.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -87,6 +88,17 @@ public:
   bool lowerOperand(const MachineOperand &MO, MCOperand &MCOp) const {
     return LowerSw64MachineOperandToMCOperand(MO, MCOp, *this);
   }
+  //===------------------------------------------------------------------===//
+  // XRay implementation
+  //===------------------------------------------------------------------===//
+public:
+  // XRay-specific lowering for Sw64.
+  void LowerPATCHABLE_FUNCTION_ENTER(const MachineInstr &MI);
+  void LowerPATCHABLE_FUNCTION_EXIT(const MachineInstr &MI);
+  void LowerPATCHABLE_TAIL_CALL(const MachineInstr &MI);
+
+private:
+  void emitSled(const MachineInstr &MI, SledKind Kind);
 };
 } // end of anonymous namespace
 
@@ -94,6 +106,7 @@ bool Sw64AsmPrinter::runOnMachineFunction(MachineFunction &MF) {
 
   // Initialize TargetLoweringObjectFile.
   AsmPrinter::runOnMachineFunction(MF);
+  emitXRayTable();
   return true;
 }
 

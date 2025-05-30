@@ -206,7 +206,7 @@ void InitTlsSize() {
       GetLibcVersion(&major, &minor, &patch) && major == 2 && minor >= 25;
 
 #if defined(__aarch64__) || defined(__x86_64__) || defined(__powerpc64__) || \
-    defined(__loongarch__)
+    defined(__loongarch__) || defined(__sw_64__)
   void *get_tls_static_info = dlsym(RTLD_NEXT, "_dl_get_tls_static_info");
   size_t tls_align;
   ((void (*)(size_t *, size_t *))get_tls_static_info)(&g_tls_size, &tls_align);
@@ -288,6 +288,8 @@ static uptr ThreadDescriptorSizeFallback() {
   val = 1776;
 #elif defined(__powerpc64__)
   val = 1776; // from glibc.ppc64le 2.20-8.fc21
+#elif defined(__sw_64__)
+  val = 1776;
 #endif
   return val;
 }
@@ -522,6 +524,10 @@ static void GetTls(uptr *addr, uptr *size) {
   const uptr pre_tcb_size = TlsPreTcbSize();
   *addr = tp - pre_tcb_size;
   *size = g_tls_size + pre_tcb_size;
+#elif SANITIZER_GLIBC && defined(__sw_64__)
+  *addr = reinterpret_cast<uptr>(__builtin_thread_pointer()) -
+          ThreadDescriptorSize();
+  *size = g_tls_size + ThreadDescriptorSize();
 #elif SANITIZER_FREEBSD || SANITIZER_LINUX || SANITIZER_SOLARIS
   uptr align;
   GetStaticTlsBoundary(addr, size, &align);

@@ -117,6 +117,9 @@ const unsigned struct_kernel_stat64_sz = 144;
 const unsigned struct___old_kernel_stat_sz = 0;
 const unsigned struct_kernel_stat_sz = 64;
 const unsigned struct_kernel_stat64_sz = 104;
+#elif defined(__sw_64__)
+const unsigned struct_kernel_stat_sz = 80;
+const unsigned struct_kernel_stat64_sz = 136;
 #elif SANITIZER_RISCV64
 const unsigned struct_kernel_stat_sz = 128;
 const unsigned struct_kernel_stat64_sz = 0;  // RISCV64 does not use stat64
@@ -274,15 +277,15 @@ struct __sanitizer_shmid_ds {
   u64 shm_ctime;
 #else
   uptr shm_atime;
-#if !defined(_LP64) && !defined(__mips__)
+#if !defined(_LP64) && !defined(__mips__) && !defined(__sw_64__)
   uptr __unused1;
 #endif
   uptr shm_dtime;
-#if !defined(_LP64) && !defined(__mips__)
+#if !defined(_LP64) && !defined(__mips__) && !defined(__sw_64__)
   uptr __unused2;
 #endif
   uptr shm_ctime;
-#if !defined(_LP64) && !defined(__mips__)
+#if !defined(_LP64) && !defined(__mips__) && !defined(__sw_64__)
   uptr __unused3;
 #endif
 #endif
@@ -527,7 +530,7 @@ typedef int __sanitizer_clockid_t;
 
 #if SANITIZER_LINUX
 #    if defined(_LP64) || defined(__x86_64__) || defined(__powerpc__) || \
-        defined(__mips__) || defined(__hexagon__)
+        defined(__mips__) || defined(__hexagon__) || defined(__sw_64__)
 typedef unsigned __sanitizer___kernel_uid_t;
 typedef unsigned __sanitizer___kernel_gid_t;
 #else
@@ -540,7 +543,7 @@ typedef long long __sanitizer___kernel_off_t;
 typedef long __sanitizer___kernel_off_t;
 #endif
 
-#if defined(__powerpc__) || defined(__mips__)
+#if defined(__powerpc__) || defined(__mips__) || defined(__sw_64__)
 typedef unsigned int __sanitizer___kernel_old_uid_t;
 typedef unsigned int __sanitizer___kernel_old_gid_t;
 #else
@@ -677,7 +680,7 @@ struct __sanitizer_sigaction {
 #endif
 #endif
 #endif
-#if SANITIZER_LINUX
+#if SANITIZER_LINUX && !defined(__sw_64__)
   void (*sa_restorer)();
 #endif
 #if defined(__mips__) && (SANITIZER_WORDSIZE == 32)
@@ -857,7 +860,8 @@ typedef void __sanitizer_FILE;
 #if SANITIZER_LINUX && !SANITIZER_ANDROID &&                               \
     (defined(__i386) || defined(__x86_64) || defined(__mips64) ||          \
      defined(__powerpc64__) || defined(__aarch64__) || defined(__arm__) || \
-     defined(__s390__) || defined(__loongarch__) || SANITIZER_RISCV64)
+     defined(__s390__) || defined(__loongarch__) || SANITIZER_RISCV64 ||   \
+     defined(__sw_64__))
 extern unsigned struct_user_regs_struct_sz;
 extern unsigned struct_user_fpregs_struct_sz;
 extern unsigned struct_user_fpxregs_struct_sz;
@@ -943,7 +947,7 @@ struct __sanitizer_cookie_io_functions_t {
 #define IOC_NRBITS 8
 #define IOC_TYPEBITS 8
 #if defined(__powerpc__) || defined(__powerpc64__) || defined(__mips__) || \
-    defined(__sparc__)
+    defined(__sparc__) || defined(__sw_64__)
 #define IOC_SIZEBITS 13
 #define IOC_DIRBITS 3
 #define IOC_NONE 1U

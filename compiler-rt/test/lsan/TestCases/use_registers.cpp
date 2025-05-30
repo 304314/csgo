@@ -57,6 +57,8 @@ extern "C" void *registers_thread_func(void *arg) {
   asm("mv s11, %0"
       :
       : "r"(p));
+#elif defined(__sw_64__)
+  asm("bis $31,%0,$28" : : "r"(p));
 #else
 #error "Test is not supported on this architecture."
 #endif

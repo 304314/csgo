@@ -72,6 +72,11 @@ set(mips64el_SOURCES
   xray_trampoline_mips64.S
   )
 
+set(sw_64_SOURCES
+  xray_sw64.cpp
+  xray_trampoline_sw64.S
+  )
+
 set(powerpc64le_SOURCES
   xray_powerpc64.cpp
   xray_trampoline_powerpc64.cpp
@@ -140,6 +145,7 @@ set(XRAY_ALL_SOURCE_FILES
   ${mipsel_SOURCES}
   ${mips64_SOURCES}
   ${mips64el_SOURCES}
+  ${sw_64_SOURCES}
   ${powerpc64le_SOURCES}
   ${XRAY_IMPL_HEADERS}
   )

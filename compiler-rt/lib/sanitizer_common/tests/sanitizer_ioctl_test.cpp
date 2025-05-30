@@ -77,7 +77,11 @@ TEST(SanitizerIoctl, Fixup) {
 // Test decoding KVM ioctl numbers.
 TEST(SanitizerIoctl, KVM_GET_MP_STATE) {
   ioctl_desc desc;
+#ifndef __sw_64__
   unsigned int desc_value = SANITIZER_MIPS ? 0x4004ae98U : 0x8004ae98U;
+#else
+  unsigned int desc_value = SANITIZER_SW64 ? 0x4004ae98U : 0x8004ae98U;
+#endif
   bool res = ioctl_decode(desc_value, &desc);
   EXPECT_TRUE(res);
   EXPECT_EQ(ioctl_desc::WRITE, desc.type);
@@ -86,7 +90,11 @@ TEST(SanitizerIoctl, KVM_GET_MP_STATE) {
 
 TEST(SanitizerIoctl, KVM_GET_LAPIC) {
   ioctl_desc desc;
+#ifndef __sw_64__
   unsigned int desc_value = SANITIZER_MIPS ? 0x4400ae8eU : 0x8400ae8eU;
+#else
+  unsigned int desc_value = SANITIZER_SW64 ? 0x4400ae8eU : 0x8400ae8eU;
+#endif
   bool res = ioctl_decode(desc_value, &desc);
   EXPECT_TRUE(res);
   EXPECT_EQ(ioctl_desc::WRITE, desc.type);

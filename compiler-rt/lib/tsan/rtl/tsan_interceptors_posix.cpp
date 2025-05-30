@@ -76,7 +76,7 @@ struct ucontext_t {
 #endif
 
 #if defined(__x86_64__) || defined(__mips__) || SANITIZER_PPC64V1 || \
-    defined(__s390x__)
+    defined(__s390x__) || defined(__sw_64__)
 #define PTHREAD_ABI_BASE  "GLIBC_2.3.2"
 #elif defined(__aarch64__) || SANITIZER_PPC64V2
 #define PTHREAD_ABI_BASE  "GLIBC_2.17"
@@ -151,7 +151,7 @@ typedef __sanitizer::u16 mode_t;
 # define F_TLOCK 2      /* Test and lock a region for exclusive use.  */
 # define F_TEST  3      /* Test a region for other processes locks.  */
 
-#if SANITIZER_FREEBSD || SANITIZER_APPLE || SANITIZER_NETBSD
+#if SANITIZER_FREEBSD || SANITIZER_APPLE || SANITIZER_NETBSD || SANITIZER_SW64
 const int SA_SIGINFO = 0x40;
 const int SIG_SETMASK = 3;
 #elif defined(__mips__)
@@ -2567,7 +2567,8 @@ int sigaction_impl(int sig, const __sanitizer_sigaction *act,
     sigactions[sig].sa_flags = *(volatile int const *)&act->sa_flags;
     internal_memcpy(&sigactions[sig].sa_mask, &act->sa_mask,
                     sizeof(sigactions[sig].sa_mask));
-#if !SANITIZER_FREEBSD && !SANITIZER_APPLE && !SANITIZER_NETBSD
+#if !SANITIZER_FREEBSD && !SANITIZER_APPLE && !SANITIZER_NETBSD &&             \
+    !SANITIZER_SW64
     sigactions[sig].sa_restorer = act->sa_restorer;
 #endif
     internal_memcpy(&newact, act, sizeof(newact));
@@ -2870,13 +2871,25 @@ void InitializeInterceptors() {
   TSAN_INTERCEPT(strncpy);
   TSAN_INTERCEPT(strdup);
 
+  #if SANITIZER_SW64
+  TSAN_INTERCEPT_VER(pthread_create, "GLIBC_2.1");
+  #else
   TSAN_INTERCEPT(pthread_create);
+  #endif
   TSAN_INTERCEPT(pthread_join);
   TSAN_INTERCEPT(pthread_detach);
   TSAN_INTERCEPT(pthread_exit);
   #if SANITIZER_LINUX
   TSAN_INTERCEPT(pthread_tryjoin_np);
   TSAN_INTERCEPT(pthread_timedjoin_np);
+  #endif
+
+  #if SANITIZER_SW64
+  // sw64 have two version of timer function, osf_xxx with @glibc2.0,
+  // which is 32bits syscall for old kernal. xxx with @glibc2.1 is 64bits
+  // syscall for new kernal, we use the new one.
+  TSAN_INTERCEPT_VER(setitimer, "GLIBC_2.1");
+  TSAN_INTERCEPT_VER(getitimer, "GLIBC_2.1");
   #endif
 
   TSAN_INTERCEPT_VER(pthread_cond_init, PTHREAD_ABI_BASE);
