@@ -30,6 +30,13 @@
 
 using namespace llvm;
 
+namespace llvm {
+cl::opt<bool> BBSectionsMatchHash(
+    "bbsections-match-hash",
+    cl::desc("This matches basic blocks by hash to fit source drift"),
+    cl::init(false), cl::Hidden);
+}
+
 char BasicBlockSectionsProfileReaderWrapperPass::ID = 0;
 INITIALIZE_PASS(BasicBlockSectionsProfileReaderWrapperPass,
                 "bbsections-profile-reader",
@@ -41,18 +48,29 @@ BasicBlockSectionsProfileReader::parseUniqueBBID(StringRef S) const {
   SmallVector<StringRef, 2> Parts;
   S.split(Parts, '.');
   if (Parts.size() > 2)
-    return createProfileParseError(Twine("unable to parse basic block id: '") +
+    return createProfileParseError(Twine("unable to parse unique basic block id: '") +
                                    S + "'");
-  unsigned long long BaseBBID;
-  if (getAsUnsignedInteger(Parts[0], 10, BaseBBID))
+  SmallVector<StringRef, 2> IdAndHash;
+  Parts[0].split(IdAndHash, '-');
+  if (IdAndHash.size() > 2)
+    return createProfileParseError(Twine("unable to parse basic block id and hash: '") +
+                                   Parts[0] + "'");
+  unsigned long long BaseBBID = 0;
+  if (getAsUnsignedInteger(IdAndHash[0], 10, BaseBBID))
     return createProfileParseError(
-        Twine("unable to parse BB id: '" + Parts[0]) +
+        Twine("unable to parse BB id: '" + IdAndHash[0]) +
         "': unsigned integer expected");
+  unsigned long long BBHash = 0;
+  if (IdAndHash.size() > 1 && getAsUnsignedInteger(IdAndHash[1], 16, BBHash))
+    return createProfileParseError(
+        Twine("unable to parse BB hash: '" + IdAndHash[1]) +
+        "': hex unsigned integer expected");
   unsigned long long CloneID = 0;
   if (Parts.size() > 1 && getAsUnsignedInteger(Parts[1], 10, CloneID))
     return createProfileParseError(Twine("unable to parse clone id: '") +
                                    Parts[1] + "': unsigned integer expected");
   return UniqueBBID{static_cast<unsigned>(BaseBBID),
+                    static_cast<uint64_t>(BBHash),
                     static_cast<unsigned>(CloneID)};
 }
 

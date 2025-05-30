@@ -28,10 +28,13 @@
 #include "llvm/Support/LineIterator.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/Support/CommandLine.h"
 
 using namespace llvm;
 
 namespace llvm {
+
+extern cl::opt<bool> BBSectionsMatchHash;
 
 // This struct represents the cluster information for a machine basic block,
 // which is specifed by a unique ID (`MachineBasicBlock::BBID`).
@@ -65,13 +68,22 @@ template <> struct DenseMapInfo<UniqueBBID> {
     return UniqueBBID{TombstoneKey, TombstoneKey};
   }
   static unsigned getHashValue(const UniqueBBID &Val) {
+    if (BBSectionsMatchHash) {
+      std::pair<uint64_t, unsigned> PairVal =
+          std::make_pair(Val.Hash, Val.CloneID);
+      return DenseMapInfo<std::pair<uint64_t, unsigned>>::getHashValue(PairVal);
+    }
     std::pair<unsigned, unsigned> PairVal =
         std::make_pair(Val.BaseID, Val.CloneID);
     return DenseMapInfo<std::pair<unsigned, unsigned>>::getHashValue(PairVal);
   }
   static bool isEqual(const UniqueBBID &LHS, const UniqueBBID &RHS) {
+    if (BBSectionsMatchHash) {
+      return DenseMapInfo<uint64_t>::isEqual(LHS.Hash, RHS.Hash) &&
+             DenseMapInfo<unsigned>::isEqual(LHS.CloneID, RHS.CloneID);
+    }
     return DenseMapInfo<unsigned>::isEqual(LHS.BaseID, RHS.BaseID) &&
-           DenseMapInfo<unsigned>::isEqual(LHS.CloneID, RHS.CloneID);
+            DenseMapInfo<unsigned>::isEqual(LHS.CloneID, RHS.CloneID);
   }
 };
 
