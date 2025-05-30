@@ -193,6 +193,7 @@ static std::tuple<ELFKind, uint16_t, uint8_t> parseEmulation(StringRef emul) {
           .Case("msp430elf", {ELF32LEKind, EM_MSP430})
           .Case("elf64_amdgpu", {ELF64LEKind, EM_AMDGPU})
           .Case("elf64loongarch", {ELF64LEKind, EM_LOONGARCH})
+          .Cases("elf64-sw_64", "elf64sw_64", {ELF64LEKind, EM_SW64})
           .Default({ELFNoneKind, EM_NONE});
 
   if (ret.first == ELFNoneKind)
@@ -1101,7 +1102,7 @@ static bool getIsRela(opt::InputArgList &args) {
   uint16_t m = config->emachine;
   return m == EM_AARCH64 || m == EM_AMDGPU || m == EM_HEXAGON ||
          m == EM_LOONGARCH || m == EM_PPC || m == EM_PPC64 || m == EM_RISCV ||
-         m == EM_X86_64;
+         m == EM_SW64 || m == EM_X86_64;
 }
 
 static void parseClangOption(StringRef opt, const Twine &msg) {
@@ -1355,6 +1356,16 @@ static void readConfigs(opt::InputArgList &args) {
   config->timeTraceEnabled = args.hasArg(OPT_time_trace_eq);
   config->timeTraceGranularity =
       args::getInteger(args, OPT_time_trace_granularity, 500);
+
+  config->sw64_tlsrelgot_tlsgd =
+      args.hasFlag(OPT_sw64_tlsrelgot_tlsgd, OPT_no_sw64_tlsrelgot_tlsgd, false);
+  config->sw64_tlsrelgot_tlsldm =
+      args.hasFlag(OPT_sw64_tlsrelgot_tlsldm, OPT_no_sw64_tlsrelgot_tlsldm, false);
+  config->sw64_tlsrelgot_gottprel =
+      args.hasFlag(OPT_sw64_tlsrelgot_gottprel, OPT_no_sw64_tlsrelgot_gottprel, false);
+  config->sw64_tlsrelgot_gotdtprel =
+      args.hasFlag(OPT_sw64_tlsrelgot_gotdtprel, OPT_no_sw64_tlsrelgot_gotdtprel, false);
+
   config->trace = args.hasArg(OPT_trace);
   config->undefined = args::getStrings(args, OPT_undefined);
   config->undefinedVersion =
@@ -2632,7 +2643,7 @@ void LinkerDriver::link(opt::InputArgList &args) {
   // If a --hash-style option was not given, set to a default value,
   // which varies depending on the target.
   if (!args.hasArg(OPT_hash_style)) {
-    if (config->emachine == EM_MIPS)
+    if (config->emachine == EM_MIPS || config->emachine == EM_SW64)
       config->sysvHash = true;
     else
       config->sysvHash = config->gnuHash = true;

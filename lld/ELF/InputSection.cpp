@@ -462,9 +462,12 @@ void InputSection::copyRelocations(uint8_t *buf,
         addend += sec->getFile<ELFT>()->mipsGp0;
       }
 
-      if (RelTy::IsRela)
+      if (RelTy::IsRela) {
+        if (config->emachine == EM_SW64 &&
+            (R_SW_64_GPDISP == type || R_SW_64_LITUSE == type))
+          continue;
         p->r_addend = sym.getVA(addend) - section->getOutputSection()->addr;
-      else if (config->relocatable && type != target.noneRel)
+      } else if (config->relocatable && type != target.noneRel)
         sec->addReloc({R_ABS, type, rel.offset, addend, &sym});
     } else if (config->emachine == EM_PPC && type == R_PPC_PLTREL24 &&
                p->r_addend >= 0x8000 && sec->file->ppc32Got2) {
@@ -634,6 +637,7 @@ static int64_t getTlsTpOffset(const Symbol &s) {
     // Variant 1.
   case EM_ARM:
   case EM_AARCH64:
+  case EM_SW64:
     return s.getVA(0) + config->wordsize * 2 +
            ((tls->p_vaddr - config->wordsize * 2) & (tls->p_align - 1));
   case EM_MIPS:
@@ -867,6 +871,21 @@ uint64_t InputSectionBase::getRelocTargetVA(const InputFile *file, RelType type,
     return in.got->getTlsIndexOff() + a;
   case R_TLSLD_PC:
     return in.got->getTlsIndexVA() + a - p;
+  case R_SW_HINT_PC: {
+    uint64_t symVA = sym.getVA(a);
+    return 0 == symVA ? 4 : symVA - p;
+  }
+  case R_SW_GOT_OFF:
+  case R_SW_PLT_GOT_OFF:
+    return in.sw64Got->getSymEntryOffset(file, sym, a, expr) -
+           in.sw64Got->getGpOffset(file);
+  case R_SW_GOTREL:
+    return sym.getVA(a) - in.sw64Got->getVA() - in.sw64Got->getGpOffset(file);
+  case R_SW_GOT_GP_PC:
+    return in.sw64Got->getVA() + in.sw64Got->getGpOffset(file) + a - p;
+  case R_SW_TLSGD_GOT:
+    return in.sw64Got->getDynOffset(file, sym) -
+           in.sw64Got->getGpOffset(file);
   default:
     llvm_unreachable("invalid expression");
   }

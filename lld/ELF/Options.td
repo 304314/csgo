@@ -278,6 +278,10 @@ def library: JoinedOrSeparate<["-"], "l">, MetaVarName<"<libname>">,
 def library_path: JoinedOrSeparate<["-"], "L">, MetaVarName<"<dir>">,
   HelpText<"Add <dir> to the library search path">;
 
+defm literalgot: B<"literalgot",
+    "Support LITERAL_GOT relocation",
+    "Do not support LITERAL_GOT relocation (default)">;
+
 def m: JoinedOrSeparate<["-"], "m">, HelpText<"Set target emulation">;
 
 defm Map: Eq<"Map", "Print a link map to the specified file">;
@@ -447,6 +451,19 @@ def : FF<"time-trace">, Alias<time_trace_eq>,
 
 defm time_trace_granularity: EEq<"time-trace-granularity",
   "Minimum time granularity (in microseconds) traced by time profiler">;
+
+defm sw64_tlsrelgot_tlsgd: B<"sw64_tlsrelgot_tlsgd",
+    "Support TLSREL_GOT relocation on TLSGD",
+    "Do not support TLSREL_GOT relocation on TLSGD (default)">;
+defm sw64_tlsrelgot_tlsldm: B<"sw64_tlsrelgot_tlsldm",
+    "Support TLSREL_GOT relocation on TLSLDM",
+    "Do not support TLSREL_GOT relocation on TLSLDM (default)">;
+defm sw64_tlsrelgot_gottprel: B<"sw64_tlsrelgot_gottprel",
+    "Support TLSREL_GOT relocation on GOTTPREL",
+    "Do not support TLSREL_GOT relocation on GOTTPREL (default)">;
+defm sw64_tlsrelgot_gotdtprel: B<"sw64_tlsrelgot_gotdtprel",
+    "Support TLSREL_GOT relocation on GOTDTPREL",
+    "Do not support TLSREL_GOT relocation on GOTDTPREL (default)">;
 
 defm toc_optimize : BB<"toc-optimize",
     "(PowerPC64) Enable TOC related optimizations (default)",
@@ -731,12 +748,14 @@ def plugin_opt_eq : J<"plugin-opt=">;
 // Options listed below are silently ignored for now for compatibility.
 def: Flag<["-"], "d">;
 def: Flag<["-"], "g">;
+def: J<"hash-size=">;
 def: F<"long-plt">;
 def: FF<"no-add-needed">;
 def: F<"no-copy-dt-needed-entries">;
 def: F<"no-ctors-in-init-array">;
 def: F<"no-keep-memory">;
 def: F<"no-warn-mismatch">;
+def: F<"reduce-memory-overheads">;
 def: Separate<["--", "-"], "rpath-link">;
 def: J<"rpath-link=">;
 def: F<"secure-plt">;

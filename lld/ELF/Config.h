@@ -278,6 +278,10 @@ struct Config {
   bool isStatic = false;
   bool sysvHash = false;
   bool target1Rel;
+  bool sw64_tlsrelgot_tlsgd;
+  bool sw64_tlsrelgot_tlsldm;
+  bool sw64_tlsrelgot_gottprel;
+  bool sw64_tlsrelgot_gotdtprel;
   bool trace;
   bool thinLTOEmitImportsFiles;
   bool thinLTOEmitIndexFiles;

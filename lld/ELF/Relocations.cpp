@@ -205,8 +205,8 @@ static bool needsPlt(RelExpr expr) {
 static bool needsGot(RelExpr expr) {
   return oneof<R_GOT, R_GOT_OFF, R_MIPS_GOT_LOCAL_PAGE, R_MIPS_GOT_OFF,
                R_MIPS_GOT_OFF32, R_AARCH64_GOT_PAGE_PC, R_GOT_PC, R_GOTPLT,
-               R_AARCH64_GOT_PAGE, R_LOONGARCH_GOT, R_LOONGARCH_GOT_PAGE_PC>(
-      expr);
+               R_AARCH64_GOT_PAGE, R_LOONGARCH_GOT, R_LOONGARCH_GOT_PAGE_PC,
+               R_SW_GOT_OFF, R_SW_PLT_GOT_OFF>(expr);
 }
 
 // True if this expression is of the form Sym - X, where X is a position in the
@@ -214,8 +214,8 @@ static bool needsGot(RelExpr expr) {
 static bool isRelExpr(RelExpr expr) {
   return oneof<R_PC, R_GOTREL, R_GOTPLTREL, R_MIPS_GOTREL, R_PPC64_CALL,
                R_PPC64_RELAX_TOC, R_AARCH64_PAGE_PC, R_RELAX_GOT_PC,
-               R_RISCV_PC_INDIRECT, R_PPC64_RELAX_GOT_PC, R_LOONGARCH_PAGE_PC>(
-      expr);
+               R_RISCV_PC_INDIRECT, R_PPC64_RELAX_GOT_PC, R_LOONGARCH_PAGE_PC,
+               R_SW_PLT_GOT_OFF>(expr);
 }
 
 static RelExpr toPlt(RelExpr expr) {
@@ -228,6 +228,8 @@ static RelExpr toPlt(RelExpr expr) {
     return R_PLT_PC;
   case R_ABS:
     return R_PLT;
+  case R_SW_GOT_OFF:
+    return R_SW_PLT_GOT_OFF;
   default:
     return expr;
   }
@@ -246,6 +248,8 @@ static RelExpr fromPlt(RelExpr expr) {
     return R_PPC64_CALL;
   case R_PLT:
     return R_ABS;
+  case R_SW_PLT_GOT_OFF:
+    return R_SW_GOT_OFF;
   case R_PLT_GOTPLT:
     return R_GOTPLTREL;
   default:
@@ -853,6 +857,64 @@ RelType RelocationScanner::getMipsN32RelType(RelTy *&rel) const {
   return type;
 }
 
+template <class ELFT, class RelTy>
+static RelType getSw64RelType(RelTy *&I, RelTy *const E) {
+  static __thread RelTy *last_rel = nullptr;
+  static __thread RelTy *last_tls_rel = nullptr;
+  RelType Type = R_SW_64_NONE;
+  auto prev = I++;
+  Type = prev->getType(false);
+  switch (0xff & Type) {
+  case R_SW_64_GPDISP:
+    // TODO: Check addend overflow for huge function?
+    Type |= (getAddend<ELFT>(*prev) << 8);
+    break;
+  case R_SW_64_LITERAL: {
+    if (nullptr != last_rel &&
+        R_SW_64_LITERAL_GOT == last_rel->getType(false)) {
+      auto addend = last_rel->r_offset - prev->r_offset;
+      // TODO: Check addend overflow.
+      Type |= (addend << 16);
+    }
+    if (E != I && R_SW_64_LITUSE == I->getType(false)) {
+      auto addend = getAddend<ELFT>(*I);
+      // TODO: Check addend overflow.
+      Type |= addend << 8;
+    }
+  } break;
+  case R_SW_64_TLSGD:
+  case R_SW_64_TLSLDM:
+  case R_SW_64_GOTTPREL:
+  case R_SW_64_GOTDTPREL:
+    if (nullptr != last_tls_rel &&
+        R_SW_64_TLSREL_GOT == last_tls_rel->getType(false)) {
+      auto addend = last_tls_rel->r_offset - prev->r_offset;
+      // TODO: Check addend overflow.
+      Type |= (addend << 16);
+    }
+    break;
+  case R_SW_64_LITUSE:
+    Type = R_SW_64_NONE;
+    break;
+  case R_SW_64_TLSREL_GOT:
+    if (E != I) {
+      last_tls_rel = prev;
+      return R_SW_64_NONE;
+    }
+    break;
+  case R_SW_64_LITERAL_GOT:
+    if (E != I) {
+      last_rel = prev;
+      return R_SW_64_NONE;
+    }
+    // fallthrough
+  default:
+    break;
+  }
+  last_rel = nullptr;
+  return Type;
+}
+
 template <bool shard = false>
 static void addRelativeReloc(InputSectionBase &isec, uint64_t offsetInSec,
                              Symbol &sym, int64_t addend, RelExpr expr,
@@ -957,8 +1019,8 @@ bool RelocationScanner::isStaticLinkTimeConstant(RelExpr e, RelType type,
             R_AARCH64_GOT_PAGE_PC, R_GOT_PC, R_GOTONLY_PC, R_GOTPLTONLY_PC,
             R_PLT_PC, R_PLT_GOTPLT, R_PPC32_PLTREL, R_PPC64_CALL_PLT,
             R_PPC64_RELAX_TOC, R_RISCV_ADD, R_AARCH64_GOT_PAGE,
-            R_LOONGARCH_PLT_PAGE_PC, R_LOONGARCH_GOT, R_LOONGARCH_GOT_PAGE_PC>(
-          e))
+            R_LOONGARCH_PLT_PAGE_PC, R_LOONGARCH_GOT, R_LOONGARCH_GOT_PAGE_PC,
+            R_SW_GOT_OFF, R_SW_PLT_GOT_OFF, R_SW_GOTREL, R_SW_GOT_GP_PC>(e))
     return true;
 
   // These never do, except if the entire file is position dependent or if
@@ -1062,6 +1124,8 @@ void RelocationScanner::processAux(RelExpr expr, RelType type, uint64_t offset,
       // for detailed description:
       // ftp://www.linux-mips.org/pub/linux/mips/doc/ABI/mipsabi.pdf
       in.mipsGot->addEntry(*sec->file, sym, addend, expr);
+    } else if (config->emachine == EM_SW64) {
+      in.sw64Got->addEntry(*sec->file, sym, addend, expr);
     } else if (!sym.isTls() || config->emachine != EM_LOONGARCH) {
       // Many LoongArch TLS relocs reuse the R_LOONGARCH_GOT type, in which
       // case the NEEDS_GOT flag shouldn't get set.
@@ -1145,6 +1209,16 @@ void RelocationScanner::processAux(RelExpr expr, RelType type, uint64_t offset,
       return;
     }
 
+    if (config->emachine == EM_SW64) {
+      error("can't create dynamic relocation " + toString(type) + " against " +
+            (sym.getName().empty() ? "local symbol"
+                                   : "symbol: " + toString(sym)) +
+            " in readonly segment; "
+            "pass '-Wl,-z,notext' to allow text relocations in the output" +
+            getLocation(*sec, sym, offset));
+      return;
+    }
+
     if (sym.isObject()) {
       // Produce a copy relocation.
       if (auto *ss = dyn_cast<SharedSymbol>(&sym)) {
@@ -1225,6 +1299,39 @@ static unsigned handleMipsTlsRelocation(RelType type, Symbol &sym,
   return 0;
 }
 
+static unsigned handleSw64TlsRelocation(RelType Type, Symbol &Sym,
+                                         InputSectionBase &C, uint64_t Offset,
+                                         int64_t Addend, RelExpr Expr) {
+  // Local dynamic.
+  if (oneof<R_SW_TLSGD_GOT>(Expr) && R_SW_64_TLSLDM == Type) {
+    // TODO: relax
+    in.sw64Got->addTlsIndex(*C.file);
+    C.relocations.push_back({Expr, Type, Offset, Addend, nullptr});
+    return target->getTlsGdRelaxSkip(Type);
+  }
+
+  // Global dynamic.
+  if (oneof<R_SW_TLSGD_GOT>(Expr)) {
+    // TODO: relax
+    in.sw64Got->addDynTlsEntry(*C.file, Sym);
+    C.relocations.push_back({Expr, Type, Offset, Addend, &Sym});
+    return target->getTlsGdRelaxSkip(Type);
+  }
+
+  if (R_TPREL == Expr) {
+    assert(nullptr == dyn_cast<SharedSymbol>(&Sym));
+    C.relocations.push_back({Expr, Type, Offset, Addend, &Sym});
+    return 1;
+  }
+
+  if (R_DTPREL == Expr) {
+    C.addReloc({Expr, Type, Offset, Addend, &Sym});
+    return 1;
+  }
+
+  return 0;
+}
+
 // Notes about General Dynamic and Local Dynamic TLS models below. They may
 // require the generation of a pair of GOT entries that have associated dynamic
 // relocations. The pair of GOT entries created are of the form GOT[e0] Module
@@ -1246,6 +1353,9 @@ static unsigned handleTlsRelocation(RelType type, Symbol &sym,
 
   if (config->emachine == EM_MIPS)
     return handleMipsTlsRelocation(type, sym, c, offset, addend, expr);
+
+  if (config->emachine == EM_SW64)
+    return handleSw64TlsRelocation(type, sym, c, offset, addend, expr);
 
   if (oneof<R_AARCH64_TLSDESC_PAGE, R_TLSDESC, R_TLSDESC_CALL, R_TLSDESC_PC,
             R_TLSDESC_GOTPLT>(expr) &&
@@ -1360,6 +1470,8 @@ template <class ELFT, class RelTy> void RelocationScanner::scanOne(RelTy *&i) {
   RelType type;
   if (config->mipsN32Abi) {
     type = getMipsN32RelType(i);
+  } else if (config->emachine == EM_SW64) {
+    type = getSw64RelType<ELFT>(i, static_cast<const RelTy *>(end));
   } else {
     type = rel.getType(config->isMips64EL);
     ++i;
@@ -1388,6 +1500,11 @@ template <class ELFT, class RelTy> void RelocationScanner::scanOne(RelTy *&i) {
   if (sym.isUndefined() && symIndex != 0 &&
       maybeReportUndefined(cast<Undefined>(sym), *sec, offset))
     return;
+
+  if (R_SW_HINT_PC == expr) {
+    sec->relocations.push_back({expr, type, offset, addend, &sym});
+    return;
+  }
 
   if (config->emachine == EM_PPC64) {
     // We can separate the small code model relocations into 2 categories:
@@ -1534,7 +1651,7 @@ template <class ELFT> void elf::scanRelocations() {
   // for -z nocombreloc. MIPS and PPC64 use global states which are not suitable
   // for parallelism.
   bool serial = !config->zCombreloc || config->emachine == EM_MIPS ||
-                config->emachine == EM_PPC64;
+                config->emachine == EM_PPC64 || config->emachine == EM_SW64;
   parallel::TaskGroup tg;
   for (ELFFileBase *f : ctx.objectFiles) {
     auto fn = [f]() {
