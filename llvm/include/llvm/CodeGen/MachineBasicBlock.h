@@ -101,6 +101,7 @@ template <> struct DenseMapInfo<MBBSectionID> {
 // the basic block sections profile.
 struct UniqueBBID {
   unsigned BaseID;
+  uint64_t Hash;
   unsigned CloneID;
 };
 
@@ -666,8 +667,12 @@ public:
 
   std::optional<UniqueBBID> getBBID() const { return BBID; }
 
+  uint64_t getHash() const { return BBID->Hash; }
+
   /// Returns the section ID of this basic block.
   MBBSectionID getSectionID() const { return SectionID; }
+
+  void setHash(uint64_t Hash) { BBID->Hash = Hash; }
 
   /// Sets the fixed BBID of this basic block.
   void setBBID(const UniqueBBID &V) {

@@ -108,6 +108,7 @@ Sections:
                 AddressOffset: 0x00000001
                 Size:          0x00000002
                 Metadata:      0x00000003
+                Hash:          0x00000004
 
 ## 5) When specifying the description with Entries, the 'Address' field will be
 ##    zero when omitted.
@@ -121,6 +122,7 @@ Sections:
               AddressOffset: 0x00000001
               Size:          0x00000002
               Metadata:      0x00000003
+              Hash:          0x00000004
 
 ## 6) We can override the NumBlocks field with a value different from the
 ##    actual number of BB Entries.
@@ -136,6 +138,7 @@ Sections:
                AddressOffset: 0x00000001
                Size:          0x00000002
                Metadata:      0x00000003
+               Hash:          0x00000004
 
 ## 7) We can produce a SHT_LLVM_BB_ADDR_MAP section from a description
 ##    with one entry with empty BBRanges.

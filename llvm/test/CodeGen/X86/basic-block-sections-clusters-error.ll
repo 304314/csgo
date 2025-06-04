@@ -39,7 +39,7 @@
 ; RUN: echo 'f dummy1' >> %t10
 ; RUN: echo 'c 0 1.1.1' >> %t10
 ; RUN: not --crash llc < %s -O0 -mtriple=x86_64 -function-sections -basic-block-sections=%t10 2>&1 | FileCheck %s --check-prefix=CHECK-ERROR10
-; CHECK-ERROR10: LLVM ERROR: invalid profile {{.*}} at line 3: unable to parse basic block id: '1.1.1'
+; CHECK-ERROR10: LLVM ERROR: invalid profile {{.*}} at line 3: unable to parse unique basic block id: '1.1.1'
 ; RUN: echo 'v1' > %t11
 ; RUN: echo 'f dummy1' >> %t11
 ; RUN: echo 'c 0 1.a' >> %t11

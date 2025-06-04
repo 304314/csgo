@@ -71,26 +71,32 @@ declare i32 @__gxx_personality_v0(...)
 ; CHECK-NEXT:	.uleb128 .Lfunc_begin0-.Lfunc_begin0
 ; CHECK-NEXT:	.uleb128 .LBB_END0_0-.Lfunc_begin0
 ; CHECK-NEXT:	.byte	8
+; CHECK-NEXT:	.ascii	"\360\271\333\306\325\246\370\236\032" # hash value
 ; CHECK-NEXT:	.byte	1		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_1-.LBB_END0_0
 ; CHECK-NEXT:	.uleb128 .LBB_END0_1-.LBB0_1
 ; CHECK-NEXT:	.byte	8
+; CHECK-NEXT:	.ascii	"\263\327\252\372\303\255\341\321\022" # hash value
 ; CHECK-NEXT:	.byte	3		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_2-.LBB_END0_1
 ; CHECK-NEXT:	.uleb128 .LBB_END0_2-.LBB0_2
 ; CHECK-NEXT:	.byte	8
+; CHECK-NEXT:	.ascii	"\314\223\213\277\342\235\347\304." # hash value
 ; CHECK-NEXT:	.byte	5		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_3-.LBB_END0_2
 ; CHECK-NEXT:	.uleb128 .LBB_END0_3-.LBB0_3
 ; CHECK-NEXT:	.byte	1
+; CHECK-NEXT:	.ascii	"\346\346\246\226\304\321\256\375D" # hash value
 ; CHECK-NEXT:	.byte	4		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_4-.LBB_END0_3
 ; CHECK-NEXT:	.uleb128 .LBB_END0_4-.LBB0_4
 ; CHECK-NEXT:	.byte	16
+; CHECK-NEXT:	.ascii	"\264\373\313\206\340\360\363\365C" # hash value
 ; CHECK-NEXT:	.byte	2		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_5-.LBB_END0_4
 ; CHECK-NEXT:	.uleb128 .LBB_END0_5-.LBB0_5
 ; CHECK-NEXT:	.byte	4
+; CHECK-NEXT:	.ascii	"\315\254\220\356\210\355\223\331\262\001" # hash value
 
 ;; PGO Analysis Map
 ; PGO-FEC-NEXT:	.byte	100                             # function entry count

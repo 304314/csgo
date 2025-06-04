@@ -60,23 +60,29 @@ declare i32 @__gxx_personality_v0(...)
 ; CHECK-NEXT:	.uleb128 .Lfunc_begin0-.Lfunc_begin0
 ; CHECK-NEXT:	.uleb128 .LBB_END0_0-.Lfunc_begin0
 ; CHECK-NEXT:	.byte	8
+; CHECK-NEXT:	.ascii "\360\271\333\306\325\246\370\236\032" # hash value
 ; CHECK-NEXT:   .byte	1		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_1-.LBB_END0_0
 ; CHECK-NEXT:	.uleb128 .LBB_END0_1-.LBB0_1
 ; CHECK-NEXT:	.byte	8
+; CHECK-NEXT:	.ascii "\263\327\252\372\303\255\341\321\022" # hash value
 ; CHECK-NEXT:   .byte	3		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_2-.LBB_END0_1
 ; CHECK-NEXT:	.uleb128 .LBB_END0_2-.LBB0_2
 ; CHECK-NEXT:	.byte	8
+; CHECK-NEXT:	.ascii "\220\227\205\337\215\230\345\203\313\001" # hash value
 ; CHECK-NEXT:   .byte	4		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_3-.LBB_END0_2
 ; CHECK-NEXT:	.uleb128 .LBB_END0_3-.LBB0_3
 ; CHECK-NEXT:	.byte	16
+; CHECK-NEXT:	.ascii "\264\373\313\206\340\360\363\365C" # hash value
 ; CHECK-NEXT:   .byte	5		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_4-.LBB_END0_3
 ; CHECK-NEXT:	.uleb128 .LBB_END0_4-.LBB0_4
 ; CHECK-NEXT:	.byte	1
+; CHECK-NEXT:	.ascii "\346\346\246\226\304\321\256\375D" # hash value
 ; CHECK-NEXT:   .byte	2		# BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_5-.LBB_END0_4
 ; CHECK-NEXT:	.uleb128 .LBB_END0_5-.LBB0_5
 ; CHECK-NEXT:	.byte	5
+; CHECK-NEXT:	.ascii "\346\346\246\226\304\321\256\375D" # hash value

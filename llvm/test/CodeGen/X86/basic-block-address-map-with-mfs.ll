@@ -64,16 +64,19 @@ declare i32 @qux()
 ; CHECK-NEXT:   .uleb128 .Lfunc_begin0-.Lfunc_begin0
 ; CHECK-NEXT:   .uleb128 .LBB_END0_0-.Lfunc_begin0
 ; CHECK-NEXT:   .byte   8
+; CHECK-NEXT:   .ascii  "\303\200\334\274\251\374\267\262<" # hash value
 ; CHECK-NEXT:   .byte   1               # BB id
 ; CHECK-NEXT:   .uleb128 .LBB0_1-.LBB_END0_0
 ; CHECK-NEXT:   .uleb128 .LBB_END0_1-.LBB0_1
 ; CHECK-NEXT:   .byte   3
+; CHECK-NEXT:   .ascii  "\327\340\345\332\255\374\300\305\223\001" # hash value
 ; CHECK-NEXT:   .quad   foo.cold    # base address
 ; CHECK-NEXT:   .byte   1               # number of basic blocks
 ; CHECK-NEXT:   .byte   2               # BB id
 ; CHECK-NEXT:   .uleb128 foo.cold-foo.cold
 ; CHECK-NEXT:   .uleb128 .LBB_END0_2-foo.cold
 ; CHECK-NEXT:   .byte   3
+; CHECK-NEXT:   .ascii  "\225\367\322\342\214\252\331\231\301\001" # hash value
 
 ;; PGO Analysis Map
 ; PGO:         .ascii  "\3306"                         # function entry count
