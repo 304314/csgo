@@ -54,18 +54,22 @@ declare i32 @__gxx_personality_v0(...)
 ; CHECK-NEXT:	.uleb128 .Lfunc_begin0-.Lfunc_begin0
 ; CHECK-NEXT:	.uleb128 .LBB_END0_0-.Lfunc_begin0
 ; CHECK-NEXT:	.byte	0
+; CHECK-NEXT:	.ascii "\303\200\334\274\251\374\267\262<" # hash value
 ; CHECK-NEXT:	.byte	2               # BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_1-.LBB_END0_0
 ; CHECK-NEXT:	.uleb128 .LBB_END0_1-.LBB0_1
 ; CHECK-NEXT:	.byte	5
+; CHECK-NEXT:	.ascii "\327\300\366\245\367\337\275\345d" # hash value
 ; CHECK-NEXT:	.quad	_Z3bazb.cold    # base address
 ; CHECK-NEXT:	.byte	2               # number of basic blocks
 ; CHECK-NEXT:	.byte	1               # BB id
 ; CHECK-NEXT:	.uleb128 _Z3bazb.cold-_Z3bazb.cold
 ; CHECK-NEXT:	.uleb128 .LBB_END0_2-_Z3bazb.cold
 ; CHECK-NEXT:	.byte	8
+; CHECK-NEXT:	.ascii "\263\327\252\372\303\255\341\321\022" # hash value
 ; CHECK-NEXT:	.byte	3               # BB id
 ; CHECK-NEXT:	.uleb128 .LBB0_3-.LBB_END0_2
 ; CHECK-NEXT:	.uleb128 .LBB_END0_3-.LBB0_3
 ; CHECK-NEXT:	.byte	1
+; CHECK-NEXT:	.ascii "\221\300\354\233\225\361\207\221\231\001" # hash value
 
