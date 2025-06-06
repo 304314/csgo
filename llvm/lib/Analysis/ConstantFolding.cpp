@@ -62,6 +62,11 @@
 
 using namespace llvm;
 
+static cl::opt<bool>
+EnableLoglConstantFold("enable-logl-constant-fold",
+                       cl::desc("Enable logl constant fold."),
+                       cl::init(false), cl::Hidden);
+
 namespace {
 
 //===----------------------------------------------------------------------===//
@@ -1750,7 +1755,7 @@ Constant *GetConstantFoldFPValue(double V, Type *Ty) {
 }
 
 #if defined(HAS_IEE754_FLOAT128)
-Constant *GetConstantFoldFPValue128(__float128 V, Type *Ty) {
+Constant *GetConstantFoldFPValue128(float128 V, Type *Ty) {
   if (Ty->isFP128Ty())
     return ConstantFP::get(Ty, V);
   llvm_unreachable("Can only constant fold fp128");
@@ -1790,10 +1795,10 @@ Constant *ConstantFoldFP(double (*NativeFP)(double), const APFloat &V,
 }
 
 #if defined(HAS_IEE754_FLOAT128)
-Constant *ConstantFoldFP128(long double (*NativeFP)(long double),
+Constant *ConstantFoldFP128(float128 (*NativeFP)(float128),
                             const APFloat &V, Type *Ty) {
   llvm_fenv_clearexcept();
-  __float128 Result = NativeFP(V.convertToQuad());
+  float128 Result = NativeFP(V.convertToQuad());
   if (llvm_fenv_testexcept()) {
     llvm_fenv_clearexcept();
     return nullptr;
@@ -2125,14 +2130,16 @@ static Constant *ConstantFoldScalarCall1(StringRef Name,
 #if defined(HAS_IEE754_FLOAT128) && defined(HAS_LOGF128)
     if (Ty->isFP128Ty()) {
       if (IntrinsicID == Intrinsic::log) {
-        __float128 Result = logf128(Op->getValueAPF().convertToQuad());
-        return GetConstantFoldFPValue128(Result, Ty);
+        float128 Result = logf128(Op->getValueAPF().convertToQuad());
+        if (EnableLoglConstantFold)
+          return GetConstantFoldFPValue128(Result, Ty);
       }
 
       LibFunc Fp128Func = NotLibFunc;
       if (TLI->getLibFunc(Name, Fp128Func) && TLI->has(Fp128Func) &&
           Fp128Func == LibFunc_logl)
-        return ConstantFoldFP128(logf128, Op->getValueAPF(), Ty);
+        if (EnableLoglConstantFold)
+          return ConstantFoldFP128(logf128, Op->getValueAPF(), Ty);
     }
 #endif
 

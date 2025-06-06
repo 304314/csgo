@@ -20,6 +20,10 @@ typedef __float128 float128;
     (defined(__GNUC__) || defined(__GNUG__))
 #define HAS_IEE754_FLOAT128
 typedef _Float128 float128;
+#elif defined(__aarch64__) && defined(__linux__) && \
+    !defined(__LONG_DOUBLE_IBM128__)
+#define HAS_IEE754_FLOAT128
+typedef long double float128;
 #endif
 
 } // namespace llvm
