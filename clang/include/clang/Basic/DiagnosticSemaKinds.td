@@ -3086,6 +3086,12 @@ def err_attribute_too_many_arguments : Error<
   "%0 attribute takes no more than %1 argument%s1">;
 def err_attribute_too_few_arguments : Error<
   "%0 attribute takes at least %1 argument%s1">;
+#ifdef BUILD_FOR_OPENEULER
+def warn_invalid_optimize_attr_level : Warning<
+  "invalid optimization level '%0' specified; only "
+  "0 and 'O0' are supported; attribute ignored">,
+  InGroup<IgnoredAttributes>;
+#endif
 def err_attribute_invalid_vector_type : Error<"invalid vector element type %0">;
 def err_attribute_invalid_bitint_vector_type : Error<
   "'_BitInt' vector element width must be %select{a power of 2|"
@@ -3163,6 +3169,12 @@ def err_attribute_argument_n_type : Error<
 def err_attribute_argument_type : Error<
   "%0 attribute requires %select{int or bool|an integer "
   "constant|a string|an identifier}1">;
+#ifdef BUILD_FOR_OPENEULER
+def err_attribute_argument_either_type : Error<
+  "%0 attribute requires %select{int or bool|an integer "
+  "constant|a string|an identifier}1 or %select{int or "
+  "bool|an integer constant|a string|an identifier}2">;
+#endif
 def err_attribute_argument_out_of_range : Error<
   "%0 attribute requires integer constant between %1 and %2 inclusive">;
 def err_init_priority_object_attr : Error<

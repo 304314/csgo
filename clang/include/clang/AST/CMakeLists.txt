@@ -1,20 +1,30 @@
+set(CLANG_AST_OPTIONS)
+if(BUILD_FOR_OPENEULER)
+  list(APPEND CLANG_AST_OPTIONS -DBUILD_FOR_OPENEULER)
+endif()
+
 clang_tablegen(Attrs.inc -gen-clang-attr-classes
+  ${CLANG_AST_OPTIONS}
   SOURCE ../Basic/Attr.td
   TARGET ClangAttrClasses)
 
 clang_tablegen(AttrImpl.inc -gen-clang-attr-impl
+  ${CLANG_AST_OPTIONS}
   SOURCE ../Basic/Attr.td
   TARGET ClangAttrImpl)
 
 clang_tablegen(AttrTextNodeDump.inc -gen-clang-attr-text-node-dump
+  ${CLANG_AST_OPTIONS}
   SOURCE ../Basic/Attr.td
   TARGET ClangAttrTextDump)
 
 clang_tablegen(AttrNodeTraverse.inc -gen-clang-attr-node-traverse
+  ${CLANG_AST_OPTIONS}
   SOURCE ../Basic/Attr.td
   TARGET ClangAttrTraverse)
 
 clang_tablegen(AttrVisitor.inc -gen-clang-attr-ast-visitor
+  ${CLANG_AST_OPTIONS}
   SOURCE ../Basic/Attr.td
   TARGET ClangAttrVisitor)
 

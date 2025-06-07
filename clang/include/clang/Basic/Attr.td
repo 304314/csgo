@@ -2379,6 +2379,15 @@ def OptimizeNone : InheritableAttr {
   let Documentation = [OptnoneDocs];
 }
 
+#ifdef BUILD_FOR_OPENEULER
+def Optimize : InheritableAttr {
+  let Spellings = [GCC<"optimize">];
+  let Args = [StringArgument<"Level">];
+  let Subjects = SubjectList<[Function]>;
+  let Documentation = [OptimizeDocs];
+}
+#endif
+
 def Overloadable : Attr {
   let Spellings = [Clang<"overloadable">];
   let Subjects = SubjectList<[Function], ErrorDiag>;

@@ -6,6 +6,11 @@ set(LLVM_LINK_COMPONENTS
   TargetParser
   )
 
+set(CLANG_AST_OPTIONS)
+if (BUILD_FOR_OPENEULER)
+  list(APPEND CLANG_AST_OPTIONS -DBUILD_FOR_OPENEULER)
+endif()
+
 # FIXME: the entry points to the interpreter should be moved out of clangAST
 # into the parser or Sema in order to allow the interpreter to be moved to
 # another library which depends on clangAST.
@@ -16,6 +21,7 @@ clang_tablegen(Opcodes.inc
 
 clang_tablegen(AttrDocTable.inc -gen-clang-attr-doc-table
   -I ${CMAKE_CURRENT_SOURCE_DIR}/../../include/
+  ${CLANG_AST_OPTIONS}
   SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../../include/clang/Basic/Attr.td
   TARGET ClangAttrDocTable)
 
