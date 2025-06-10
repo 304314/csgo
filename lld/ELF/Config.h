@@ -317,6 +317,7 @@ struct Config {
   uint8_t zStartStopVisibility;
   bool zText;
   bool zRetpolineplt;
+  int8_t zOeawarePolicy;
   bool zWxneeded;
   DiscardPolicy discard;
   GnuStackKind zGnustack;

@@ -294,6 +294,11 @@ template <class ELFT> void elf::createSyntheticSections() {
   in.bss = std::make_unique<BssSection>(".bss", 0, 1);
   add(*in.bss);
 
+  if (config->zOeawarePolicy != -1) {
+    in.oeaware = std::make_unique<OeAware>();
+    add(*in.oeaware);
+  }
+
   // If there is a SECTIONS command and a .data.rel.ro section name use name
   // .data.rel.ro.bss so that we match in the .data.rel.ro output section.
   // This makes sure our relro is contiguous.
@@ -2067,6 +2072,7 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
     llvm::TimeTraceScope timeScope("Finalize synthetic sections");
 
     finalizeSynthetic(in.bss.get());
+    finalizeSynthetic(in.oeaware.get());
     finalizeSynthetic(in.bssRelRo.get());
     finalizeSynthetic(in.symTabShndx.get());
     finalizeSynthetic(in.shStrTab.get());

@@ -569,6 +569,7 @@ constexpr const char *knownZFlags[] = {
     "text",
     "undefs",
     "wxneeded",
+    "oe-aware",
 };
 
 static bool isKnownZFlag(StringRef s) {
@@ -1397,6 +1398,7 @@ static void readConfigs(opt::InputArgList &args) {
   config->zStartStopVisibility = getZStartStopVisibility(args);
   config->zText = getZFlag(args, "text", "notext", true);
   config->zWxneeded = hasZOption(args, "wxneeded");
+  config->zOeawarePolicy = args::getZOptionValue(args, OPT_z,  "oeaware-policy", -1);
   setUnresolvedSymbolPolicy(args);
   config->power10Stubs = args.getLastArgValue(OPT_power10_stubs_eq) != "no";
 

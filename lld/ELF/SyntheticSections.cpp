@@ -3900,6 +3900,15 @@ size_t PackageMetadataNote::getSize() const {
          alignTo(config->packageMetadata.size() + 1, 4);
 }
 
+void OeAware::writeTo(uint8_t *buf) {
+  if(config->zOeawarePolicy != -1)
+    write32(buf, config->zOeawarePolicy);
+}
+
+size_t OeAware::getSize() const { return 4; }
+
+void OeAware::finalizeContents() {}
+
 InStruct elf::in;
 
 std::vector<Partition> elf::partitions;
