@@ -1129,6 +1129,230 @@ void MipsGotSection::writeTo(uint8_t *buf) {
   }
 }
 
+Sw64GotSection::Sw64GotSection()
+    : SyntheticSection(SHF_ALLOC | SHF_WRITE, SHT_PROGBITS, config->wordsize,
+                       ".got") {}
+
+// True if non-preemptable symbol always has the same value regardless of where
+// the DSO is loaded.
+static bool isAbsolute(const Symbol &Sym) {
+  if (Sym.isUndefWeak())
+    return true;
+  if (const auto *DR = dyn_cast<Defined>(&Sym))
+    return DR->section == nullptr; // Absolute symbol.
+  return false;
+}
+
+void Sw64GotSection::build() {
+  for (auto i = std::begin(Gots); i < std::end(Gots); ++i) {
+    if (nullptr == i->File)
+      continue;
+    for (auto j = std::next(i); j < std::end(Gots); ++j) {
+      if (nullptr == j->File)
+        continue;
+      mergeGots(*i, *j);
+      if (MAX_GOTS <= i->getEntriesNum())
+        break;
+    }
+  }
+
+  // Calculate indexes for each GOT entry.
+  size_t Index = 0;
+  uint32_t PltIndex = 0;
+  for (auto &Got : Gots) {
+    if (nullptr == Got.File)
+      continue;
+    Got.StartIndex = Index;
+    for (auto &P : Got.Global) {
+      P.second = Index++;
+
+      auto Sym = P.first.first;
+      auto Addend = P.first.second;
+      uint64_t Offset = P.second * config->wordsize;
+      mainPart->relaDyn->addReloc(
+          {Sym->isTls() ? target->tlsGotRel : target->gotRel, this, Offset,
+           DynamicReloc::AgainstSymbolWithTargetVA, *Sym, Addend, R_ADDEND});
+      if (0 != Addend || (Sym->isDefined() && Sym->isWeak())) {
+        relocations.push_back({R_ABS, R_SW_64_REFQUAD, Offset, Addend, Sym});
+      }
+    }
+
+    for (auto &P : Got.Jump) {
+      P.second = Index++;
+
+      auto Sym = P.first.first;
+
+      auto Addend = P.first.second;
+      uint64_t Offset = P.second * config->wordsize;
+      assert(0 == Addend);
+      in.plt->addEntry(*Sym);
+      Addend += target->pltEntrySize * (PltIndex - Sym->getPltIdx());
+      relocations.push_back({R_PLT, target->gotRel, Offset, Addend, Sym});
+      in.relaPlt->addReloc({target->pltRel, this, Offset,
+                            DynamicReloc::AgainstSymbolWithTargetVA, *Sym, 0,
+                            R_ADDEND});
+
+      ++PltIndex;
+    }
+    // Add the only one entry to make it not empty and to compensate
+    // the size when necessary.
+    if (!Got.Jump.empty() && !in.gotPlt->isNeeded()) {
+      in.gotPlt->addEntry(*Got.Jump.front().first.first);
+    }
+
+    for (auto &P : Got.Local) {
+      P.second = Index++;
+
+      auto Sym = P.first.first;
+      auto Addend = P.first.second;
+      uint64_t Offset = P.second * config->wordsize;
+      if (!config->isPic || isAbsolute(*Sym)) {
+        relocations.push_back({Sym->isTls() ? R_TPREL : R_ABS, target->gotRel,
+                               Offset, Addend, Sym});
+      } else {
+        mainPart->relaDyn->addReloc<false>(
+            DynamicReloc::AgainstSymbolWithTargetVA,
+            Sym->isTls() ? target->tlsGotRel : target->relativeRel, *this,
+            Offset, *Sym, Addend, R_ABS, target->gotRel);
+      }
+    }
+
+    for (auto &P : Got.DynTls) {
+      P.second = Index;
+      Index += DYNAMIC_GOT_COUNT;
+
+      auto Sym = P.first;
+      uint64_t Offset = P.second * config->wordsize;
+      uint64_t Offset2 = Offset + config->wordsize;
+      if (config->shared || nullptr == Sym || Sym->isPreemptible) {
+        if (nullptr == Sym) {
+          mainPart->relaDyn->addReloc({R_SW_64_DTPMOD64, this, Offset,
+                                       DynamicReloc::AddendOnly, *Sym, 0,
+                                       R_ADDEND});
+          continue;
+        }
+        mainPart->relaDyn->addReloc({R_SW_64_DTPMOD64, this, Offset,
+                                     DynamicReloc::AgainstSymbol, *Sym, 0,
+                                     R_ADDEND});
+      }
+      if (Sym->isPreemptible) {
+        mainPart->relaDyn->addReloc({R_SW_64_DTPREL64, this, Offset2,
+                                     DynamicReloc::AgainstSymbol, *Sym, 0,
+                                     R_ADDEND});
+      } else {
+        if (!config->shared) {
+          relocations.push_back({
+              R_ABS,
+              R_SW_64_DTPMOD64,
+              Offset,
+              1,
+              Sym,
+          });
+        }
+        relocations.push_back({
+            R_ABS,
+            R_SW_64_TPREL64,
+            Offset2,
+            0,
+            Sym,
+        });
+      }
+    }
+  }
+}
+
+bool Sw64GotSection::updateAllocSize() {
+  Size = 0;
+  for (const FileGot &G : Gots) {
+    if (nullptr == G.File)
+      continue;
+    Size += G.getEntriesNum() * config->wordsize;
+  }
+  return false;
+}
+
+size_t Sw64GotSection::FileGot::getEntriesNum() const {
+  return Local.size() + Global.size() + Jump.size() +
+         DynTls.size() * DYNAMIC_GOT_COUNT;
+}
+
+void Sw64GotSection::addEntry(InputFile &File, Symbol &Sym, int64_t Addend,
+                               RelExpr Expr) {
+  FileGot &G = getGot(File);
+  if (Sym.isPreemptible) {
+    auto &Entries = R_SW_PLT_GOT_OFF == Expr ? G.Jump : G.Global;
+    Entries.insert({{&Sym, Addend}, 0});
+  } else {
+    G.Local.insert({{&Sym, Addend}, 0});
+  }
+}
+
+uint64_t Sw64GotSection::getSymEntryOffset(const InputFile *F, const Symbol &S,
+                                            int64_t Addend,
+                                            RelExpr Expr) const {
+  const FileGot &G = Gots[F->mipsGotIndex];
+  Symbol *Sym = const_cast<Symbol *>(&S);
+  if (Sym->isPreemptible) {
+    auto &Entries = R_SW_PLT_GOT_OFF == Expr ? G.Jump : G.Global;
+    return Entries.lookup({Sym, Addend}) * config->wordsize;
+  }
+  return G.Local.lookup({Sym, Addend}) * config->wordsize;
+}
+
+void Sw64GotSection::addDynTlsEntry(InputFile &File, Symbol &Sym) {
+  getGot(File).DynTls.insert({&Sym, 0});
+}
+
+void Sw64GotSection::addTlsIndex(InputFile &File) {
+  getGot(File).DynTls.insert({nullptr, 0});
+}
+
+uint64_t Sw64GotSection::getDynOffset(const InputFile *F,
+                                       const Symbol &S) const {
+  const FileGot &G = Gots[F->mipsGotIndex];
+  Symbol *Sym = const_cast<Symbol *>(&S);
+  return G.DynTls.lookup(Sym) * config->wordsize;
+}
+
+uint64_t Sw64GotSection::getGpOffset(const InputFile *F) const {
+  uint64_t offset = GP_OFFSET;
+  if (F && uint32_t(-1) != F->mipsGotIndex) {
+    offset += Gots[F->mipsGotIndex].StartIndex * config->wordsize;
+  }
+  return offset;
+}
+
+Sw64GotSection::FileGot &Sw64GotSection::getGot(InputFile &F) {
+  if (uint32_t(-1) == F.mipsGotIndex) {
+    Gots.emplace_back();
+    Gots.back().File = &F;
+    F.mipsGotIndex = Gots.size() - 1;
+  }
+  return Gots[F.mipsGotIndex];
+}
+
+void Sw64GotSection::writeTo(uint8_t *buf) {
+  target->relocateAlloc(*this, buf);
+}
+
+bool Sw64GotSection::mergeGots(FileGot &Dst, FileGot &Src) {
+  assert(nullptr != Dst.File);
+
+  // TODO: Do an optimistic merge.
+  if (MAX_GOTS < Dst.getEntriesNum() + Src.getEntriesNum())
+    return false;
+
+  set_union(Dst.Local, Src.Local);
+  set_union(Dst.Global, Src.Global);
+  set_union(Dst.Jump, Src.Jump);
+  set_union(Dst.DynTls, Src.DynTls);
+  Src.File->mipsGotIndex = Dst.File->mipsGotIndex;
+  Src.File = nullptr;
+
+  assert(Dst.getEntriesNum() <= MAX_GOTS);
+  return true;
+}
+
 // On PowerPC the .plt section is used to hold the table of function addresses
 // instead of the .got.plt, and the type is SHT_NOBITS similar to a .bss
 // section. I don't know why we have a BSS style type for the section but it is
@@ -1441,6 +1665,9 @@ DynamicSection<ELFT>::computeContents() {
       break;
     }
     addInt(DT_PLTREL, config->isRela ? DT_RELA : DT_REL);
+    if (config->emachine == EM_SW64) {
+      addInt(/* SW_64_PLTRO */ DT_LOPROC, 1);
+    }
   }
 
   if (config->emachine == EM_AARCH64) {
@@ -2224,6 +2451,11 @@ template <class ELFT> void SymbolTableSection<ELFT>::writeTo(uint8_t *buf) {
     eSym->st_name = ent.strTabOffset;
     eSym->setBindingAndType(sym->binding, sym->type);
     eSym->st_other = sym->stOther;
+    if (config->emachine == EM_SW64) {
+      // It's not clear what the flags `0x88` mean, but `bfd` doesn't copy it.
+      // So we mimic the behaviour of `bfd`.
+      eSym->st_other &= ~0x88;
+    }
 
     if (BssSection *commonSec = getCommonSec(sym)) {
       // When -r is specified, a COMMON symbol is not allocated. Its st_shndx

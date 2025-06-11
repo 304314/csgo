@@ -162,6 +162,8 @@ static const u64 kAddressSpaceSize = 1ULL << 39;
 static const u64 kAddressSpaceSize = 1ULL << 53;
 #elif defined(__s390__)
 static const u64 kAddressSpaceSize = 1ULL << 31;
+#elif defined(__sw_64__)
+static const u64 kAddressSpaceSize = 1ULL << 52;
 #else
 static const u64 kAddressSpaceSize = 1ULL << 32;
 #endif

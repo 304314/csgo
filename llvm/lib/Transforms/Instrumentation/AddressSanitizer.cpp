@@ -117,6 +117,7 @@ static const uint64_t kNetBSD_ShadowOffset64 = 1ULL << 46;
 static const uint64_t kNetBSDKasan_ShadowOffset64 = 0xdfff900000000000;
 static const uint64_t kPS_ShadowOffset64 = 1ULL << 40;
 static const uint64_t kWindowsShadowOffset32 = 3ULL << 28;
+static const uint64_t kSW64_ShadowOffset64 = 1ULL << 49;
 static const uint64_t kEmscriptenShadowOffset = 0;
 
 // The shadow memory space is dynamically allocated.
@@ -498,6 +499,7 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
   bool IsFuchsia = TargetTriple.isOSFuchsia();
   bool IsEmscripten = TargetTriple.isOSEmscripten();
   bool IsAMDGPU = TargetTriple.isAMDGPU();
+  bool IsSW64 = TargetTriple.isSw64();
 
   ShadowMapping Mapping;
 
@@ -571,6 +573,8 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
     else if (IsAMDGPU)
       Mapping.Offset = (kSmallX86_64ShadowOffsetBase &
                         (kSmallX86_64ShadowOffsetAlignMask << Mapping.Scale));
+    else if (IsSW64)
+      Mapping.Offset = kSW64_ShadowOffset64;
     else
       Mapping.Offset = kDefaultShadowOffset64;
   }

@@ -279,6 +279,8 @@ static inline bool MaybeUserPointer(uptr p) {
 #  elif defined(__loongarch_lp64)
   // Allow 47-bit user-space VMA at current.
   return ((p >> 47) == 0);
+#  elif defined(__sw_64__)
+  return ((p >> 52) == 0);
 #  else
   return true;
 #  endif

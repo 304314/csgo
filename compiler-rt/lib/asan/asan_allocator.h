@@ -140,6 +140,10 @@ typedef VeryDenseSizeClassMap SizeClassMap;
 const uptr kAllocatorSpace = ~(uptr)0;
 const uptr kAllocatorSize = 0x20000000000ULL;  // 2T.
 typedef DefaultSizeClassMap SizeClassMap;
+# elif SANITIZER_SW64
+const uptr kAllocatorSpace = ~(uptr)0;
+const uptr kAllocatorSize = 0x40000000000ULL;  // 4T.
+typedef DefaultSizeClassMap SizeClassMap;
 # elif SANITIZER_WINDOWS
 const uptr kAllocatorSpace = ~(uptr)0;
 const uptr kAllocatorSize  =  0x8000000000ULL;  // 500G

@@ -347,7 +347,59 @@ private:
   // Try to merge two GOTs. In case of success the `Dst` contains
   // result of merging and the function returns true. In case of
   // overflow the `Dst` is unchanged and the function returns false.
-  bool tryMergeGots(FileGot & dst, FileGot & src, bool isPrimary);
+  bool tryMergeGots(FileGot &dst, FileGot &src, bool isPrimary);
+};
+
+class Sw64GotSection final : public SyntheticSection {
+public:
+  static constexpr int64_t GP_OFFSET = 0x8000;
+  static constexpr size_t DYNAMIC_GOT_COUNT = 2;
+  Sw64GotSection();
+
+  void writeTo(uint8_t *Buf) override;
+  size_t getSize() const override { return Size; }
+  bool updateAllocSize() override;
+  void finalizeContents() override { updateAllocSize(); }
+
+  // Join separate GOTs built for each input file.
+  void build();
+
+  void addEntry(InputFile &File, Symbol &Sym, int64_t Addend, RelExpr Expr);
+  uint64_t getSymEntryOffset(const InputFile *F, const Symbol &S,
+                             int64_t Addend, RelExpr Expr) const;
+  void addDynTlsEntry(InputFile &File, Symbol &Sym);
+  uint64_t getDynOffset(const InputFile *F, const Symbol &S) const;
+  void addTlsIndex(InputFile &File);
+  // Return gp value for particular input file.
+  uint64_t getGpOffset(const InputFile *F = nullptr) const;
+
+private:
+  uint64_t Size;
+
+  // Symbol and addend.
+  typedef std::pair<Symbol *, int64_t> GotEntry;
+
+  struct FileGot {
+    InputFile *File = nullptr;
+    size_t StartIndex = 0;
+
+    llvm::MapVector<GotEntry, size_t> Local;
+    llvm::MapVector<GotEntry, size_t> Global;
+    llvm::MapVector<GotEntry, size_t> Jump;
+    llvm::MapVector<Symbol *, size_t> DynTls;
+
+    // Total number of all entries.
+    size_t getEntriesNum() const;
+  };
+
+  // Container of GOT created for each input file.
+  std::vector<FileGot> Gots;
+
+  // Return (and create if necessary) `FileGot`.
+  FileGot &getGot(InputFile &F);
+
+  static constexpr size_t MAX_GOTS = 1 << 13;
+  static bool mergeGots(FileGot &Dst, FileGot &Src);
 };
 
 class GotPltSection final : public SyntheticSection {
@@ -709,6 +761,7 @@ public:
   HashTableSection();
   void finalizeContents() override;
   void writeTo(uint8_t *buf) override;
+  template <class EntryType> void writeTo(uint8_t *Buf);
   size_t getSize() const override { return size; }
 
 private:
@@ -1321,6 +1374,7 @@ struct InStruct {
   std::unique_ptr<RelocationBaseSection> relaIplt;
   std::unique_ptr<StringTableSection> shStrTab;
   std::unique_ptr<StringTableSection> strTab;
+  std::unique_ptr<Sw64GotSection> sw64Got;
   std::unique_ptr<SymbolTableBaseSection> symTab;
   std::unique_ptr<SymtabShndxSection> symTabShndx;
 

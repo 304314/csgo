@@ -212,6 +212,18 @@ const MappingDesc kMemoryLayout[] = {
 #define MEM_TO_SHADOW(mem) (((uptr)(mem)) ^ 0x500000000000ULL)
 #define SHADOW_TO_ORIGIN(mem) (((uptr)(mem)) + 0x100000000000ULL)
 
+#elif SANITIZER_LINUX && defined(__sw_64__)
+const MappingDesc kMemoryLayout[] = {
+    {0x0000000000000ULL, 0x0100000000000ULL, MappingDesc::APP, "low memory"},
+    {0x0100000000000ULL, 0x0400000000000ULL, MappingDesc::INVALID, "invalid"},
+    {0x0400000000000ULL, 0x1000000000000ULL, MappingDesc::APP, "high memory"},
+    {0x1000000000000ULL, 0x2000000000000ULL, MappingDesc::SHADOW, "shadow"},
+    {0x2000000000000ULL, 0x5000000000000ULL, MappingDesc::INVALID, "invalid"},
+    {0x5000000000000ULL, 0x6000000000000ULL, MappingDesc::ORIGIN, "origin"}};
+
+#define MEM_TO_SHADOW(mem)   (((uptr)(mem)) ^ 0x1000000000000ULL)
+#define SHADOW_TO_ORIGIN(shadow) (((uptr)(shadow)) + 0x4000000000000ULL)
+
 #else
 #error "Unsupported platform"
 #endif

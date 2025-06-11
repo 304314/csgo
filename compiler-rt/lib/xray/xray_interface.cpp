@@ -56,6 +56,8 @@ static const int16_t cSledLength = 64;
 static const int16_t cSledLength = 8;
 #elif defined(__hexagon__)
 static const int16_t cSledLength = 20;
+#elif defined(__sw_64__)
+static const int16_t cSledLength = 76;
 #else
 #error "Unsupported CPU Architecture"
 #endif /* CPU architecture */

@@ -1061,6 +1061,7 @@ SanitizerMask Linux::getSupportedSanitizers() const {
   const bool IsX86_64 = getTriple().getArch() == llvm::Triple::x86_64;
   const bool IsMIPS = getTriple().isMIPS32();
   const bool IsMIPS64 = getTriple().isMIPS64();
+  const bool IsSw64 = getTriple().isSw64();
   const bool IsPowerPC64 = getTriple().getArch() == llvm::Triple::ppc64 ||
                            getTriple().getArch() == llvm::Triple::ppc64le;
   const bool IsAArch64 = getTriple().getArch() == llvm::Triple::aarch64 ||
@@ -1086,15 +1087,15 @@ SanitizerMask Linux::getSupportedSanitizers() const {
   if (IsX86_64 || IsMIPS64 || IsAArch64 || IsLoongArch64)
     Res |= SanitizerKind::DataFlow;
   if (IsX86_64 || IsMIPS64 || IsAArch64 || IsX86 || IsArmArch || IsPowerPC64 ||
-      IsRISCV64 || IsSystemZ || IsHexagon || IsLoongArch64)
+      IsRISCV64 || IsSystemZ || IsHexagon || IsLoongArch64 || IsSw64)
     Res |= SanitizerKind::Leak;
   if (IsX86_64 || IsMIPS64 || IsAArch64 || IsPowerPC64 || IsSystemZ ||
-      IsLoongArch64)
+      IsLoongArch64 || IsSw64)
     Res |= SanitizerKind::Thread;
   if (IsX86_64 || IsSystemZ)
     Res |= SanitizerKind::KernelMemory;
   if (IsX86_64 || IsMIPS64 || IsAArch64 || IsX86 || IsMIPS || IsArmArch ||
-      IsPowerPC64 || IsHexagon || IsLoongArch64 || IsRISCV64)
+      IsPowerPC64 || IsHexagon || IsLoongArch64 || IsRISCV64 || IsSw64)
     Res |= SanitizerKind::Scudo;
   if (IsX86_64 || IsAArch64 || IsRISCV64) {
     Res |= SanitizerKind::HWAddress;

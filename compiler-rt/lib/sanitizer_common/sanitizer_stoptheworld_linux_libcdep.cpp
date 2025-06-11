@@ -16,7 +16,8 @@
 #if SANITIZER_LINUX &&                                                   \
     (defined(__x86_64__) || defined(__mips__) || defined(__aarch64__) || \
      defined(__powerpc64__) || defined(__s390__) || defined(__i386__) || \
-     defined(__arm__) || SANITIZER_RISCV64 || SANITIZER_LOONGARCH64)
+     defined(__arm__) || SANITIZER_RISCV64 || SANITIZER_LOONGARCH64 ||   \
+     defined(__sw_64__))
 
 #include "sanitizer_stoptheworld.h"
 
@@ -508,6 +509,12 @@ typedef struct user regs_struct;
 # else
 #  define REG_SP regs[EF_REG29]
 # endif
+
+#elif defined(__sw_64__)
+typedef struct user regs_struct;
+#define REG_SP regs[30]
+static constexpr uptr kExtraRegs[] = {0};
+#define ARCH_IOVEC_FOR_GETREGSET
 
 #elif defined(__aarch64__)
 typedef struct user_pt_regs regs_struct;
