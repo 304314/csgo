@@ -29,6 +29,7 @@ build_dir_name="build"
 install_dir_name="install"
 build_prefix="$dir/$build_dir_name"
 install_prefix="$dir/$install_dir_name"
+container="openEuler"
 
 # Use 8 threads for builds and tests by default. Use more threads if possible,
 # but avoid overloading the system by using up to 50% of available cores.
@@ -56,7 +57,7 @@ Options:
   -A       Disable ACPO.
   -b type  Specify CMake build type (default: $buildtype).
   -c       Use ccache (default: $use_ccache).
-  -C       Containerize the build for openEuler compatibility.
+  -C env   Containerize the build for openEuler/CentOS compatibility (default: $container).
   -e       Build for embedded cross tool chain.
   -E       Build for openEuler.
   -h       Display this help message.
@@ -77,7 +78,7 @@ EOF
 # Process command-line options. Remember the options for passing to the
 # containerized build script.
 containerized_opts=()
-while getopts :aAb:d:cCeEhiI:j:orstvfX: optchr; do
+while getopts :aAb:d:cC::eEhiI:j:orstvfX: optchr; do
   case "$optchr" in
     a)
       enable_autotuner="0"
@@ -107,10 +108,19 @@ while getopts :aAb:d:cCeEhiI:j:orstvfX: optchr; do
       containerized_opts+=(-$optchr)
       ;;
     C)
+      container="$OPTARG"
       if [ -z "$docker" -o ! -x "$docker" ]; then
         echo "$0: no usable Docker"
         exit 1
       fi
+      case "${container,,}" in
+        openEuler|CentOS)
+          ;;
+        *)
+          echo "$0: invalid container env '$container'"
+          exit 1
+          ;;
+      esac
       containerize=1
       ;;
     d)
@@ -257,7 +267,11 @@ else
   trap 'docker_cleanup 130 INT' SIGINT
   trap 'docker_cleanup 143 TERM' SIGTERM
 
-  DOCKER_IMAGE="llvm-build-deps:latest"
+  if [ "$container" == "CentOS" ]; then
+    DOCKER_IMAGE="swr.cn-north-4.myhuaweicloud.com/llvm4oe/llvm-build-dep-centos7.6:latest"
+  else
+    DOCKER_IMAGE="hub.oepkgs.net/openeuler/llvm-build-deps:latest"
+  fi
   docker_opts="--rm
     --cap-add=SYS_ADMIN
     --cap-add=SYS_PTRACE
@@ -271,7 +285,7 @@ else
     -v $passwd:/etc/passwd
     -v $group:/etc/group
     -e BINUTILS_INCDIR=/usr/local/include
-    hub.oepkgs.net/openeuler/${DOCKER_IMAGE}"
+    ${DOCKER_IMAGE}"
 
   if [ -t 1 ]; then
     $docker run -it $docker_opts ${cmd} ${containerized_opts[@]}
