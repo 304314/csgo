@@ -1961,6 +1961,7 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
     llvm::TimeTraceScope timeScope("Finalize synthetic sections");
 
     finalizeSynthetic(in.bss.get());
+    finalizeSynthetic(in.oeaware.get());
     finalizeSynthetic(in.bssRelRo.get());
     finalizeSynthetic(in.symTabShndx.get());
     finalizeSynthetic(in.shStrTab.get());
