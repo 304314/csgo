@@ -139,6 +139,20 @@ struct AP64 {
   using AddressSpaceView = LocalAddressSpaceView;
 };
 typedef SizeClassAllocator64<AP64> PrimaryAllocator;
+#elif defined(__sw_64__)
+static const uptr kMaxAllowedMallocSize = 2UL << 30;  // 2G
+
+struct AP32 {
+  static const uptr kSpaceBeg = 0;
+  static const u64 kSpaceSize = SANITIZER_MMAP_RANGE_SIZE;
+  static const uptr kMetadataSize = sizeof(Metadata);
+  typedef __sanitizer::CompactSizeClassMap SizeClassMap;
+  static const uptr kRegionSizeLog = 20;
+  using AddressSpaceView = LocalAddressSpaceView;
+  typedef MsanMapUnmapCallback MapUnmapCallback;
+  static const uptr kFlags = 0;
+};
+typedef SizeClassAllocator32<AP32> PrimaryAllocator;
 #endif
 typedef CombinedAllocator<PrimaryAllocator> Allocator;
 typedef Allocator::AllocatorCache AllocatorCache;

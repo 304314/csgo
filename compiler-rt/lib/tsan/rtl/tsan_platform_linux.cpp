@@ -405,6 +405,10 @@ static uptr UnmangleLongJmpSp(uptr mangled_sp) {
   return mangled_sp ^ xor_key;
 #elif defined(__mips__)
   return mangled_sp;
+#elif defined(__sw_64__)
+  uptr xor_key;
+  asm("ldl  %0, __pointer_chk_guard($r29)" : "=r" (xor_key));
+  return mangled_sp ^ xor_key;
 #elif defined(__s390x__)
   // tcbhead_t.stack_guard
   uptr xor_key = ((uptr *)__builtin_thread_pointer())[5];
@@ -437,6 +441,8 @@ static uptr UnmangleLongJmpSp(uptr mangled_sp) {
 #  define LONG_JMP_SP_ENV_SLOT 1
 # elif defined(__s390x__)
 #  define LONG_JMP_SP_ENV_SLOT 9
+# elif defined(__sw_64__)
+#  define LONG_JMP_SP_ENV_SLOT 8
 # else
 #  define LONG_JMP_SP_ENV_SLOT 6
 # endif

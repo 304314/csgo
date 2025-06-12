@@ -220,6 +220,10 @@ else()
       set(TSAN_ASM_SOURCES
         tsan_rtl_mips64.S
         )
+    elseif(arch MATCHES "sw_64|sw64")
+      set(TSAN_ASM_SOURCES
+        tsan_rtl_sw64.S
+        )
     elseif(arch MATCHES "s390x")
       set(TSAN_ASM_SOURCES
         tsan_rtl_s390x.S

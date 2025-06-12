@@ -24,6 +24,8 @@ static const u32 kStackTraceMax = 255;
 
 #if SANITIZER_LINUX && defined(__mips__)
 # define SANITIZER_CAN_FAST_UNWIND 0
+#elif SANITIZER_LINUX && defined(__sw_64__)
+# define SANITIZER_CAN_FAST_UNWIND 0
 #elif SANITIZER_WINDOWS
 # define SANITIZER_CAN_FAST_UNWIND 0
 #else

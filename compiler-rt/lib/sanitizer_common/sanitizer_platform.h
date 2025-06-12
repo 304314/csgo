@@ -278,6 +278,12 @@
 #  define SANITIZER_LOONGARCH64 0
 #endif
 
+#if defined(__sw_64__)
+#  define SANITIZER_SW64 1
+#else
+#  define SANITIZER_SW64 0
+#endif
+
 // By default we allow to use SizeClassAllocator64 on 64-bit platform.
 // But in some cases SizeClassAllocator64 does not work well and we need to
 // fallback to SizeClassAllocator32.
@@ -318,6 +324,8 @@
 #    define SANITIZER_MMAP_RANGE_SIZE FIRST_32_SECOND_64(1ULL << 32, 1ULL << 48)
 #  endif
 #elif defined(__sparc__)
+#  define SANITIZER_MMAP_RANGE_SIZE FIRST_32_SECOND_64(1ULL << 32, 1ULL << 52)
+#elif defined(__sw_64__)
 #  define SANITIZER_MMAP_RANGE_SIZE FIRST_32_SECOND_64(1ULL << 32, 1ULL << 52)
 #else
 #  define SANITIZER_MMAP_RANGE_SIZE FIRST_32_SECOND_64(1ULL << 32, 1ULL << 47)

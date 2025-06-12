@@ -434,6 +434,9 @@ template <class ELFT> void elf::createSyntheticSections() {
   if (config->emachine == EM_MIPS) {
     in.mipsGot = std::make_unique<MipsGotSection>();
     add(*in.mipsGot);
+  } else if (config->emachine == EM_SW64) {
+    in.sw64Got = std::make_unique<Sw64GotSection>();
+    add(*in.sw64Got);
   } else {
     in.got = std::make_unique<GotSection>();
     add(*in.got);
@@ -850,6 +853,9 @@ enum RankFlags {
   RF_NOT_RELRO = 1 << 9,
   RF_NOT_TLS = 1 << 8,
   RF_BSS = 1 << 7,
+
+  RF_SW_64_GPREL = 1 << 2,
+  RF_SW_64_GOT = 1 << 1,
 };
 
 static unsigned getSectionRank(const OutputSection &osec) {
@@ -927,6 +933,16 @@ static unsigned getSectionRank(const OutputSection &osec) {
   // sections, place non-NOBITS sections first.
   if (osec.type == SHT_NOBITS)
     rank |= RF_BSS;
+
+  if (config->emachine == EM_SW64) {
+    StringRef name = osec.name;
+    // Matching bfd section layout to make `gprel16` works as bfd.
+    if (".got" == name) {
+      rank |= RF_SW_64_GOT;
+    } else if (".sdata" == name || ".sbss" == name) {
+      rank |= RF_SW_64_GPREL;
+    }
+  }
 
   // Some architectures have additional ordering restrictions for sections
   // within the same PT_LOAD.
@@ -1955,6 +1971,18 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
 
   {
     llvm::TimeTraceScope timeScope("Add symbols to symtabs");
+
+    if (nullptr != in.sw64Got) {
+      in.sw64Got->build();
+      if (in.plt->isNeeded()) {
+        // Make it compatible with bfd.
+        Symbol *s = symtab.addSymbol(Defined{
+            /*file*/ nullptr, "_PROCEDURE_LINKAGE_TABLE_", STB_LOCAL,
+            STV_DEFAULT, STT_OBJECT, /*value*/ 0, /*size*/ 0, in.plt.get()});
+        s->isUsedInRegularObj = true;
+      }
+    }
+
     // Now that we have defined all possible global symbols including linker-
     // synthesized ones. Visit all symbols to give the finishing touches.
     for (Symbol *sym : symtab.getSymbols()) {
@@ -2073,6 +2101,7 @@ template <class ELFT> void Writer<ELFT>::finalizeSections() {
     finalizeSynthetic(in.strTab.get());
     finalizeSynthetic(in.got.get());
     finalizeSynthetic(in.mipsGot.get());
+    finalizeSynthetic(in.sw64Got.get());
     finalizeSynthetic(in.igotPlt.get());
     finalizeSynthetic(in.gotPlt.get());
     finalizeSynthetic(in.relaIplt.get());
@@ -2678,9 +2707,11 @@ template <class ELFT> void Writer<ELFT>::setPhdrs(Partition &part) {
       // musl/glibc ld.so rounds the size down, so we need to round up
       // to protect the last page. This is a no-op on FreeBSD which always
       // rounds up.
-      p->p_memsz =
-          alignToPowerOf2(p->p_offset + p->p_memsz, config->commonPageSize) -
-          p->p_offset;
+      if (config->emachine != EM_SW64) {
+        p->p_memsz =
+            alignToPowerOf2(p->p_offset + p->p_memsz, config->commonPageSize) -
+            p->p_offset;
+      }
     }
   }
 }

@@ -4711,7 +4711,12 @@ INTERCEPTOR(int, shmctl, int shmid, int cmd, void *buf) {
   }
   return res;
 }
+// SW64 calls shmctl@@GLIBC_2.2 while common interceptor calls shmctl@GLIBC_2.0
+#if SANITIZER_SW64
+#define INIT_SHMCTL COMMON_INTERCEPT_FUNCTION_VER(shmctl, "GLIBC_2.2");
+#else
 #define INIT_SHMCTL COMMON_INTERCEPT_FUNCTION(shmctl);
+#endif
 #else
 #define INIT_SHMCTL
 #endif

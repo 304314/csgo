@@ -233,8 +233,15 @@
   (SI_LINUX || SI_FREEBSD || SI_NETBSD)
 #define SANITIZER_INTERCEPT_GETITIMER SI_POSIX
 #define SANITIZER_INTERCEPT_TIME SI_POSIX
+// Disable the glob intercept as SW64 calls glob64 actually when glob is used.
+// Hacking it like glibc is a better way, which is difficult.
+#if SANITIZER_SW64
+#define SANITIZER_INTERCEPT_GLOB 0
+#define SANITIZER_INTERCEPT_GLOB64 0
+#else
 #define SANITIZER_INTERCEPT_GLOB (SI_GLIBC || SI_SOLARIS)
 #define SANITIZER_INTERCEPT_GLOB64 SI_GLIBC
+#endif
 #define SANITIZER_INTERCEPT___B64_TO SI_LINUX_NOT_ANDROID
 #define SANITIZER_INTERCEPT_DN_COMP_EXPAND SI_LINUX_NOT_ANDROID
 #define SANITIZER_INTERCEPT_POSIX_SPAWN SI_POSIX
@@ -273,7 +280,8 @@
 #if SI_LINUX_NOT_ANDROID &&                                                \
     (defined(__i386) || defined(__x86_64) || defined(__mips64) ||          \
      defined(__powerpc64__) || defined(__aarch64__) || defined(__arm__) || \
-     defined(__s390__) || defined(__loongarch__) || SANITIZER_RISCV64)
+     defined(__s390__) || defined(__loongarch__) || SANITIZER_RISCV64 ||   \
+     defined(__sw_64__))
 #define SANITIZER_INTERCEPT_PTRACE 1
 #else
 #define SANITIZER_INTERCEPT_PTRACE 0

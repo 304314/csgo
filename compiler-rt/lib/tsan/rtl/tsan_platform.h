@@ -644,6 +644,46 @@ struct MappingGoS390x {
   static const uptr kShadowAdd = 0x400000000000ull;
 };
 
+// TODO(sw64_map): as sw64 kernal doesn't map such large space, we just map
+// it for test, for now it works will.
+// TODO(sw64_map_la): as sw64 map all space in low address, we set all user
+// space
+// in Lo address, perhaps there is some way to change it.
+/*
+C/C++ on linux/sw64 (52-bit VMA)
+0000 0000 0000 - 0001 2000 0000: modules and main thread stack
+0001 2000 0000 - 0008 0000 0000: main binary
+0400 0000 0000 - 0600 0000 0000: pie main binary (including heap)
+0600 0000 0000 - 4000 0000 0000: -
+4000 0000 0000 - 6000 0000 0000: shadow
+6000 0000 0000 - 7000 0000 0000: metainfo
+7000 0000 0000 - 7c00 0000 0000: trace
+*/
+
+// TODO: fix HiAppMemEnd
+struct MappingSW64 {
+  static const uptr kLoAppMemBeg   = 0x0000000000000ull;
+  static const uptr kLoAppMemEnd   = 0x0600000000000ull;
+  static const uptr kShadowBeg     = 0x6000000000000ull;
+  static const uptr kShadowEnd     = 0x8000000000000ull;
+  static const uptr kMidAppMemBeg  = 0;
+  static const uptr kMidAppMemEnd  = 0;
+  static const uptr kHiAppMemBeg   = 0xfff7000000000ull;
+  static const uptr kHiAppMemEnd   = 0x10000000000000ull;
+  static const uptr kShadowMsk     = 0xf800000000000ull;
+  //distans between lo address to shadow begin
+  static const uptr kShadowXor     = 0x1800000000000ull;
+  static const uptr kShadowAdd     = 0x0ull;
+  static const uptr kHeapMemBeg    = 0xff00000000000ull;
+  static const uptr kHeapMemEnd    = 0xff00000000000ull;
+  static const uptr kMetaShadowBeg = 0x9000000000000ull;
+  static const uptr kMetaShadowEnd = 0xa000000000000ull;
+
+//  static const uptr kTraceMemBeg   = 0xa000000000000ull;
+//  static const uptr kTraceMemEnd   = 0xac00000000000ull;
+  static const uptr kVdsoBeg       = 0x3c00000000000000ull;
+};
+
 extern uptr vmaSize;
 
 template <typename Func, typename Arg>
@@ -698,6 +738,8 @@ ALWAYS_INLINE auto SelectMapping(Arg arg) {
   return Func::template Apply<MappingMips64_40>(arg);
 #  elif defined(__s390x__)
   return Func::template Apply<MappingS390x>(arg);
+#  elif defined(__sw_64__)
+  return Func::template Apply<MappingSW64>(arg);
 #  else
 #    error "unsupported platform"
 #  endif

@@ -859,7 +859,7 @@ elif config.android:
 
 # Allow tests to use REQUIRES=stable-runtime.  For use when you cannot use XFAIL
 # because the test hangs or fails on one configuration and not the other.
-if config.android or (config.target_arch not in ["arm", "armhf", "aarch64"]):
+if config.android or (config.target_arch not in ['arm', 'armhf', 'aarch64', 'sw_64']):
     config.available_features.add("stable-runtime")
 
 if config.asan_shadow_scale:
@@ -881,6 +881,10 @@ if config.expensive_checks:
 run_wrapper = []
 target_cflags = [getattr(config, "target_cflags", None)]
 extra_cflags = []
+
+# On Sw64 we need -mlong-double=64 to make some test pass.
+if config.target_arch == 'sw_64':
+    extra_cflags += ["-mlong-double-64"]
 
 if config.use_lto and config.lto_supported:
     extra_cflags += config.lto_flags

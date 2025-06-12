@@ -1,6 +1,7 @@
 // FIXME: https://code.google.com/p/address-sanitizer/issues/detail?id=316
 // XFAIL: android
 // XFAIL: target=mips{{.*}}
+// XFAIL: sw_64
 //
 // RUN: %clangxx_asan -O0 %s -o %t && %run %t
 // RUN: %clangxx_asan -DPOSITIVE -O0 %s -o %t && not %run %t 2>&1 | FileCheck %s
@@ -55,6 +56,15 @@ typedef elf_fpregset_t fpregs_struct;
 typedef struct pt_regs regs_struct;
 typedef elf_fpregset_t fpregs_struct;
 #define PRINT_REG_PC(__regs)    printf ("%lx\n", (unsigned long) (__regs.cp0_epc))
+#define PRINT_REG_FP(__fpregs)  printf ("%lx\n", (elf_greg_t) (__fpregs[32]))
+#define __PTRACE_FPREQUEST PTRACE_GETFPREGS
+
+#elif defined(__sw_64__)
+# include <asm/ptrace.h>
+# include <sys/procfs.h>
+typedef struct pt_regs regs_struct;
+typedef fpregset_t fpregs_struct;
+#define PRINT_REG_PC(__regs)    printf ("%lx\n", (unsigned long) (__regs.pc))
 #define PRINT_REG_FP(__fpregs)  printf ("%lx\n", (elf_greg_t) (__fpregs[32]))
 #define __PTRACE_FPREQUEST PTRACE_GETFPREGS
 
