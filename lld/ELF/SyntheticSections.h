@@ -1298,6 +1298,20 @@ public:
   size_t getSize() const override;
 };
 
+class OeAware : public SyntheticSection {
+public:
+  OeAware()
+      : SyntheticSection(llvm::ELF::SHF_ALLOC | llvm::ELF::SHF_WRITE,
+		         llvm::ELF::SHT_NOTE, /*alignment=*/4, ".LLVM4OE_oeAware")
+        {}
+  void writeTo(uint8_t *buf) override;
+  size_t getSize() const override;
+  void finalizeContents() override;
+
+private:
+  uint64_t size;
+};
+
 InputSection *createInterpSection();
 MergeInputSection *createCommentSection();
 template <class ELFT> void splitSections();
@@ -1377,6 +1391,7 @@ struct InStruct {
   std::unique_ptr<Sw64GotSection> sw64Got;
   std::unique_ptr<SymbolTableBaseSection> symTab;
   std::unique_ptr<SymtabShndxSection> symTabShndx;
+  std::unique_ptr<SyntheticSection> oeaware;
 
   void reset();
 };
