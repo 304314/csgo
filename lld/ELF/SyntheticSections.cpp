@@ -4922,7 +4922,20 @@ template <class ELFT> void elf::createSyntheticSections() {
   add(*in.shStrTab);
   if (in.strTab)
     add(*in.strTab);
+  if (config->zOeawarePolicy != -1) {
+    in.oeaware = std::make_unique<OeAware>();
+    add(*in.oeaware);
+  }
 }
+
+void OeAware::writeTo(uint8_t *buf) {
+  if (config->zOeawarePolicy != -1)
+    write32(buf, config->zOeawarePolicy);
+}
+
+size_t OeAware::getSize() const { return 4; }
+
+void OeAware::finalizeContents() {}
 
 InStruct elf::in;
 
