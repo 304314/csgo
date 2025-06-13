@@ -53,6 +53,10 @@ static cl::opt<double> PartialSampleProfileWorkingSetSizeScaleFactor(
              "and the factor to scale the working set size to use the same "
              "shared thresholds as PGO."));
 
+static cl::opt<bool> ProfileSummaryHotCountForICP(
+    "profile-summary-hot-count-for-ipc", cl::Hidden, cl::init(false),
+    cl::desc("A hot count is for IPC."));
+
 // The profile summary metadata may be attached either by the frontend or by
 // any backend passes (IR level instrumentation, for example). This method
 // checks if the Summary is null and if so checks if the summary metadata is now
@@ -124,6 +128,8 @@ void ProfileSummaryInfo::computeThresholds() {
       DetailedSummary, ProfileSummaryCutoffHot);
   HotCountThreshold =
       ProfileSummaryBuilder::getHotCountThreshold(DetailedSummary);
+  HotCountThresholdICP =
+      ProfileSummaryBuilder::getHotCountThresholdForICP(DetailedSummary);
   ColdCountThreshold =
       ProfileSummaryBuilder::getColdCountThreshold(DetailedSummary);
   assert(ColdCountThreshold <= HotCountThreshold &&
@@ -171,7 +177,10 @@ bool ProfileSummaryInfo::hasLargeWorkingSetSize() const {
   return HasLargeWorkingSetSize && *HasLargeWorkingSetSize;
 }
 
-bool ProfileSummaryInfo::isHotCount(uint64_t C) const {
+bool ProfileSummaryInfo::isHotCount(uint64_t C, bool isForICP) const {
+  if (ProfileSummaryHotCountForICP) {
+    return HotCountThresholdICP && C >= *HotCountThresholdICP;
+  }
   return HotCountThreshold && C >= *HotCountThreshold;
 }
 
