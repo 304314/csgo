@@ -77,10 +77,12 @@
 #include "llvm/IR/MDBuilder.h"
 #include "llvm/IR/Metadata.h"
 #include "llvm/IR/Value.h"
+#include "llvm/InitializePasses.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Utils.h"
 #include "llvm/Transforms/Utils/LoopUtils.h"
 #include "llvm/Transforms/Utils/LoopVersioning.h"
@@ -112,7 +114,7 @@ static cl::opt<unsigned> LVLoopDepthThreshold(
 static cl::opt<bool>
     LVOverlap("loop-versioning-overlap",
               cl::desc("Loop versioning with a fixed length's overlap"),
-              cl::init(false), cl::Hidden);
+              cl::init(true), cl::Hidden);
 
 namespace {
 
@@ -729,3 +731,51 @@ PreservedAnalyses LoopVersioningLICMPass::run(Loop &L, LoopAnalysisManager &AM,
   return getLoopPassPreservedAnalyses();
 }
 } // namespace llvm
+
+class LoopVersioningLICMLegacyPass : public LoopPass {
+public:
+  static char ID; // Pass identification, replacement for typeid
+  LoopVersioningLICMLegacyPass() : LoopPass(ID) {
+    initializeLoopVersioningLICMLegacyPassPass(
+        *PassRegistry::getPassRegistry());
+  }
+
+  bool runOnLoop(Loop *L, LPPassManager &LPM) override {
+    if (skipLoop(L))
+      return false;
+
+    AliasAnalysis *AA = &getAnalysis<AAResultsWrapperPass>().getAAResults();
+    ScalarEvolution *SE = &getAnalysis<ScalarEvolutionWrapperPass>().getSE();
+    DominatorTree *DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    LoopInfo *LI = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+    OptimizationRemarkEmitter *ORE =
+        &getAnalysis<OptimizationRemarkEmitterWrapperPass>().getORE();
+
+    LoopAccessInfoManager LAIs(*SE, *AA, *DT, *LI, nullptr);
+    return LoopVersioningLICM(AA, SE, ORE, LAIs, *LI, L).run(DT);
+  }
+
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<AAResultsWrapperPass>();
+    AU.addRequired<ScalarEvolutionWrapperPass>();
+    AU.addRequired<DominatorTreeWrapperPass>();
+    AU.addRequired<LoopInfoWrapperPass>();
+    AU.addRequired<OptimizationRemarkEmitterWrapperPass>();
+  }
+};
+
+Pass *llvm::createLoopVersioningLICMPass() {
+  return new LoopVersioningLICMLegacyPass();
+}
+
+char LoopVersioningLICMLegacyPass::ID = 0;
+INITIALIZE_PASS_BEGIN(LoopVersioningLICMLegacyPass, "loop-versioning-licm",
+                      "Loop Versioning LICM", false, false)
+INITIALIZE_PASS_DEPENDENCY(AAResultsWrapperPass)
+INITIALIZE_PASS_DEPENDENCY(ScalarEvolutionWrapperPass)
+INITIALIZE_PASS_DEPENDENCY(DominatorTreeWrapperPass)
+INITIALIZE_PASS_DEPENDENCY(LoopInfoWrapperPass)
+INITIALIZE_PASS_DEPENDENCY(OptimizationRemarkEmitterWrapperPass)
+INITIALIZE_PASS_DEPENDENCY(LoopSimplify)
+INITIALIZE_PASS_END(LoopVersioningLICMLegacyPass, "loop-versioning-licm",
+                    "Loop Versioning LICM", false, false)
