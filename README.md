@@ -39,6 +39,12 @@ The openEuler LLVM project provides a containerized building mode to solve the p
 ./build.sh -C -r -b release -X X86 -j 8 // added -C option
 ` ` `
 
+To address glibc compatibility issues on other operating systems (such as CentOS), the openEuler LLVM project also provides an optional CentOS build image (currently only supporting the AArch64 architecture). Developers can switch the build container using the -D option in the build.sh script. For example:
+
+` ` `
+./build.sh -C -D CentOS -r -b release -X AArch64 -j 8   // added -D CentOS option
+` ` `
+
 Dependency:
 * The Docker application must be correctly installed in the development environment.
 * The user is added to the docker user group so that the `sudo` command is not required when the `build.sh` script executes the docker command. You can run the following command to add the current user to the docker user group:

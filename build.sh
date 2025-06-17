@@ -29,7 +29,8 @@ build_dir_name="build"
 install_dir_name="install"
 build_prefix="$dir/$build_dir_name"
 install_prefix="$dir/$install_dir_name"
-container="openEuler"
+container=openEuler
+containerize_needed=0
 
 # Use 8 threads for builds and tests by default. Use more threads if possible,
 # but avoid overloading the system by using up to 50% of available cores.
@@ -57,7 +58,8 @@ Options:
   -A       Disable ACPO.
   -b type  Specify CMake build type (default: $buildtype).
   -c       Use ccache (default: $use_ccache).
-  -C env   Containerize the build for openEuler/CentOS compatibility (default: $container).
+  -C       Containerize the build for compatibility.
+  -D env   Use openEuler/CentOS docker container for containerize build (default: $container).
   -e       Build for embedded cross tool chain.
   -E       Build for openEuler.
   -h       Display this help message.
@@ -78,7 +80,7 @@ EOF
 # Process command-line options. Remember the options for passing to the
 # containerized build script.
 containerized_opts=()
-while getopts :aAb:d:cC::eEhiI:j:orstvfX: optchr; do
+while getopts :aAb:cCd:D:eEhiI:j:orstvfX: optchr; do
   case "$optchr" in
     a)
       enable_autotuner="0"
@@ -108,25 +110,34 @@ while getopts :aAb:d:cC::eEhiI:j:orstvfX: optchr; do
       containerized_opts+=(-$optchr)
       ;;
     C)
-      container="$OPTARG"
       if [ -z "$docker" -o ! -x "$docker" ]; then
         echo "$0: no usable Docker"
         exit 1
       fi
-      case "${container,,}" in
-        openEuler|CentOS)
-          ;;
-        *)
-          echo "$0: invalid container env '$container'"
-          exit 1
-          ;;
-      esac
       containerize=1
       ;;
     d)
       build_dir_name="$OPTARG"
       build_prefix="$dir/$build_dir_name"
       containerized_opts+=(-$optchr "$OPTARG")
+      ;;
+    D)
+      container="$OPTARG"
+      containerize_needed=1
+      case "${container}" in
+        openEuler)
+          ;;
+        CentOS)
+          if [ "$(uname -m)" != "aarch64" ]; then
+            echo "$0: CentOS container only support AArch64 for now"
+            exit 1
+          fi
+          ;;
+        *)
+          echo "$0: invalid container env '$container'"
+          exit 1
+          ;;
+      esac
       ;;
     f)
       enable_classic_flang="1"
@@ -229,6 +240,10 @@ if [ $containerize -eq 0 ]; then
   trap 'handle_abort 129 HUP' SIGHUP
   trap 'handle_abort 130 INT' SIGINT
   trap 'handle_abort 143 TERM' SIGTERM
+  if [ $containerize_needed -eq 1 ]; then
+    echo "$0: -C is needed for containerize build"
+    exit 1
+  fi
 else
   cmd=$(readlink --canonicalize-existing $0)
 
