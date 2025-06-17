@@ -119,6 +119,12 @@ Pass *createLoopRotatePass(int MaxHeaderSize = -1, bool PrepareForLTO = false);
 
 //===----------------------------------------------------------------------===//
 //
+// LoopVersioningLICM - This pass is a loop versioning pass.
+//
+Pass *createLoopVersioningLICMPass();
+
+//===----------------------------------------------------------------------===//
+//
 // DemoteRegisterToMemoryPass - This pass is used to demote registers to memory
 // references. In basically undoes the PromoteMemoryToRegister pass to make cfg
 // hacking easier.

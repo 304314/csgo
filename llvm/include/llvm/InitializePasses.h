@@ -200,6 +200,7 @@ void initializeLoopSimplifyCFGLegacyPassPass(PassRegistry&);
 void initializeLoopSimplifyPass(PassRegistry&);
 void initializeLoopStrengthReducePass(PassRegistry&);
 void initializeLoopUnrollPass(PassRegistry&);
+void initializeLoopVersioningLICMLegacyPassPass(PassRegistry&);
 void initializeLowerAtomicLegacyPassPass(PassRegistry&);
 void initializeLowerConstantIntrinsicsPass(PassRegistry&);
 void initializeLowerEmuTLSPass(PassRegistry&);
