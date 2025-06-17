@@ -12,7 +12,7 @@
 ; CHECK-NEXT:    load
 ; CHECK-NEXT:    store i64 [[TMP1]], ptr [[Y:%.*]]
 
-define void @LZ4_wildCopy8(ptr %dstPtr, ptr %srcPtr, ptr %dstEnd) {
+define void @test0(ptr %dstPtr, ptr %srcPtr, ptr %dstEnd) {
 entry:
   br label %do.body
 
