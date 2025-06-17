@@ -35,6 +35,12 @@ python3-setuptools python-wheel texinfo binutils-devel libatomic
 ./build.sh -C -r -b release -X X86 -j 8   // 添加了-C选项
 ```
 
+为解决其他操作系统下（CentOS等）的glibc兼容性问题，openEuler LLVM项目同时提供可选的CentOS构建镜像（当前仅支持AArch64架构），开发者可以通过`build.sh`脚本的`-D`选项切换使用的构建容器，例如：
+
+```
+./build.sh -C -D CentOS -r -b release -X AArch64 -j 8   // 添加了-D CentOS
+```
+
 相关依赖：
 * 开发环境需要正确安装了docker应用。
 * 用户加入了docker用户组，使得`build.sh`脚本执行docker命令时不需要再加`sudo`命令。可以通过如下命令将当前用户加入docker用户组。
