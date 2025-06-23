@@ -50,7 +50,8 @@ int main() {
   return 0;
 }
 /*
-REQUIRES: system-linux,shell,fuser
+REQUIRES: system-linux,shell,fuser, x86_64-linux
+UNSUPPORTS:target={{x86.*|aarch64.*}}
 
 RUN: %clang %cflags %s -o %t.exe -Wl,-q -pie -fpie
 
