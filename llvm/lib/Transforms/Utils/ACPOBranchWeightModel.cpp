@@ -192,7 +192,7 @@ bool ACPOBranchWeightModelPass::applyBranchWeightUsingACPOModel(Module &M, Modul
           continue;
         }
         TI->setMetadata(LLVMContext::MD_prof, MDWeight);
-        LLVM_DEBUG(dbgs() << "Instruction after adding metadata" << *TI < "\n");
+        LLVM_DEBUG(dbgs() << "Instruction after adding metadata" << *TI << "\n");
         Changed = true;
       }
     }

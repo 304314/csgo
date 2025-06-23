@@ -38,7 +38,7 @@ std::unique_ptr<ACPOAdvice> ACPOBWModel::getAdviceML() {
   std::shared_ptr<ACPOMLInterface> MLIF = getMLIF();
   // Generate result.
   std::unique_ptr<ACPOAdvice> Advice = std::make_unique<ACPOAdvice>();
-  assert(MLIR != nullptr);
+  assert(MLIF != nullptr);
   if (!MLIF->loadModel("") ||
       !MLIF->initializeFeatures("BW", CustomFeatureValues)) {
     outs() << "Model not loaded or features not initialized. "
