@@ -103,7 +103,7 @@ static bool skipAnalysis(const Function &F) {
 
 PreservedAnalyses  AI4CAnalysis::run(Module &M, ModuleAnalysisManager &MAM) {
   if (EnableAI4CFH) {
-    LLVM_DEBUG(dbgs << "Annotate function hotness by ACPO: ");
+    LLVM_DEBUG(dbgs() << "Annotate function hotness by ACPO: ");
     // Initialize Feature Data Collector
     std::error_code EC;
     raw_fd_ostream RawOS(AI4CDumpFile.getValue(), EC, sys::fs::CD_OpenAlways,
@@ -128,7 +128,7 @@ PreservedAnalyses  AI4CAnalysis::run(Module &M, ModuleAnalysisManager &MAM) {
 
     for (auto &F : HotFunctions) {
       F->addFnAttr(Attribute::AlwaysInline);
-      LLVM_DEBUG(dbgs << "Set inline attribute to function " << F->getName()
+      LLVM_DEBUG(dbgs() << "Set inline attribute to function " << F->getName()
                       << "\n");
     }
     for (auto &F : ColdFunctions) {
