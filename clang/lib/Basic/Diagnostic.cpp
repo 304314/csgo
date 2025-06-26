@@ -355,13 +355,22 @@ void DiagnosticsEngine::setSeverity(diag::kind Diag, diag::Severity Map,
                                     SourceLocation L) {
   assert(Diag < diag::DIAG_UPPER_LIMIT &&
          "Can only map builtin diagnostics");
+#ifdef BUILD_FOR_OPENEULER
+  if (!(DiagOpts->GccCompatible)) {
+#endif
   assert((Diags->isBuiltinWarningOrExtension(Diag) ||
           (Map == diag::Severity::Fatal || Map == diag::Severity::Error)) &&
          "Cannot map errors into warnings!");
+#ifdef BUILD_FOR_OPENEULER
+  }
+#endif         
   assert((L.isInvalid() || SourceMgr) && "No SourceMgr for valid location");
 
   // Don't allow a mapping to a warning override an error/fatal mapping.
   bool WasUpgradedFromWarning = false;
+#ifdef BUILD_FOR_OPENEULER
+  if (!(DiagOpts->GccCompatible)) {
+#endif  
   if (Map == diag::Severity::Warning) {
     DiagnosticMapping &Info = GetCurDiagState()->getOrAddMapping(Diag);
     if (Info.getSeverity() == diag::Severity::Error ||
@@ -370,6 +379,9 @@ void DiagnosticsEngine::setSeverity(diag::kind Diag, diag::Severity Map,
       WasUpgradedFromWarning = true;
     }
   }
+#ifdef BUILD_FOR_OPENEULER
+   }
+#endif  
   DiagnosticMapping Mapping = makeUserMapping(Map, L);
   Mapping.setUpgradedFromWarning(WasUpgradedFromWarning);
 
