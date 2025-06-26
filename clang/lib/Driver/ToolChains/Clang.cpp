@@ -5582,6 +5582,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   if (Arg *A = Args.getLastArg(options::OPT_fpcc_struct_return,
                                options::OPT_freg_struct_return)) {
     if (TC.getArch() != llvm::Triple::x86) {
+#ifdef BUILD_FOR_OPENEULER
+    if (Args.hasFlag(options::OPT_fgcc_compatible))
+      D.Diag(diag::warning_drv_unsupported_target_compability)
+          << A->getSpelling() << RawTriple.str();
+    else
+#endif
       D.Diag(diag::err_drv_unsupported_opt_for_target)
           << A->getSpelling() << RawTriple.str();
     } else if (A->getOption().matches(options::OPT_fpcc_struct_return)) {
@@ -5678,6 +5684,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
         D.Diag(diag::err_drv_invalid_argument_to_option)
             << A->getValue() << A->getOption().getName();
     } else
+#ifdef BUILD_FOR_OPENEULER
+      if (Args.hasFlag(options::OPT_fgcc_compatible))
+        D.Diag(diag::warning_drv_unsupported_target_compability)
+            << A->getOption().getName() << TripleStr;
+      else
+#endif
       D.Diag(diag::err_drv_unsupported_opt_for_target)
           << A->getOption().getName() << TripleStr;
   }
@@ -5699,6 +5711,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     else if (TC.getTriple().isSw64())
       A->render(Args, CmdArgs);
     else
+#ifdef BUILD_FOR_OPENEULER
+      if (Args.hasFlag(options::OPT_fgcc_compatible))
+        D.Diag(diag::warning_drv_unsupported_target_compability)
+            << A->getOption().getName() << TripleStr;
+      else
+#endif
       D.Diag(diag::err_drv_unsupported_opt_for_target)
           << A->getAsString(Args) << TripleStr;
   }
