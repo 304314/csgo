@@ -31,6 +31,7 @@
 #include "clang/Parse/ParseAST.h"
 #include "clang/Sema/HLSLExternalSemaSource.h"
 #include "clang/Sema/MultiplexExternalSemaSource.h"
+#include "clang/Sema/SemaDiagnostic.h"
 #include "clang/Serialization/ASTDeserializationListener.h"
 #include "clang/Serialization/ASTReader.h"
 #include "clang/Serialization/GlobalModuleIndex.h"
@@ -1169,7 +1170,13 @@ void ASTFrontendAction::ExecuteAction() {
 
   if (!CI.hasSema())
     CI.createSema(getTranslationUnitKind(), CompletionConsumer);
-
+#ifdef BUILD_FOR_OPENEULER
+  if (CI.getLangOpts().GccCompatible) {
+    // error: narrowing in initializer list
+    CI.getSema().Diags.setSeverity(diag::ext_init_list_type_narrowing,
+		                   diag::Severity::Warning, {});
+  }
+#endif
   ParseAST(CI.getSema(), CI.getFrontendOpts().ShowStats,
            CI.getFrontendOpts().SkipFunctionBodies);
 }
