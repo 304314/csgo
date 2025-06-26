@@ -7729,9 +7729,18 @@ Sema::BuildCompoundLiteralExpr(SourceLocation LParenLoc, TypeSourceInfo *TInfo,
   if (isFileScope) {
     if (!LiteralExpr->isTypeDependent() &&
         !LiteralExpr->isValueDependent() &&
-        !literalType->isDependentType()) // C99 6.5.2.5p3
-      if (CheckForConstantInitializer(LiteralExpr, literalType))
-        return ExprError();
+        !literalType->isDependentType()) {
+  #ifdef BUILD_FOR_OPENEULER        
+        // Try to behave like gcc and ignore this check by default
+        // while compiling CPP files. 
+        bool ignoreCheck = getLangOpts().CPlusPlus &&
+                          getLangOpts().GccCompatible;                                
+        if (!ignoreCheck && CheckForConstantInitializer(LiteralExpr, literalType))
+  #else
+        if (CheckForConstantInitializer(LiteralExpr, literalType))
+  #endif  
+          return ExprError();
+        }
   } else if (literalType.getAddressSpace() != LangAS::opencl_private &&
              literalType.getAddressSpace() != LangAS::Default) {
     // Embedded-C extensions to C99 6.5.2.5:
