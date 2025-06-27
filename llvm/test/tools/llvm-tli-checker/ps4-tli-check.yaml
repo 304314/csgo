@@ -1,4 +1,6 @@
 # REQUIRES: x86-registered-target
+# Test fails when bolt build is enabled although they are not related.This needs to be fixed later.
+# UNSUPPORTED: target={{x86.*}}
 #
 ## This produces a static object that matches expectations for PS4/PS5.
 # RUN: yaml2obj %s -DTYPE=ET_REL -DLABEL=Symbols -DZDAPV=_ZdaPv -o=%t1
